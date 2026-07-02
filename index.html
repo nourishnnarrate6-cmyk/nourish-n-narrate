@@ -768,13 +768,18 @@
     }
     .contact-email-icon { font-size: 1.3rem; }
 
-    /* Team grid */
-    .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
-    .team-card { background: var(--bg); border: 1px solid var(--border); border-radius: 20px; padding: 2rem 1.5rem; text-align: center; transition: transform var(--dur), box-shadow var(--dur); }
-    .team-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-md); }
-    .team-avatar { width: 64px; height: 64px; border-radius: 50%; background: var(--green-pale); border: 2px solid var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 1rem; }
-    .team-card h4 { font-size: .95rem; font-weight: 700; color: var(--text); margin-bottom: .35rem; line-height: 1.3; }
-    .team-role { font-size: .78rem; font-weight: 600; color: var(--green); background: var(--green-pale); padding: .2rem .75rem; border-radius: 99px; display: inline-block; }
+    /* Contact bottom row */
+    .contact-bottom { display: flex; align-items: flex-start; justify-content: space-between; gap: 3rem; margin-top: 3rem; flex-wrap: wrap; }
+    .contact-founders { flex: 1; min-width: 200px; }
+    .contact-founders-title { font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 1rem; }
+    .contact-founders-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .6rem; }
+    .contact-founders-list li { font-size: 1rem; color: var(--text); font-weight: 500; }
+    .contact-email-wrap { flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+    .contact-email-label { font-size: .85rem; color: var(--text-muted); margin-bottom: .75rem; }
+    @media (max-width: 600px) {
+      .contact-bottom { flex-direction: column; align-items: flex-start; }
+      .contact-email-wrap { align-items: flex-start; }
+    }
 
 
     /* ============================================================
@@ -1273,40 +1278,29 @@
         <span class="section-label">Contact</span>
         <h2 class="section-title">Say Hello 👋</h2>
         <div class="divider"></div>
-        <p class="section-sub">We are a team of student founders passionate about making healthy eating delicious, accessible, and fun. Nourish N Narrate was born from our shared belief that nutritious food should never be boring — so we take the recipes you already love and give them a wholesome twist.</p>
       </div>
 
-      <!-- Team -->
-      <div class="team-grid reveal">
-        <div class="team-card">
-          <div class="team-avatar" aria-hidden="true">👤</div>
-          <h4>Sai Sathvik Erukulla</h4>
-          <span class="team-role">Co-Founder</span>
+      <!-- Founders + Email row -->
+      <div class="contact-bottom reveal">
+        <!-- Left: Founders -->
+        <div class="contact-founders">
+          <h3 class="contact-founders-title">Founders</h3>
+          <ul class="contact-founders-list">
+            <li>Sai Sathvik Erukulla</li>
+            <li>Manvik Tej Kandem</li>
+            <li>Aatish Chittineni</li>
+            <li>Thanush Cherukuri</li>
+          </ul>
         </div>
-        <div class="team-card">
-          <div class="team-avatar" aria-hidden="true">👤</div>
-          <h4>Manvik Tej Kandem</h4>
-          <span class="team-role">Co-Founder</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar" aria-hidden="true">👤</div>
-          <h4>Aatish Chittineni</h4>
-          <span class="team-role">Co-Founder</span>
-        </div>
-        <div class="team-card">
-          <div class="team-avatar" aria-hidden="true">👤</div>
-          <h4>Thanush Cherukuri</h4>
-          <span class="team-role">Co-Founder</span>
-        </div>
-      </div>
 
-      <!-- Email -->
-      <div class="text-center reveal" style="margin-top:3rem">
-        <p style="color:var(--text-muted);margin-bottom:1rem;font-size:.95rem;">Have a question or just want to say hi?</p>
-        <a href="mailto:nourishnnarrate6@gmail.com" class="contact-email-link">
-          <span class="contact-email-icon" aria-hidden="true">📧</span>
-          nourishnnarrate6@gmail.com
-        </a>
+        <!-- Right: Email -->
+        <div class="contact-email-wrap">
+          <p class="contact-email-label">Get in touch</p>
+          <a href="mailto:nourishnnarrate6@gmail.com" class="contact-email-link">
+            <span class="contact-email-icon" aria-hidden="true">📧</span>
+            nourishnnarrate6@gmail.com
+          </a>
+        </div>
       </div>
     </div>
   </section>
@@ -1431,7 +1425,7 @@
         title:    "Date Ladoo",
         category: "snack",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c1/Laddu_Sweet.JPG/960px-Laddu_Sweet.JPG",
         desc:     "A wholesome no-bake Indian sweet made from dates and roasted nuts — naturally sweet, energy-packed, and completely guilt-free.",
         time:     "25 min",
         servings: "12",
@@ -1472,10 +1466,10 @@
       },
 
       {
-        title:    "Healthy Whole Wheat Veggie Pizza",
+        title:    "Whole Wheat Veggie Pizza",
         category: "dinner",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Pizza-3007395.jpg/960px-Pizza-3007395.jpg",
         desc:     "All the comfort of pizza with a whole wheat crust, part-skim mozzarella, and a rainbow of vegetables — fewer calories, way more goodness.",
         time:     "35 min",
         servings: "4",
@@ -1526,10 +1520,10 @@
       },
 
       {
-        title:    "Healthy Chicken Biryani",
+        title:    "Chicken Biryani",
         category: "dinner",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/5/5a/%22Hyderabadi_Dum_Biryani%22.jpg/960px-%22Hyderabadi_Dum_Biryani%22.jpg",
         desc:     "All the aromatic depth of classic biryani — marinated chicken, warm spices, and fragrant rice — made lighter with brown basmati and extra vegetables.",
         time:     "60 min",
         servings: "4",
@@ -1597,7 +1591,7 @@
         title:    "Banana Oat Pancakes",
         category: "breakfast",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Foodiesfeed.com_pouring-honey-on-pancakes-with-walnuts.jpg/960px-Foodiesfeed.com_pouring-honey-on-pancakes-with-walnuts.jpg",
         desc:     "Fluffy, naturally sweet pancakes made with bananas and oats instead of refined flour and sugar. They're high in fiber, packed with nutrients, and perfect for a healthy breakfast.",
         time:     "20 min",
         servings: "4",
@@ -1640,10 +1634,10 @@
       },
 
       {
-        title:    "Healthy Strawberry Frozen Yogurt",
+        title:    "Strawberry Frozen Yogurt",
         category: "dessert",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/d/da/Strawberry_ice_cream_cone_%285076899310%29.jpg",
         desc:     "A creamy, refreshing frozen treat made with Greek yogurt and real strawberries. It's naturally sweet, high in protein, and a healthier alternative to traditional ice cream.",
         time:     "10 min + 3–4 hrs freeze",
         servings: "4",
@@ -1682,10 +1676,10 @@
       },
 
       {
-        title:    "Healthy Veggie Noodles",
+        title:    "Veggie Noodles",
         category: "lunch",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Nagata_Honjoken_Bokkake_Yakisoba.jpg/960px-Nagata_Honjoken_Bokkake_Yakisoba.jpg",
         desc:     "A colorful noodle dish packed with fresh vegetables and a light garlic-ginger sauce. Lower in oil, higher in fiber, and much more nutritious than traditional takeout noodles.",
         time:     "30 min",
         servings: "4",
@@ -1733,10 +1727,10 @@
       },
 
       {
-        title:    "Healthy Garlic Chicken Noodles",
+        title:    "Garlic Chicken Noodles",
         category: "dinner",
         emoji:    null,
-        image:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/3/39/Phat_Thai_kung_Chang_Khien_street_stall.jpg/960px-Phat_Thai_kung_Chang_Khien_street_stall.jpg",
         desc:     "Lean chicken breast, whole wheat noodles, and fresh vegetables tossed in a light garlic-ginger sauce for a high-protein, healthier take on restaurant-style noodles.",
         time:     "35 min",
         servings: "4",
@@ -1842,7 +1836,6 @@
              class="card-img"
              src="${recipe.image}"
              alt="${recipe.title}"
-             loading="lazy"
              onerror="this.parentNode.innerHTML='<div class=\\'card-title-banner\\'><span>${recipe.title}</span></div>'"
            />`
         : recipe.emoji
@@ -2162,5 +2155,3 @@
   </script>
 </body>
 </html>
-
-
