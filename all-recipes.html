@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>All Recipes — Nourish N Narrate</title>
+  <meta name="description" content="Browse every recipe from Nourish N Narrate — healthier twists on your favorite comfort foods." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Shared stylesheet (same look as the home page) -->
+  <link rel="stylesheet" href="nn-styles.css" />
+
+  <style>
+    /* Small page-specific tweaks for the All Recipes page */
+    .allrx-header { padding-top: 7rem; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: .5rem;
+      color: var(--green); font-weight: 600; text-decoration: none;
+      font-size: .95rem; margin-bottom: 1.25rem; transition: gap var(--dur);
+    }
+    .back-link:hover { gap: .85rem; }
+    .allrx-bottom { margin: 3.5rem 0 1rem; }
+  </style>
+</head>
+<body data-view="all">
+
+  <!-- Loading screen -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="NourishNNarrate.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="NourishNNarrate.html#home">Home</a></li>
+        <li><a href="NourishNNarrate.html#recipes">Recipes</a></li>
+        <li><a href="NourishNNarrate.html#about">About</a></li>
+        <li><a href="NourishNNarrate.html#request">Suggest a Food</a></li>
+        <li><a href="NourishNNarrate.html#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <a class="nav-cta" href="NourishNNarrate.html#home" style="text-decoration:none;">← Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- All recipes -->
+  <section id="recipes" class="allrx-header">
+    <div class="container">
+
+      <div class="recipes-header">
+        <div class="reveal">
+          <a href="NourishNNarrate.html#recipes" class="back-link">← Back to home</a>
+          <span class="section-label">Full Menu</span>
+          <h2 class="section-title">All Recipes</h2>
+          <div class="divider"></div>
+        </div>
+        <div class="search-wrap reveal">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input type="search" id="recipe-search" placeholder="Search recipes…"
+                 aria-label="Search recipes" oninput="filterRecipes()" />
+        </div>
+      </div>
+
+      <div class="filter-pills reveal" role="group" aria-label="Filter by category">
+        <button class="pill active" data-filter="all"       onclick="setFilter(this,'all')">All</button>
+        <button class="pill"        data-filter="breakfast" onclick="setFilter(this,'breakfast')">Breakfast</button>
+        <button class="pill"        data-filter="lunch"     onclick="setFilter(this,'lunch')">Lunch</button>
+        <button class="pill"        data-filter="dinner"    onclick="setFilter(this,'dinner')">Dinner</button>
+        <button class="pill"        data-filter="snack"     onclick="setFilter(this,'snack')">Snacks</button>
+        <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
+      </div>
+
+      <div class="recipe-grid" id="recipe-grid"></div>
+
+      <div class="text-center allrx-bottom">
+        <a href="NourishNNarrate.html#home" class="see-more-btn" style="text-decoration:none;">← Back to Home</a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Recipe modal (populated by nn-cards.js) -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" id="recipe-modal">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close recipe">✕</button>
+      <div id="modal-header"></div>
+      <div class="modal-body">
+        <div  class="modal-category" id="modal-category"></div>
+        <h2  class="modal-title"    id="modal-title"></h2>
+        <p   class="modal-desc"     id="modal-desc"></p>
+        <div class="modal-stats">
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-time"></div><div class="modal-stat-label">Prep &amp; Cook</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-servings"></div><div class="modal-stat-label">Servings</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-calories"></div><div class="modal-stat-label">Per Serving</div></div>
+        </div>
+        <div class="modal-ingredients">
+          <div class="modal-section-title">🛒 Ingredients</div>
+          <div id="modal-ingredients-list"></div>
+        </div>
+        <div class="modal-steps">
+          <div class="modal-section-title">📋 Instructions</div>
+          <ol id="modal-steps-list"></ol>
+        </div>
+        <div class="modal-tip" id="modal-tip" style="display:none">
+          <strong>💡 Healthy Tip</strong>
+          <span id="modal-tip-text"></span>
+        </div>
+        <div class="modal-why" id="modal-why" style="display:none">
+          <div class="modal-section-title">💚 Why It's Healthier</div>
+          <div class="modal-why-list" id="modal-why-list"></div>
+        </div>
+        <div class="modal-comparison" id="modal-comparison" style="display:none">
+          <div class="modal-section-title" style="margin-top:1.5rem">⚖️ Original vs. Our Version</div>
+          <table class="modal-table" id="modal-table">
+            <thead>
+              <tr><th>Original Version</th><th>Our Healthier Version</th></tr>
+            </thead>
+            <tbody id="modal-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared data + card/modal logic -->
+  <script src="recipes-data.js"></script>
+  <script src="nn-cards.js"></script>
+
+  <!-- Page logic: render every recipe, search + filter, theme -->
+  <script>
+    let currentFilter = 'all';
+
+    /* Featured order first, then the rest — but every recipe is shown here. */
+    const FEATURED = [
+      "Chicken Biryani",
+      "Whole Wheat Veggie Pizza",
+      "Berry Smoothie Bowl",
+      "Strawberry Frozen Yogurt",
+      "Garlic Chicken Noodles",
+      "Avocado Toast with Egg",
+    ];
+
+    function renderRecipes() {
+      const grid = document.getElementById('recipe-grid');
+      grid.innerHTML = '';
+      const featuredIdx = [], extraIdx = [];
+      RECIPES.forEach((r, i) => (FEATURED.includes(r.title) ? featuredIdx : extraIdx).push(i));
+      featuredIdx.sort((a, b) =>
+        FEATURED.indexOf(RECIPES[a].title) - FEATURED.indexOf(RECIPES[b].title));
+      [...featuredIdx, ...extraIdx].forEach(i => grid.appendChild(buildRecipeCard(RECIPES[i], i)));
+      filterRecipes();
+    }
+
+    function setFilter(btn, category) {
+      currentFilter = category;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      filterRecipes();
+    }
+
+    function filterRecipes() {
+      const query = document.getElementById('recipe-search').value.toLowerCase().trim();
+      document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
+        const cat  = card.dataset.category || '';
+        const text = card.textContent.toLowerCase();
+        const matchCat = currentFilter === 'all' || cat === currentFilter;
+        const matchQ   = !query || text.includes(query);
+        card.style.display = (matchCat && matchQ) ? '' : 'none';
+      });
+    }
+
+    /* Dark mode (shares the saved preference with the home page) */
+    const htmlEl   = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeBtn.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+
+    /* Navbar shadow on scroll */
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* Reveal-on-scroll (matches home) */
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+
+    /* Hide loading screen */
+    window.addEventListener('load', () => {
+      setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 400);
+    });
+
+    renderRecipes();
+  </script>
+</body>
+</html>
