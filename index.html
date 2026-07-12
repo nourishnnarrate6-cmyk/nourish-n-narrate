@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================
+    PAGE TITLE & META
+    Edit the title and description below to match your project.
+  ============================================================ -->
+  <title>Nourish N Narrate</title>
+  <meta name="description" content="Transforming your favorite comfort foods into healthier, delicious alternatives—one recipe at a time." />
+
+  <!-- Google Fonts (no changes needed here) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="nn-styles.css" />
+</head>
+<body>
+
+  <!-- ============================================================
+       LOADING SCREEN — no edits needed here
+  ============================================================ -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+
+  <!-- ============================================================
+       NAVIGATION BAR
+       ✏️  Edit: logo name, nav links, and the CTA button text.
+  ============================================================ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+
+      <!-- ✏️ Logo — change "Nourish", "N", "Narrate" to your name -->
+      <a href="#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+      </a>
+
+      <!-- ✏️ Desktop navigation links — add or remove <li> items as needed -->
+      <ul class="nav-links" role="list">
+        <li><a href="#home"    class="active">Home</a></li>
+        <li><a href="#recipes">Recipes</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#request">Suggest a Food</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="display:flex;align-items:center;color:var(--text-muted);font-size:1.4rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#E1306C'" onmouseout="this.style.color='var(--text-muted)'">
+          <span style="font-size:0.9rem;font-weight:600;margin-right:4px;">Instagram</span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <!-- Dark mode toggle — no edits needed -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <!-- ✏️ CTA button text -->
+        <button class="nav-cta" onclick="document.getElementById('request').scrollIntoView({behavior:'smooth'})">
+          Suggest a Food
+        </button>
+        <!-- Hamburger — mobile only, no edits needed -->
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ✏️ Mobile menu links — keep in sync with the desktop nav above -->
+  <div class="mobile-menu" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
+    <a href="#home"    onclick="closeMobileMenu()">Home</a>
+    <a href="#recipes" onclick="closeMobileMenu()">Recipes</a>
+    <a href="#about"   onclick="closeMobileMenu()">About</a>
+    <a href="#request" onclick="closeMobileMenu()">Suggest a Food</a>
+    <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+    <a href="#request" class="mobile-cta" onclick="closeMobileMenu()">Suggest a Food 🍽️</a>
+  </div>
+
+
+  <!-- ============================================================
+       HERO SECTION
+       ✏️  Edit: badge text, title, subtitle, and button labels.
+  ============================================================ -->
+  <section id="home">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+    </div>
+
+    <div class="hero-inner container">
+      <div class="hero-content">
+        <!-- ✏️ Small badge above the title -->
+        <div class="hero-badge">Student-led healthy eating project</div>
+
+        <!-- ✏️ Main headline -->
+        <h1 class="hero-title">
+          Nourish<br />
+          <span class="accent">N</span> Narrate
+        </h1>
+
+        <!-- ✏️ Subtitle / tagline -->
+        <p class="hero-sub">
+          Transforming your favorite comfort foods into healthier, delicious
+          alternatives—one recipe at a time.
+        </p>
+
+        <!-- ✏️ Button labels -->
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="document.getElementById('recipes').scrollIntoView({behavior:'smooth'})">
+            🌿 Explore Recipes
+          </button>
+          <button class="btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
+            Learn More
+          </button>
+        </div>
+      </div>
+
+      <!-- Decorative floating image — visible on desktop only -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-img-wrap">🥗</div>
+        <div class="stat-card stat-card-1">
+          <div class="stat-icon">🥦</div>
+          <div><div class="stat-num">Healthier</div><div style="color:var(--text-muted);font-size:.75rem">Ingredient swaps</div></div>
+        </div>
+        <div class="stat-card stat-card-2">
+          <div class="stat-icon" style="background:var(--orange-pale);color:var(--orange)">😋</div>
+          <div><div class="stat-num">Same taste</div><div style="color:var(--text-muted);font-size:.75rem">Better for you</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       ABOUT SECTION
+       ✏️  Edit: the emoji grid, tags, heading, paragraphs, and
+           the four pillar cards below.
+  ============================================================ -->
+  <section id="about">
+    <div class="container">
+      <div class="about-inner">
+
+        <!-- ✏️ Decorative emoji grid (9 emojis in a 3×3 layout) -->
+        <div class="about-visual reveal">
+          <div class="about-img-box">
+            <div class="emoji-grid" aria-hidden="true">
+              <span>🥑</span><span>🍎</span><span>🥕</span>
+              <span>🌽</span><span>🫐</span><span>🍋</span>
+              <span>🥦</span><span>🍅</span><span>🧄</span>
+            </div>
+          </div>
+          <!-- ✏️ Small floating tags -->
+          <div class="about-tag about-tag-1">🎓 Student Led</div>
+          <div class="about-tag about-tag-2">🌿 Healthier Choices</div>
+        </div>
+
+        <!-- ✏️ About text and value pillars -->
+        <div class="about-text reveal">
+          <span class="section-label">About Us</span>
+          <h2 class="section-title">Eating well shouldn't mean giving up what you love</h2>
+          <div class="divider"></div>
+          <p class="section-sub">
+            Nourish N Narrate is a student-led project dedicated to recreating popular comfort
+            foods with better-for-you ingredients—without sacrificing the flavors that make
+            them special. We believe that healthy eating is a journey, not a restriction.
+          </p>
+          <p class="section-sub" style="margin-top:1rem">
+            Through practical ingredient substitutions and easy-to-follow recipes, we encourage
+            everyone to explore a more nourishing lifestyle—one delicious dish at a time.
+          </p>
+
+          <!-- ✏️ Four value pillars — edit icon, title, and description for each -->
+          <div class="about-pillars">
+            <div class="pillar">
+              <div class="pillar-icon">🔄</div>
+              <div class="pillar-title">Smart Swaps</div>
+              <div class="pillar-desc">Replacing less healthy ingredients with nutritious alternatives that taste just as good.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">📖</div>
+              <div class="pillar-title">Simple Steps</div>
+              <div class="pillar-desc">Every recipe is written clearly so anyone can recreate it, regardless of skill level.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">🤝</div>
+              <div class="pillar-title">Community First</div>
+              <div class="pillar-desc">Built around your requests—we recreate the foods you actually want to eat healthier.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">💚</div>
+              <div class="pillar-title">No Compromise</div>
+              <div class="pillar-desc">Flavor always comes first. Healthy food should be food you genuinely enjoy.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       RECIPES SECTION
+       The recipe cards below are generated automatically from
+       the RECIPES array in the <script> section at the bottom.
+       You do NOT need to edit this HTML to add recipes.
+       Just edit the RECIPES array in JavaScript instead!
+  ============================================================ -->
+  <section id="recipes">
+    <div class="container">
+
+      <div class="recipes-header">
+        <div class="reveal">
+          <!-- ✏️ Section label and title -->
+          <span class="section-label">Recipes</span>
+          <h2 class="section-title">Healthy Twists on Classics</h2>
+          <div class="divider"></div>
+        </div>
+        <!-- Search bar — works automatically with all recipe cards -->
+        <div class="search-wrap reveal">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            id="recipe-search"
+            placeholder="Search recipes…"
+            aria-label="Search recipes"
+            oninput="filterRecipes()"
+          />
+        </div>
+      </div>
+
+      <!-- ✏️ Add or remove category pills here to match your recipe categories.
+           The data-filter value must match the "category" field in your recipe objects. -->
+      <div class="filter-pills reveal" role="group" aria-label="Filter by category">
+        <button class="pill active" data-filter="all"       onclick="setFilter(this,'all')">All</button>
+        <button class="pill"        data-filter="breakfast" onclick="setFilter(this,'breakfast')">Breakfast</button>
+        <button class="pill"        data-filter="lunch"     onclick="setFilter(this,'lunch')">Lunch</button>
+        <button class="pill"        data-filter="dinner"    onclick="setFilter(this,'dinner')">Dinner</button>
+        <button class="pill"        data-filter="snack"     onclick="setFilter(this,'snack')">Snacks</button>
+        <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
+      </div>
+
+      <!-- Recipe cards are injected here by renderRecipes() in JavaScript -->
+      <div class="recipe-grid" id="recipe-grid"></div>
+
+      <!-- See all / show fewer toggle (managed by JS) -->
+      <div class="text-center" id="see-more-wrap" style="margin-top:2.25rem; display:none;">
+        <a href="all-recipes.html" id="see-more-btn" class="see-more-btn">See all 11 recipes →</a>
+      </div>
+
+      <!-- Rate Us -->
+      <div class="text-center reveal" style="margin-top:2.5rem;">
+        <p style="color:var(--text-muted);margin-bottom:1rem;font-size:1rem;">Enjoyed our recipes? Let us know what you think!</p>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScGB0JQA7vv-c65fRwx55KJVPVipxNZvfVxurwDjiCBD-AezQ/viewform?usp=publish-editor"
+           target="_blank" rel="noopener noreferrer"
+           style="display:inline-block;background:var(--green);color:#fff;font-weight:600;font-size:1.05rem;padding:0.8rem 2rem;border-radius:2rem;text-decoration:none;transition:background 0.2s;"
+           onmouseover="this.style.background='var(--green-mid)'" onmouseout="this.style.background='var(--green)'">
+          ⭐ Rate Our Project &amp; Foods
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       RECIPE MODAL
+       This popup is populated automatically when a recipe card
+       is clicked. You don't need to edit this HTML at all.
+       All content comes from your recipe objects in JavaScript.
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" id="recipe-modal">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close recipe">✕</button>
+      <div id="modal-header"></div><!-- Image or emoji header injected here -->
+      <div class="modal-body">
+        <div  class="modal-category" id="modal-category"></div>
+        <h2  class="modal-title"    id="modal-title"></h2>
+        <p   class="modal-desc"     id="modal-desc"></p>
+        <div class="modal-stats">
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-time"></div><div class="modal-stat-label">Prep &amp; Cook</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-servings"></div><div class="modal-stat-label">Servings</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-calories"></div><div class="modal-stat-label">Per Serving</div></div>
+        </div>
+        <div class="modal-ingredients">
+          <div class="modal-section-title">🛒 Ingredients</div>
+          <div id="modal-ingredients-list"></div>
+        </div>
+        <div class="modal-steps">
+          <div class="modal-section-title">📋 Instructions</div>
+          <ol id="modal-steps-list"></ol>
+        </div>
+        <div class="modal-tip" id="modal-tip" style="display:none">
+          <strong>💡 Healthy Tip</strong>
+          <span id="modal-tip-text"></span>
+        </div>
+
+        <!-- Why It's Healthier — injected by JS -->
+        <div class="modal-why" id="modal-why" style="display:none">
+          <div class="modal-section-title">💚 Why It's Healthier</div>
+          <div class="modal-why-list" id="modal-why-list"></div>
+        </div>
+
+        <!-- Original vs. Our Version comparison table — injected by JS -->
+        <div class="modal-comparison" id="modal-comparison" style="display:none">
+          <div class="modal-section-title" style="margin-top:1.5rem">⚖️ Original vs. Our Version</div>
+          <table class="modal-table" id="modal-table">
+            <thead>
+              <tr>
+                <th>Original Version</th>
+                <th>Our Healthier Version</th>
+              </tr>
+            </thead>
+            <tbody id="modal-table-body"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SUGGEST YOUR FAVORITE FOOD SECTION
+       ✏️  Edit: section label, title, description text, button
+           label, and the Google Form URL in the <a> tag below.
+  ============================================================ -->
+  <section id="request">
+    <div class="container">
+
+      <!-- Section header -->
+      <div class="text-center reveal">
+        <span class="section-label">Get Involved</span>
+        <h2 class="section-title">Suggest Your Favorite Food!</h2>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Main card -->
+      <div class="suggest-card reveal">
+
+        <!-- Floating food emoji accents (purely decorative) -->
+        <span class="suggest-accent" aria-hidden="true">🥑</span>
+        <span class="suggest-accent" aria-hidden="true">🍓</span>
+        <span class="suggest-accent" aria-hidden="true">🌽</span>
+        <span class="suggest-accent" aria-hidden="true">🫐</span>
+
+        <!-- Central icon -->
+        <div class="suggest-icon-ring" aria-hidden="true">🍽️</div>
+
+        <!-- ✏️ Card heading -->
+        <h3>Have a comfort food in mind?</h3>
+
+        <!-- ✏️ Card description -->
+        <p>
+          Have a favorite comfort food you'd like us to recreate in a healthier way?
+          We'd love to hear your ideas! Click the button below to submit your suggestion.
+        </p>
+
+        <!-- ✏️ Button — change href to update the Google Form URL -->
+        <div class="btn-suggest-wrap">
+          <a
+            href="https://docs.google.com/forms/d/1CxOj8zlfUGBFqSco64umxKzwCFaFRy4w4gl40yZlSoY/viewform?ts=6a32edc2&edit_requested=true"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-suggest"
+            aria-label="Submit a food request (opens Google Form in new tab)"
+          >
+            🍽️ Submit a Food Request
+          </a>
+        </div>
+
+        <!-- Reassurance line below the button -->
+        <p class="suggest-note">
+          <span>Free &amp; quick</span> — takes less than a minute ✨
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       FAQ SECTION
+       ✏️  Edit: add, remove, or rewrite question/answer pairs.
+           Each FAQ item is a .faq-item div with a .faq-q button
+           and a .faq-a div containing the answer.
+  ============================================================ -->
+  <section id="faq">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">FAQ</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="divider"></div>
+        <p class="section-sub">Everything you might want to know about Nourish N Narrate.</p>
+      </div>
+
+      <div class="faq-grid">
+
+        <!-- ✏️ FAQ item — copy this block to add a new question -->
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            What is Nourish N Narrate?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Nourish N Narrate is a student-led project that takes popular comfort foods and recreates them with healthier ingredient substitutions. Our goal is to prove that eating well doesn't have to mean sacrificing the foods you love.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            Are these recipes actually tested?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Yes! Every recipe we publish is tested by our team to ensure it's not only nutritionally improved but also genuinely delicious. Flavor is never sacrificed for health—both must pass the taste test.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            How do I submit a recipe request?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Scroll up to the "Request a Recipe" section and fill out the short form with your name, email, and the food you'd love to see recreated. We review every submission and prioritize the most popular ones.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            How healthy are the substitutions?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">We aim to reduce processed ingredients, refined sugars, excessive saturated fats, and empty calories wherever possible—without making the recipe complicated. Common swaps include whole grain alternatives, natural sweeteners, and nutrient-dense vegetables.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            Do I need cooking experience to follow these recipes?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Not at all! Our recipes are written for everyone, from complete beginners to experienced home cooks. Steps are clear and concise, and we always include tips to make things easier.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            How often are new recipes posted?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">We're working hard to bring new recipes regularly. Follow us on social media to get notified the moment a new recipe goes live. You can also request a recipe to help shape our upcoming content!</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       CONTACT SECTION
+       ✏️  Edit: the four contact cards and the social media links.
+  ============================================================ -->
+  <section id="contact">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">Contact</span>
+        <h2 class="section-title">Say Hello 👋</h2>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Founders + Email row -->
+      <div class="contact-bottom reveal">
+        <!-- Left: Founders -->
+        <div class="contact-founders">
+          <h3 class="contact-founders-title">Founders</h3>
+          <ul class="contact-founders-list">
+            <li>Sai Sathvik Erukulla</li>
+            <li>Manvik Tej Kandem</li>
+            <li>Aatish Chittineni</li>
+            <li>Thanush Cherukuri</li>
+          </ul>
+        </div>
+
+        <!-- Right: Email -->
+        <div class="contact-email-wrap">
+          <p class="contact-email-label">Get in touch</p>
+          <a href="mailto:nourishnnarrate6@gmail.com" class="contact-email-link">
+            <span class="contact-email-icon" aria-hidden="true">📧</span>
+            nourishnnarrate6@gmail.com
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       FOOTER
+       ✏️  Edit: the copyright text and tagline below.
+  ============================================================ -->
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>© 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <p style="margin-top:.5rem;font-size:.8rem;opacity:.6">Made with 💚 by students, for everyone.</p>
+  </footer>
+
+  <!-- Scroll to top button — no edits needed -->
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">↑</button>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+       TABLE OF CONTENTS:
+         A. RECIPE DATA  ← ✏️ THIS IS WHERE YOU ADD YOUR RECIPES
+         B. Recipe Renderer (builds cards from the data above)
+         C. Recipe Modal (popup)
+         D. Search & Filter
+         E. Loading Screen
+         F. Dark Mode Toggle
+         G. Navigation (scroll effect, active links, mobile menu)
+         H. Scroll-to-Top Button
+         I. Scroll Reveal Animation
+         J. Request Form
+         K. FAQ Accordion
+  ============================================================ -->
+  <script src="recipes-data.js"></script>
+  <script src="nn-cards.js"></script>
+  <script>
+
+    /* ===========================================================
+       A. RECIPE DATA
+       ✏️  THIS IS THE ONLY PLACE YOU NEED TO EDIT TO ADD RECIPES.
+
+       HOW TO ADD A RECIPE:
+       1. Copy one recipe object (everything from the opening { to
+          the closing },) from the TEMPLATE below.
+       2. Paste it inside the RECIPES array below.
+       3. Fill in each field. That's it — the card, search, filter,
+          and modal all update automatically!
+
+       ─── RECIPE TEMPLATE ──────────────────────────────────────
+       {
+         // ── Basic Info ─────────────────────────────────────────
+         title:    "Your Recipe Title",       // ✏️ Name of the dish
+         category: "dinner",                  // ✏️ Must match a filter pill:
+                                              //    "breakfast" | "lunch" | "dinner"
+                                              //    "snack" | "dessert"
+         emoji:    "🍝",                      // ✏️ Emoji shown on the card & modal
+                                              //    (used when no image is provided)
+
+         // ── Image (optional) ───────────────────────────────────
+         // To use your own photo, set image to the file path or URL.
+         // Example: image: "photos/my-pasta.jpg"
+         // Leave as null to use the emoji placeholder instead.
+         image:    null,
+
+         // ── Card Preview ───────────────────────────────────────
+         desc:     "A short one- or two-sentence description shown on the card.",
+         time:     "30 min",                  // ✏️ Total cook + prep time
+         servings: "4",                       // ✏️ Number of servings
+         calories: "320",                     // ✏️ Calories per serving
+
+         // ── Modal Content ──────────────────────────────────────
+         ingredients: [
+           "Ingredient 1 – amount",           // ✏️ One string per ingredient
+           "Ingredient 2 – amount",
+           "Ingredient 3 – amount",
+         ],
+         steps: [
+           "Step one: description.",          // ✏️ One string per step
+           "Step two: description.",
+           "Step three: description.",
+         ],
+         tip: "Optional healthy eating tip shown at the bottom of the modal.",
+         // Set tip to null to hide the tip box: tip: null,
+       },
+       ─── END OF TEMPLATE ──────────────────────────────────────
+
+       The RECIPES array starts EMPTY (shown below with just the
+       template as a comment). When empty, six placeholder cards
+       are displayed automatically. As you add recipes, each one
+       replaces a placeholder card.
+    =========================================================== */
+
+    /* Recipes live in recipes-data.js (loaded before this script). Edit them there. */
+
+
+    /* ===========================================================
+       B. RECIPE RENDERER
+       Reads the RECIPES array and builds the HTML for the grid.
+       Also injects placeholder cards to always show at least 6.
+       ─── No edits needed below this line ─────────────────────
+    =========================================================== */
+
+    /* Card builders + modal now live in nn-cards.js (shared). */
+
+    const FEATURED = [
+      "Chicken Biryani",
+      "Whole Wheat Veggie Pizza",
+      "Berry Smoothie Bowl",
+      "Strawberry Frozen Yogurt",
+      "Garlic Chicken Noodles",
+      "Avocado Toast with Egg",
+    ];
+
+    /** Main render function — called once on page load */
+    function renderRecipes() {
+      const grid = document.getElementById('recipe-grid');
+      grid.innerHTML = ''; // Clear grid before re-rendering
+
+      // 1. Split recipes into featured (in FEATURED order) and the rest.
+      const featuredIdx = [];
+      const extraIdx = [];
+      RECIPES.forEach((r, i) => {
+        (FEATURED.includes(r.title) ? featuredIdx : extraIdx).push(i);
+      });
+      featuredIdx.sort((a, b) =>
+        FEATURED.indexOf(RECIPES[a].title) - FEATURED.indexOf(RECIPES[b].title));
+
+      // 2. Render featured cards first, then the "extra" cards (marked so they
+      //    can be collapsed behind the See-all toggle). Real array index is
+      //    always passed so the modal opens the correct recipe.
+      featuredIdx.forEach(i => grid.appendChild(buildRecipeCard(RECIPES[i], i)));
+      extraIdx.forEach(i => {
+        const card = buildRecipeCard(RECIPES[i], i);
+        card.classList.add('extra-recipe');
+        grid.appendChild(card);
+      });
+
+      // 3. Fill remaining slots with placeholder cards
+      //    (always show at least PLACEHOLDER_COUNT slots total)
+      const placeholdersNeeded = Math.max(0, PLACEHOLDER_COUNT - RECIPES.length);
+      for (let i = 0; i < placeholdersNeeded; i++) {
+        grid.appendChild(buildPlaceholderCard());
+      }
+
+      // 4. Re-apply the current search/filter so new cards behave correctly
+      filterRecipes();
+    }
+
+    /** Show or hide the "See all recipes" link based on search/filter state. */
+    function updateSeeMoreButton() {
+      const wrap = document.getElementById('see-more-wrap');
+      if (!wrap) return;
+      const query = document.getElementById('recipe-search').value.trim();
+      const hasExtras = document.querySelectorAll('#recipe-grid .extra-recipe').length > 0;
+      wrap.style.display = (hasExtras && currentFilter === 'all' && !query) ? '' : 'none';
+    }
+
+
+    /* ===========================================================
+       C. RECIPE MODAL
+       Reads from the RECIPES array by index and populates the
+       modal fields. No edits needed here.
+    =========================================================== */
+
+    /* ===========================================================
+       D. SEARCH & FILTER
+       Works automatically with any cards rendered by buildRecipeCard()
+       and buildPlaceholderCard(). No edits needed.
+    =========================================================== */
+
+    let currentFilter = 'all'; // Tracks the active filter pill
+
+    function setFilter(btn, category) {
+      currentFilter = category;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      filterRecipes();
+    }
+
+    function filterRecipes() {
+      const query = document.getElementById('recipe-search').value.toLowerCase().trim();
+      // Collapsed = default view: only the featured recipes are shown. Any active
+      // search or category filter expands the list so every match is visible.
+      const collapsed = currentFilter === 'all' && !query;
+
+      document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
+        // Placeholders always visible when no search/filter would hide them
+        if (card.classList.contains('placeholder')) {
+          // Hide placeholders when a search query is active (they contain no real text)
+          card.style.display = query ? 'none' : '';
+          return;
+        }
+        const cat   = card.dataset.category || '';
+        const text  = card.textContent.toLowerCase();
+        const matchCat = currentFilter === 'all' || cat === currentFilter;
+        const matchQ   = !query || text.includes(query);
+        let show = matchCat && matchQ;
+        // In the collapsed default view, keep the non-featured "extra" cards hidden.
+        if (show && collapsed && card.classList.contains('extra-recipe')) show = false;
+        card.style.display = show ? '' : 'none';
+      });
+
+      updateSeeMoreButton();
+    }
+
+
+    /* ===========================================================
+       E. LOADING SCREEN
+    =========================================================== */
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+      }, 900);
+    });
+
+
+    /* ===========================================================
+       F. DARK MODE TOGGLE
+    =========================================================== */
+    const html     = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+
+    // Restore saved preference from previous visit
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeBtn.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+
+
+    /* ===========================================================
+       G. NAVIGATION
+    =========================================================== */
+
+    // Navbar shadow on scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Highlight the correct nav link as user scrolls through sections
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const sectionObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(a => {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { threshold: .4 });
+    sections.forEach(s => sectionObserver.observe(s));
+
+    // Mobile hamburger menu
+    const hamburger  = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let menuOpen = false;
+
+    hamburger.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      hamburger.classList.toggle('open', menuOpen);
+      mobileMenu.classList.toggle('open', menuOpen);
+      mobileMenu.style.display = menuOpen ? 'flex' : 'none';
+      hamburger.setAttribute('aria-expanded', menuOpen);
+    });
+
+    function closeMobileMenu() {
+      menuOpen = false;
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      mobileMenu.style.display = 'none';
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+
+    // Close mobile menu when clicking outside it
+    document.addEventListener('click', e => {
+      if (menuOpen && !navbar.contains(e.target) && !mobileMenu.contains(e.target)) {
+        closeMobileMenu();
+      }
+    });
+
+
+    /* ===========================================================
+       H. SCROLL-TO-TOP BUTTON
+    =========================================================== */
+    const scrollTopBtn = document.getElementById('scroll-top');
+    window.addEventListener('scroll', () => {
+      scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+    }, { passive: true });
+
+
+    /* ===========================================================
+       I. SCROLL REVEAL ANIMATION
+       Elements with class "reveal" fade in when scrolled into view.
+    =========================================================== */
+    const revealEls  = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Stagger siblings slightly for a cascade effect
+          const siblings = Array.from(entry.target.parentNode.children);
+          const delay = siblings.indexOf(entry.target) * 0.08;
+          entry.target.style.transitionDelay = delay + 's';
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+
+    /* ===========================================================
+       J. FAQ ACCORDION
+    =========================================================== */
+    function toggleFAQ(btn) {
+      const item   = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+
+      // Close all open items first
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      });
+
+      // If this item was closed, open it
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+
+    /* ===========================================================
+       INITIALISE
+       Call renderRecipes() to build the recipe grid on page load.
+       This must run AFTER the RECIPES array is defined above.
+    =========================================================== */
+    renderRecipes();
+
+  </script>
+</body>
+</html>
