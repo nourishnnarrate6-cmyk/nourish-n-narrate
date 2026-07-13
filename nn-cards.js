@@ -1,6 +1,6 @@
 /* ===================================================================
    NOURISH N NARRATE — SHARED CARD + MODAL LOGIC
-   Used by both NourishNNarrate.html and all-recipes.html.
+   Used by both index.html and all-recipes.html.
    Requires: RECIPES (recipes-data.js) and the modal markup in the page.
 =================================================================== */
 
@@ -37,6 +37,7 @@
       const card = document.createElement('div');
       card.className = 'recipe-card';
       card.dataset.category = recipe.category || 'all';
+      card.dataset.type = recipe.type || 'veg';
       // Store the recipe index on the card so the modal can retrieve it
       card.dataset.index = index;
       card.setAttribute('role', 'button');
@@ -44,13 +45,13 @@
       card.setAttribute('aria-label', `Open recipe: ${recipe.title}`);
 
       // Image section:
-      // ✏️ If recipe.image is a path/URL, an <img> tag is used.
-      //    If recipe.image is null AND recipe.emoji is set, the emoji placeholder is shown.
+      // ✏️ If recipe.image_url is a path/URL, an <img> tag is used.
+      //    If recipe.image_url is null AND recipe.emoji is set, the emoji placeholder is shown.
       //    If both are null/empty, the recipe title is shown as a styled banner.
-      const imageHTML = recipe.image
+      const imageHTML = recipe.image_url
         ? `<img
              class="card-img"
-             src="${recipe.image}"
+             src="${recipe.image_url}"
              alt="${recipe.title}"
              onerror="this.parentNode.innerHTML='<div class=\\'card-title-banner\\'><span>${recipe.title}</span></div>'"
            />`
@@ -90,10 +91,10 @@
 
       // Header: real image or emoji fallback
       const header = document.getElementById('modal-header');
-      if (r.image) {
-        // ✏️ IMAGE PATH: r.image comes directly from your recipe object.
+      if (r.image_url) {
+        // ✏️ IMAGE PATH: r.image_url comes from Supabase.
         //    Make sure the path or URL is correct.
-        header.innerHTML = `<img class="modal-img" src="${r.image}" alt="${r.title}" onerror="this.outerHTML='<div class=\\'modal-img-emoji\\'>${r.emoji || '🍽️'}</div>'" />`;
+        header.innerHTML = `<img class="modal-img" src="${r.image_url}" alt="${r.title}" onerror="this.outerHTML='<div class=\\'modal-img-emoji\\'>${r.emoji || '🍽️'}</div>'" />`;
       } else {
         header.innerHTML = `<div class="modal-img-emoji" aria-hidden="true">${r.emoji || '🍽️'}</div>`;
       }
@@ -105,6 +106,9 @@
       document.getElementById('modal-time').textContent     = r.time     || '—';
       document.getElementById('modal-servings').textContent = r.servings || '—';
       document.getElementById('modal-calories').textContent = r.calories ? r.calories + ' cal' : '—';
+      document.getElementById('modal-protein').textContent  = r.protein  || '—';
+      document.getElementById('modal-fiber').textContent    = r.fiber    || '—';
+      document.getElementById('modal-fat').textContent      = r.fat      || '—';
 
       // Ingredients list
       const ingEl = document.getElementById('modal-ingredients-list');

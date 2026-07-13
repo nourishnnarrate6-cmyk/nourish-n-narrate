@@ -82,6 +82,7 @@
         <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
       </div>
 
+
       <div class="recipe-grid" id="recipe-grid"></div>
 
       <div class="text-center allrx-bottom">
@@ -104,6 +105,9 @@
           <div class="modal-stat"><div class="modal-stat-val" id="modal-time"></div><div class="modal-stat-label">Prep &amp; Cook</div></div>
           <div class="modal-stat"><div class="modal-stat-val" id="modal-servings"></div><div class="modal-stat-label">Servings</div></div>
           <div class="modal-stat"><div class="modal-stat-val" id="modal-calories"></div><div class="modal-stat-label">Per Serving</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-protein"></div><div class="modal-stat-label">Protein</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-fiber"></div><div class="modal-stat-label">Fiber</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-fat"></div><div class="modal-stat-label">Fat</div></div>
         </div>
         <div class="modal-ingredients">
           <div class="modal-section-title">🛒 Ingredients</div>
@@ -134,13 +138,17 @@
     </div>
   </div>
 
-  <!-- Shared data + card/modal logic -->
-  <script src="recipes-data.js"></script>
+  <!-- Supabase Integration -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="recipes-data-supabase.js"></script>
+  <script src="form-handlers.js"></script>
   <script src="nn-cards.js"></script>
 
   <!-- Page logic: render every recipe, search + filter, theme -->
   <script>
     let currentFilter = 'all';
+    let currentTypeFilter = 'all';
 
     /* Featured order first, then the rest — but every recipe is shown here. */
     const FEATURED = [
@@ -165,19 +173,22 @@
 
     function setFilter(btn, category) {
       currentFilter = category;
-      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.filter-pills:first-of-type .pill').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       filterRecipes();
     }
+
 
     function filterRecipes() {
       const query = document.getElementById('recipe-search').value.toLowerCase().trim();
       document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
         const cat  = card.dataset.category || '';
+        const type = card.dataset.type || '';
         const text = card.textContent.toLowerCase();
         const matchCat = currentFilter === 'all' || cat === currentFilter;
+        const matchType = currentTypeFilter === 'all' || type === currentTypeFilter;
         const matchQ   = !query || text.includes(query);
-        card.style.display = (matchCat && matchQ) ? '' : 'none';
+        card.style.display = (matchCat && matchType && matchQ) ? '' : 'none';
       });
     }
 
@@ -208,7 +219,36 @@
       setTimeout(() => document.getElementById('loading-screen').classList.add('hidden'), 400);
     });
 
-    renderRecipes();
+    // Listen for when recipes are loaded from Supabase
+    window.addEventListener('recipesLoaded', () => {
+      console.log('Recipes loaded event received, rendering...');
+      renderRecipes();
+    });
+
+    // Fallback: render after a delay in case recipes load before listener is attached
+    setTimeout(() => {
+      if (RECIPES && RECIPES.length > 0) {
+        console.log('Recipes already loaded, rendering now');
+        renderRecipes();
+      }
+    }, 2000);
+
+    /* Reveal recipe cards with a gentle stagger as the grid scrolls into view */
+    (function () {
+      const grid = document.getElementById('recipe-grid');
+      if (!grid) return;
+      if (!('IntersectionObserver' in window)) {
+        document.body.classList.add('no-io');
+        grid.classList.add('in-view');
+        return;
+      }
+      const gridObserver = new IntersectionObserver((entries, obs) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) { grid.classList.add('in-view'); obs.disconnect(); }
+        });
+      }, { threshold: 0.12 });
+      gridObserver.observe(grid);
+    })();
   </script>
 </body>
 </html>
