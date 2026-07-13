@@ -9,21 +9,33 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-  <!-- Shared stylesheet (same look as the home page) -->
-  <link rel="stylesheet" href="nn-styles.css" />
+  <!-- Shared modern stylesheet (same design system as the home page) -->
+  <link rel="stylesheet" href="nn-modern.css" />
 
   <style>
     /* Small page-specific tweaks for the All Recipes page */
-    .allrx-header { padding-top: 7rem; }
+    .allrx-header { padding-top: calc(var(--nav-h) + 3rem); }
     .back-link {
       display: inline-flex; align-items: center; gap: .5rem;
       color: var(--green); font-weight: 600; text-decoration: none;
-      font-size: .95rem; margin-bottom: 1.25rem; transition: gap var(--dur);
+      font-size: .95rem; margin-bottom: 1.25rem;
+      transition: gap 0.3s var(--ease-out), color 0.25s ease;
     }
-    .back-link:hover { gap: .85rem; }
+    .back-link:hover { gap: .85rem; color: var(--green-mid); }
     .allrx-bottom { margin: 3.5rem 0 1rem; }
+    /* This page has no hamburger menu — keep the Back to Home CTA visible on mobile */
+    @media (max-width: 640px) {
+      .nav-cta { display: inline-flex !important; }
+    }
+    /* Soft background wash to match the home recipes section */
+    #recipes.allrx-header {
+      background:
+        radial-gradient(800px 400px at 88% 0%, rgba(5, 150, 105, 0.06), transparent 70%),
+        radial-gradient(700px 420px at 5% 100%, rgba(234, 88, 12, 0.05), transparent 70%),
+        var(--bg);
+    }
   </style>
 </head>
 <body data-view="all">
@@ -252,4 +264,3 @@
   </script>
 </body>
 </html>
-
