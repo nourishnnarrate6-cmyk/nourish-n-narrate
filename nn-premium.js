@@ -22,6 +22,30 @@
     document.documentElement.setAttribute('data-device', device);
   })();
 
+  /* ---------------- Shared mobile menu ----------------
+     Pages other than the homepage mark their hamburger + dropdown
+     with data-nn-menu; this wires them up (works on touch). */
+  (function () {
+    var burger = document.querySelector('.hamburger[data-nn-menu]');
+    var menu = document.querySelector('.mobile-menu[data-nn-menu]');
+    if (!burger || !menu) return;
+    var open = false;
+    function setOpen(v) {
+      open = v;
+      burger.classList.toggle('open', open);
+      menu.classList.toggle('open', open);
+      menu.style.display = open ? 'flex' : 'none';
+      burger.setAttribute('aria-expanded', String(open));
+    }
+    burger.addEventListener('click', function () { setOpen(!open); });
+    document.addEventListener('click', function (e) {
+      if (open && !burger.contains(e.target) && !menu.contains(e.target)) setOpen(false);
+    });
+    menu.addEventListener('click', function (e) {
+      if (e.target.tagName === 'A') setOpen(false);
+    });
+  })();
+
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!fine || reduce) return;

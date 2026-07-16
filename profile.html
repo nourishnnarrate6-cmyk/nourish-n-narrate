@@ -24,10 +24,7 @@
   }
   #profile-hero .hero-bg { position: absolute; inset: 0; pointer-events: none; }
 
-  @media (max-width: 640px) {
-    .nav-cta { display: inline-flex !important; }
-  }
-
+  
   /* Signed-out gate */
   .gate-card {
     max-width: 440px;
@@ -222,9 +219,22 @@
       <div class="nav-actions">
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
         <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </nav>
+
+  <!-- Mobile menu (same tabs as the desktop nav) -->
+  <div class="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
+    <a href="index.html#home">Home</a>
+    <a href="index.html#recipes">Recipes</a>
+    <a href="calculator.html">Calculator</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="profile.html">Profile</a>
+  </div>
+
 
   <!-- ============================================================
        PROFILE
