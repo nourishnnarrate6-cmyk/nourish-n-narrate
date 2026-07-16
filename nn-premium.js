@@ -10,6 +10,18 @@
 (function () {
   'use strict';
 
+  /* ---------------- Device detection ----------------
+     Tags <html data-device="phone|tablet|desktop"> on load so CSS and
+     JS can adapt to the actual device, not just the window width. */
+  (function () {
+    var coarse = window.matchMedia('(pointer: coarse)').matches;
+    var touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    var shortSide = Math.min(window.screen.width, window.screen.height);
+    var device = 'desktop';
+    if (coarse || touch) device = shortSide >= 600 ? 'tablet' : 'phone';
+    document.documentElement.setAttribute('data-device', device);
+  })();
+
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!fine || reduce) return;
