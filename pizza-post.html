@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #111;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 20px;
+    gap: 16px;
+  }
+
+  .hint {
+    color: #aaa;
+    font-size: 13px;
+    font-family: sans-serif;
+    text-align: center;
+  }
+
+  /* The actual post — 1080x1350 (4:5) scaled to fit screen */
+  .post-scaler {
+    width: min(100vw - 40px, 60vh);
+    aspect-ratio: 4 / 5;
+  }
+
+  .post {
+    width: 1080px;
+    height: 1350px;
+    transform-origin: top left;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: #fff;
+  }
+
+  /* ── TOP HERO IMAGE ── */
+  .hero {
+    position: relative;
+    width: 1080px;
+    height: 480px;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hero img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hero-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(26,71,49,0.55) 0%, rgba(0,0,0,0) 40%, rgba(26,71,49,0.85) 100%);
+  }
+  .hero-top {
+    position: absolute; top: 0; left: 0; right: 0;
+    padding: 52px 60px 0;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 16px;
+  }
+  .brand-leaf { font-size: 40px; }
+  .brand-name { color: #fff; font-size: 28px; font-weight: 800; letter-spacing: 1px; }
+  .meal-tag {
+    background: rgba(255,255,255,0.18);
+    backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(255,255,255,0.35);
+    color: #fff; font-size: 24px; font-weight: 600;
+    padding: 10px 28px; border-radius: 40px;
+  }
+  .hero-bottom {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    padding: 0 60px 52px;
+  }
+  .spotlight-label {
+    color: #74c69d; font-size: 24px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .hero-title {
+    color: #fff; font-size: 80px; font-weight: 900;
+    line-height: 1.05; letter-spacing: -1px;
+  }
+  .hero-title span { color: #74c69d; }
+
+  /* ── DARK GREEN MIDDLE SECTION ── */
+  .middle {
+    background: #1a4731;
+    padding: 44px 60px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+
+  .section-head {
+    color: #74c69d;
+    font-size: 22px; font-weight: 800;
+    letter-spacing: 3px; text-transform: uppercase;
+    margin-bottom: 24px;
+    border-bottom: 2px solid rgba(116,198,157,0.3);
+    padding-bottom: 12px;
+  }
+
+  .benefits { display: flex; flex-direction: column; gap: 20px; }
+
+  .benefit {
+    display: flex; align-items: flex-start; gap: 24px;
+  }
+  .benefit-icon {
+    width: 64px; height: 64px;
+    background: rgba(116,198,157,0.15);
+    border: 2px solid rgba(116,198,157,0.3);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    flex-shrink: 0;
+  }
+  .benefit-text strong {
+    display: block;
+    color: #fff; font-size: 26px; font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .benefit-text span {
+    color: rgba(255,255,255,0.7); font-size: 21px; line-height: 1.4;
+  }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex;
+    gap: 0;
+    border: 2px solid rgba(116,198,157,0.3);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-top: 30px;
+  }
+  .stat {
+    flex: 1;
+    padding: 22px 20px;
+    text-align: center;
+    border-right: 1px solid rgba(116,198,157,0.2);
+  }
+  .stat:last-child { border-right: none; }
+  .stat-val { color: #74c69d; font-size: 36px; font-weight: 900; }
+  .stat-label { color: rgba(255,255,255,0.55); font-size: 18px; margin-top: 4px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    background: #2d6a4f;
+    padding: 36px 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    flex-shrink: 0;
+  }
+  .cta { color: #fff; font-size: 28px; font-weight: 700; }
+  .cta span { color: #74c69d; }
+  .handle { color: rgba(255,255,255,0.75); font-size: 26px; font-weight: 600; letter-spacing: 0.5px; }
+</style>
+</head>
+<body>
+
+<p class="hint">Open in browser · Zoom out to see full post · Screenshot to save</p>
+
+<div class="post-scaler">
+  <div class="post" id="post" style="transform: scale(1); transform-origin: top left;">
+
+    <!-- HERO -->
+    <div class="hero">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Pizza-3007395.jpg/960px-Pizza-3007395.jpg" alt="Veggie Pizza" />
+      <div class="hero-overlay"></div>
+      <div class="hero-top">
+        <div class="brand">
+          <span class="brand-leaf">🌿</span>
+          <span class="brand-name">Nourish N Narrate</span>
+        </div>
+        <div class="meal-tag">Vegetarian</div>
+      </div>
+      <div class="hero-bottom">
+        <div class="spotlight-label">Recipe Spotlight</div>
+        <div class="hero-title">Whole Wheat<br><span>Veggie Pizza</span></div>
+      </div>
+    </div>
+
+    <!-- MIDDLE -->
+    <div class="middle">
+      <div>
+        <div class="section-head">Why It's Good For You</div>
+        <div class="benefits">
+          <div class="benefit">
+            <div class="benefit-icon">🌾</div>
+            <div class="benefit-text">
+              <strong>Whole Wheat Crust</strong>
+              <span>More fiber & protein than white flour — keeps you full and energized longer</span>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="benefit-icon">🥦</div>
+            <div class="benefit-text">
+              <strong>Loaded with Veggies</strong>
+              <span>Bell peppers, onions & mushrooms deliver vitamins, minerals & antioxidants</span>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="benefit-icon">🫙</div>
+            <div class="benefit-text">
+              <strong>Light on Cheese</strong>
+              <span>Lower saturated fat, same great taste — a smarter, guilt-free slice</span>
+            </div>
+          </div>
+          <div class="benefit">
+            <div class="benefit-icon">❤️</div>
+            <div class="benefit-text">
+              <strong>Heart Friendly</strong>
+              <span>Whole grains & veggies work together to support healthy cholesterol</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat"><div class="stat-val">320</div><div class="stat-label">Calories</div></div>
+        <div class="stat"><div class="stat-val">40m</div><div class="stat-label">Cook Time</div></div>
+        <div class="stat"><div class="stat-val">4</div><div class="stat-label">Servings</div></div>
+        <div class="stat"><div class="stat-val">Easy</div><div class="stat-label">Difficulty</div></div>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="footer">
+      <div class="cta">Try it → <span>Link in bio</span></div>
+      <div class="handle">@nourishnnarrate</div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Scale the post to fit the scaler div
+  function scalePost() {
+    const scaler = document.querySelector('.post-scaler');
+    const post = document.getElementById('post');
+    const scale = scaler.offsetWidth / 1080;
+    post.style.transform = `scale(${scale})`;
+    scaler.style.height = (1350 * scale) + 'px';
+  }
+  scalePost();
+  window.addEventListener('resize', scalePost);
+</script>
+</body>
+</html>

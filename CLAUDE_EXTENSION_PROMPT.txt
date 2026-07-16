@@ -1,0 +1,164 @@
+════════════════════════════════════════════════════════════════════
+CLAUDE EXTENSION PROMPT — Run This in Your Claude in Chrome
+════════════════════════════════════════════════════════════════════
+
+📋 INSTRUCTIONS:
+1. Open your Claude Chrome extension
+2. Copy the entire prompt below (everything between the lines)
+3. Paste it into the Claude extension chat
+4. Hit Enter and let it do the work
+5. It will navigate to your Supabase project and run the SQL
+
+════════════════════════════════════════════════════════════════════
+COPY EVERYTHING BELOW AND PASTE INTO CLAUDE EXTENSION
+════════════════════════════════════════════════════════════════════
+
+I need you to help me set up my Supabase database. Here's what to do:
+
+1. Navigate to my Supabase project at: https://qonuiowgfwhgqnojzjxy.supabase.co
+
+2. Once there, find and click on "SQL Editor" in the left sidebar
+
+3. Click the "New Query" button
+
+4. Copy and paste this entire SQL code into the SQL editor:
+
+```sql
+-- =====================================================================
+-- RECIPES TABLE — stores all recipes with nutritional data
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS recipes (
+  id BIGSERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL UNIQUE,
+  category VARCHAR(50) NOT NULL,
+  type VARCHAR(20) NOT NULL DEFAULT 'veg',
+  emoji VARCHAR(10),
+  image_url TEXT,
+  description TEXT,
+  cook_time VARCHAR(50),
+  servings VARCHAR(50),
+  calories_per_serving INT,
+  protein_g DECIMAL(5,2),
+  fiber_g DECIMAL(5,2),
+  fat_g DECIMAL(5,2),
+  ingredients TEXT,
+  steps TEXT,
+  tip TEXT,
+  why_healthier TEXT,
+  comparison TEXT,
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now(),
+  created_by_admin BOOLEAN DEFAULT FALSE
+);
+
+-- =====================================================================
+-- RECIPE SUGGESTIONS TABLE — user-submitted food requests
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS recipe_suggestions (
+  id BIGSERIAL PRIMARY KEY,
+  user_name VARCHAR(255),
+  user_email VARCHAR(255),
+  food_name VARCHAR(255) NOT NULL,
+  category VARCHAR(50),
+  dietary_preference VARCHAR(20),
+  reason TEXT,
+  status VARCHAR(50) DEFAULT 'pending',
+  admin_notes TEXT,
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
+);
+
+-- =====================================================================
+-- CONTACT SUBMISSIONS TABLE — general contact form submissions
+-- =====================================================================
+CREATE TABLE IF NOT EXISTS contact_submissions (
+  id BIGSERIAL PRIMARY KEY,
+  user_name VARCHAR(255),
+  user_email VARCHAR(255) NOT NULL,
+  subject VARCHAR(255),
+  message TEXT NOT NULL,
+  status VARCHAR(50) DEFAULT 'new',
+  admin_reply TEXT,
+  created_at TIMESTAMP DEFAULT now(),
+  updated_at TIMESTAMP DEFAULT now()
+);
+
+-- =====================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- =====================================================================
+
+ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recipe_suggestions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE contact_submissions ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Recipes are publicly readable" ON recipes
+  FOR SELECT USING (true);
+
+CREATE POLICY "Anyone can submit suggestions" ON recipe_suggestions
+  FOR INSERT WITH CHECK (true);
+
+CREATE POLICY "Anyone can submit contact form" ON contact_submissions
+  FOR INSERT WITH CHECK (true);
+
+-- =====================================================================
+-- INDEXES for performance
+-- =====================================================================
+CREATE INDEX idx_recipes_category ON recipes(category);
+CREATE INDEX idx_recipes_type ON recipes(type);
+CREATE INDEX idx_suggestions_status ON recipe_suggestions(status);
+CREATE INDEX idx_contact_status ON contact_submissions(status);
+
+-- =====================================================================
+-- Insert sample recipe (Date Ladoo) for testing
+-- =====================================================================
+INSERT INTO recipes (
+  title, category, type, emoji, description, cook_time, servings,
+  calories_per_serving, protein_g, fiber_g, fat_g, tip
+) VALUES (
+  'Date Ladoo',
+  'snack',
+  'veg',
+  '🍪',
+  'A wholesome no-bake Indian sweet made from dates and roasted nuts — naturally sweet, energy-packed, and completely guilt-free.',
+  '25 min',
+  '12',
+  95,
+  2.0,
+  2.0,
+  5.0,
+  'Store in an airtight container in the fridge for up to 2 weeks.'
+);
+```
+
+5. After pasting all the SQL, find and click the "Run" button (usually in the top right or bottom of the editor)
+
+6. Wait for the query to complete. You should see a green checkmark ✅ indicating success.
+
+7. Once complete, navigate to "Table Editor" in the left sidebar and verify you see these three new tables:
+   - recipes
+   - recipe_suggestions
+   - contact_submissions
+
+8. Tell me when it's done and show me a screenshot of the three tables created.
+
+════════════════════════════════════════════════════════════════════
+END OF PROMPT
+════════════════════════════════════════════════════════════════════
+
+✅ WHAT THIS DOES:
+- Navigates to your Supabase project
+- Opens SQL Editor
+- Pastes the database schema
+- Runs the SQL
+- Creates all three tables
+- Loads sample recipe
+- You verify it worked
+
+⏱️ TIME: ~5 minutes (mostly automated by Claude extension)
+
+🚀 NEXT: Once the tables are created, come back here and we'll:
+1. Update your HTML files
+2. Test everything in your browser
+3. Get you live! 🎉
+
+════════════════════════════════════════════════════════════════════

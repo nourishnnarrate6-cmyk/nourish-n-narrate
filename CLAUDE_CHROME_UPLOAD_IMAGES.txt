@@ -1,0 +1,44 @@
+════════════════════════════════════════════════════════════════════
+CLAUDE CHROME PROMPT — Upload Images to Supabase Storage
+════════════════════════════════════════════════════════════════════
+
+📋 INSTRUCTIONS:
+Copy everything below and paste into Claude in Chrome extension
+
+════════════════════════════════════════════════════════════════════
+COPY AND PASTE INTO CLAUDE CHROME
+════════════════════════════════════════════════════════════════════
+
+I need you to upload images to my Supabase Storage bucket. Here's what to do:
+
+1. Navigate to my Supabase project: https://qonuiowgfwhgqnojzjxy.supabase.co
+
+2. Click "Storage" in the left sidebar
+
+3. You should see a bucket called "recipe-images" (if not, create one first)
+
+4. Click on the "recipe-images" bucket to open it
+
+5. Click "Upload file" button
+
+6. Upload these 3 images from my Downloads/OIP folder:
+   - date-ladoo.webp
+   - chicken-biryani.webp
+   - garlic-chicken-noodles.webp
+
+7. After each upload completes, take a screenshot showing:
+   - The filename
+   - The public URL (you can click the image to see it)
+   - Copy the full public URL
+
+8. Come back and tell me the three public URLs in this format:
+
+Date Ladoo: [URL]
+Chicken Biryani: [URL]
+Garlic Chicken Noodles: [URL]
+
+Make sure each URL starts with: https://qonuiowgfwhgqnojzjxy.supabase.co/storage/v1/object/public/recipe-images/
+
+════════════════════════════════════════════════════════════════════
+END OF PROMPT
+════════════════════════════════════════════════════════════════════

@@ -1,0 +1,88 @@
+<!-- ===================================================================
+     EXAMPLE: Script tags to add to index.html <head> section
+
+     Replace the OLD <script> tags with these NEW ones that include
+     Supabase integration. Keep all other CSS and meta tags unchanged.
+=================================================================== -->
+
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script>
+    // Scroll to top immediately on page load
+    window.addEventListener('load', function() {
+      window.scrollTo(0, 0);
+    });
+    // Also try before everything loads
+    document.documentElement.scrollTop = 0;
+  </script>
+
+  <!-- PAGE TITLE & META -->
+  <title>Nourish N Narrate</title>
+  <meta name="description" content="Transforming your favorite comfort foods into healthier, delicious alternatives—one recipe at a time." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="nn-styles.css" />
+
+  <!-- ===================================================================
+       SUPABASE INTEGRATION — NEW SCRIPTS ADDED HERE
+       (Include these before the </head> closing tag)
+  =================================================================== -->
+
+  <!-- Supabase JavaScript Library (required) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Nourish N Narrate Supabase Modules -->
+  <script src="supabase-client.js"></script>
+  <script src="recipes-data-supabase.js"></script>
+  <script src="form-handlers.js"></script>
+
+  <!-- Card Logic (unchanged from original) -->
+  <script src="nn-cards.js"></script>
+
+  <!-- END SUPABASE INTEGRATION -->
+
+</head>
+
+<body>
+  <!-- Your existing HTML content continues as before... -->
+
+  <!-- ===================================================================
+       LOADING SCREEN — no edits needed here
+  =================================================================== -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- [REST OF YOUR HTML CONTINUES UNCHANGED] -->
+
+</body>
+</html>
+
+<!-- ===================================================================
+     KEY CHANGES FROM ORIGINAL:
+
+     REMOVED (old static recipes):
+     - <script src="recipes-data.js"></script>
+
+     ADDED (Supabase integration):
+     + <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+     + <script src="supabase-client.js"></script>
+     + <script src="recipes-data-supabase.js"></script>
+     + <script src="form-handlers.js"></script>
+     + Keep: <script src="nn-cards.js"></script>
+
+     Everything else remains the same!
+
+     BEFORE applying these changes:
+     1. Make sure supabase-client.js has your SUPABASE_URL and SUPABASE_ANON_KEY
+     2. Ensure SUPABASE_SETUP.md steps are complete
+     3. Test in browser console to verify no errors
+=================================================================== -->

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Log In — Nourish N Narrate</title>
+  <meta name="description" content="Log in or create a free account to save your nutrition calculator results." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Shared modern stylesheet (same design system as the home page) -->
+  <link rel="stylesheet" href="nn-modern.css" />
+
+  <style>
+  /* ==================================================================
+     LOGIN PAGE — page-specific styles
+  ================================================================== */
+  #login-hero {
+    min-height: 100svh;
+    display: flex; align-items: center;
+    padding: calc(var(--nav-h) + 2rem) 0 4rem;
+    overflow: hidden;
+  }
+  #login-hero .hero-bg { position: absolute; inset: 0; pointer-events: none; }
+
+  @media (max-width: 640px) {
+    .nav-cta { display: inline-flex !important; }
+  }
+
+  .auth-card {
+    position: relative;
+    width: min(440px, 100%);
+    margin: 0 auto;
+    padding: clamp(2rem, 5vw, 2.75rem);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    animation: fadeInUp 0.7s var(--ease-out) 0.15s both;
+  }
+  .auth-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 4px;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    background: var(--grad-green);
+  }
+
+  .auth-icon {
+    display: grid; place-items: center;
+    width: 64px; height: 64px;
+    margin: 0 auto 1.2rem;
+    font-size: 1.8rem;
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: 20px;
+  }
+  .auth-card h1 {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    text-align: center;
+    margin-bottom: 0.4rem;
+  }
+  .auth-sub {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.93rem;
+    margin-bottom: 1.6rem;
+  }
+
+  /* Sign in / Create account tabs */
+  .auth-tabs {
+    display: flex;
+    padding: 4px;
+    gap: 4px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    margin-bottom: 1.5rem;
+  }
+  .auth-tab {
+    flex: 1;
+    padding: 0.55rem 1rem;
+    font-family: inherit;
+    font-size: 0.9rem; font-weight: 500;
+    color: var(--text-muted);
+    background: none;
+    border: none;
+    border-radius: var(--radius-full);
+    transition: all 0.25s var(--ease-out);
+  }
+  .auth-tab:hover { color: var(--ink); }
+  .auth-tab.active {
+    color: #fff; font-weight: 600;
+    background: var(--grad-green);
+    box-shadow: var(--shadow-green);
+  }
+
+  .auth-field { margin-bottom: 1.1rem; }
+  .auth-field label {
+    display: block;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+  }
+  .auth-field input {
+    width: 100%;
+    padding: 0.85rem 1rem;
+    font-family: inherit; font-size: 0.98rem;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border-strong);
+    border-radius: 14px;
+    outline: none;
+    transition: border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
+  }
+  .auth-field input:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.14);
+    background: var(--surface);
+  }
+  .auth-hint { font-size: 0.78rem; color: var(--text-muted); margin-top: 0.3rem; }
+
+  .auth-msg {
+    display: none;
+    margin-bottom: 1.1rem;
+    padding: 0.8rem 1.1rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+  }
+  .auth-msg.show { display: block; animation: fadeInUp 0.3s var(--ease-out); }
+  .auth-msg.error {
+    color: #b91c1c;
+    background: #fef2f2;
+    border: 1px solid rgba(185, 28, 28, 0.25);
+    border-left: 4px solid #dc2626;
+  }
+  .auth-msg.success {
+    color: var(--green-deep);
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.3);
+    border-left: 4px solid var(--green);
+  }
+  [data-theme="dark"] .auth-msg.error { background: rgba(220, 38, 38, 0.12); color: #fca5a5; }
+  [data-theme="dark"] .auth-msg.success { color: var(--green-light); }
+
+  .btn-auth {
+    width: 100%;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.95rem 1.5rem;
+    font-family: inherit;
+    font-size: 1rem; font-weight: 600;
+    color: #fff;
+    background: var(--grad-green);
+    border: none;
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-green);
+    transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease, opacity 0.2s ease;
+  }
+  .btn-auth:hover { transform: translateY(-2px); box-shadow: 0 16px 38px -10px rgba(5, 150, 105, 0.55); }
+  .btn-auth:disabled { opacity: 0.6; transform: none; cursor: wait; }
+
+  .auth-skip {
+    text-align: center;
+    margin-top: 1.4rem;
+    font-size: 0.88rem;
+    color: var(--text-muted);
+  }
+  .auth-skip a { color: var(--green-mid); font-weight: 600; text-decoration: none; }
+  .auth-skip a:hover { text-decoration: underline; }
+
+  /* Notice popup (check-your-email / email-confirmed) */
+  .notice-overlay {
+    position: fixed; inset: 0; z-index: 960;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.25rem;
+    background: rgba(10, 18, 30, 0.55);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    opacity: 0; visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+  .notice-overlay.open { opacity: 1; visibility: visible; }
+  .notice-modal {
+    width: min(420px, 100%);
+    padding: 2.5rem 2rem 2rem;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 30px 80px rgba(10, 18, 30, 0.35);
+    transform: translateY(20px) scale(0.96);
+    transition: transform 0.35s var(--ease-out);
+  }
+  .notice-overlay.open .notice-modal { transform: translateY(0) scale(1); }
+  .notice-modal h3 {
+    font-family: var(--font-display);
+    font-size: 1.45rem;
+    margin-bottom: 0.6rem;
+  }
+  .notice-modal p {
+    color: var(--text-muted);
+    font-size: 0.93rem;
+    margin-bottom: 1.5rem;
+    word-break: break-word;
+  }
+
+  .signed-in-box { display: none; text-align: center; }
+  .signed-in-box.show { display: block; }
+  .signed-in-box .user-chip {
+    display: inline-block;
+    margin-bottom: 1.4rem;
+    padding: 0.5rem 1.2rem;
+    font-weight: 600;
+    color: var(--green-deep);
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.25);
+    border-radius: var(--radius-full);
+    word-break: break-all;
+  }
+  [data-theme="dark"] .signed-in-box .user-chip { color: var(--green-light); }
+  .signed-in-actions { display: flex; flex-direction: column; gap: 0.8rem; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish&nbsp;<span class="accent">N</span>&nbsp;Narrate
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html#home">Home</a></li>
+        <li><a href="index.html#recipes">Recipes</a></li>
+        <li><a href="calculator.html">Calculator</a></li>
+        <li><a href="tracker.html">Tracker</a></li>
+        <li><a href="profile.html">Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <a class="nav-cta" href="calculator.html" style="text-decoration:none;">← Back to Calculator</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       LOGIN / SIGN UP
+  ============================================================ -->
+  <section id="login-hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+    </div>
+
+    <div class="container" style="position:relative;">
+      <div class="auth-card">
+
+        <!-- Signed-out view -->
+        <div id="auth-forms">
+          <div class="auth-icon" aria-hidden="true">🔐</div>
+          <h1 id="auth-title">Welcome back</h1>
+          <p class="auth-sub" id="auth-subtitle">Log in to save your nutrition results and pick up where you left off.</p>
+
+          <div class="auth-tabs" role="tablist" aria-label="Sign in or create account">
+            <button class="auth-tab active" id="tab-signin" role="tab" aria-selected="true" onclick="switchTab('signin')">Sign In</button>
+            <button class="auth-tab" id="tab-signup" role="tab" aria-selected="false" onclick="switchTab('signup')">Create Account</button>
+          </div>
+
+          <div class="auth-msg" id="auth-msg" role="alert" aria-live="polite"></div>
+
+          <form id="auth-form" novalidate>
+            <div class="auth-field">
+              <label for="auth-email">Email</label>
+              <input type="email" id="auth-email" autocomplete="email" placeholder="you@example.com" required />
+            </div>
+            <div class="auth-field">
+              <label for="auth-password">Password</label>
+              <input type="password" id="auth-password" autocomplete="current-password" placeholder="••••••••" minlength="6" required />
+              <p class="auth-hint" id="pw-hint" style="display:none;">At least 6 characters.</p>
+            </div>
+            <button type="submit" class="btn-auth" id="auth-submit">Sign In</button>
+          </form>
+
+        </div>
+
+        <!-- Signed-in view -->
+        <div class="signed-in-box" id="signed-in-box">
+          <div class="auth-icon" aria-hidden="true">✅</div>
+          <h1>You're signed in</h1>
+          <p class="auth-sub">Signed in as</p>
+          <div class="user-chip" id="signed-in-email"></div>
+          <div class="signed-in-actions">
+            <a href="calculator.html" class="btn-auth" style="text-decoration:none;">🧮 Go to the Calculator</a>
+            <a href="profile.html" class="btn-auth" style="text-decoration:none;">👤 View My Profile</a>
+            <button class="see-more-btn" id="btn-signout" style="justify-content:center;">Sign Out</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Notice popup — check-your-email / email-confirmed messages -->
+  <div class="notice-overlay" id="notice-modal" role="dialog" aria-modal="true" aria-labelledby="notice-title">
+    <div class="notice-modal">
+      <div class="auth-icon" id="notice-icon" aria-hidden="true">📬</div>
+      <h3 id="notice-title"></h3>
+      <p id="notice-text"></p>
+      <button class="btn-auth" id="notice-btn" type="button">OK</button>
+    </div>
+  </div>
+
+  <!-- Supabase + shared auth helper -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="nn-auth.js"></script>
+  <script>
+    /* ---------- Confirmation link detection ----------
+       Supabase redirects back with details in the URL hash, e.g.
+       #access_token=…&type=signup  (success) or
+       #error=access_denied&error_description=…  (expired/used link).
+       Capture it before the Supabase client consumes it. */
+    const authHash = new URLSearchParams(location.hash.replace(/^#/, ''));
+    const confirmType  = authHash.get('type');
+    const confirmError = authHash.get('error_description') || authHash.get('error');
+
+    /* ---------- Notice popup ---------- */
+    let noticeAction = null;
+    function showNotice(icon, title, text, btnLabel, onClick) {
+      document.getElementById('notice-icon').textContent = icon;
+      document.getElementById('notice-title').textContent = title;
+      document.getElementById('notice-text').textContent = text;
+      document.getElementById('notice-btn').textContent = btnLabel;
+      noticeAction = onClick || null;
+      document.getElementById('notice-modal').classList.add('open');
+    }
+    function closeNotice() {
+      document.getElementById('notice-modal').classList.remove('open');
+    }
+    document.getElementById('notice-btn').addEventListener('click', () => {
+      const act = noticeAction;
+      closeNotice();
+      if (act) act();
+    });
+
+    /* ---------- Tabs ---------- */
+    let mode = 'signin';
+    function switchTab(next) {
+      mode = next;
+      const signin = next === 'signin';
+      document.getElementById('tab-signin').classList.toggle('active', signin);
+      document.getElementById('tab-signup').classList.toggle('active', !signin);
+      document.getElementById('tab-signin').setAttribute('aria-selected', signin);
+      document.getElementById('tab-signup').setAttribute('aria-selected', !signin);
+      document.getElementById('auth-title').textContent    = signin ? 'Welcome back' : 'Create your account';
+      document.getElementById('auth-subtitle').textContent = signin
+        ? 'Log in to save your nutrition results and pick up where you left off.'
+        : 'Sign up free to save your nutrition results across devices.';
+      document.getElementById('auth-submit').textContent = signin ? 'Sign In' : 'Create Account';
+      document.getElementById('auth-password').setAttribute('autocomplete', signin ? 'current-password' : 'new-password');
+      document.getElementById('pw-hint').style.display = signin ? 'none' : 'block';
+      hideMsg();
+    }
+
+    /* ---------- Messages ---------- */
+    const msgEl = document.getElementById('auth-msg');
+    function showMsg(text, type) {
+      msgEl.textContent = text;
+      msgEl.className = 'auth-msg show ' + type;
+    }
+    function hideMsg() { msgEl.className = 'auth-msg'; }
+
+    /* ---------- Safe redirect (only to our own pages) ---------- */
+    function redirectTarget() {
+      const allowed = ['calculator.html', 'index.html', 'all-recipes.html', 'profile.html', 'tracker.html'];
+      const r = new URLSearchParams(location.search).get('redirect');
+      return allowed.includes(r) ? r : 'calculator.html';
+    }
+
+    /* ---------- Submit ---------- */
+    document.getElementById('auth-form').addEventListener('submit', async e => {
+      e.preventDefault();
+      const email = document.getElementById('auth-email').value.trim();
+      const password = document.getElementById('auth-password').value;
+
+      if (!email || !/.+@.+\..+/.test(email)) { showMsg('Please enter a valid email address.', 'error'); return; }
+      if (!password || password.length < 6)   { showMsg('Password must be at least 6 characters.', 'error'); return; }
+
+      const btn = document.getElementById('auth-submit');
+      btn.disabled = true;
+      btn.textContent = mode === 'signin' ? 'Signing in…' : 'Creating account…';
+
+      const res = mode === 'signin'
+        ? await NNAuth.signIn(email, password)
+        : await NNAuth.signUp(email, password);
+
+      btn.disabled = false;
+      btn.textContent = mode === 'signin' ? 'Sign In' : 'Create Account';
+
+      if (!res.ok) { showMsg(res.message || 'Something went wrong. Please try again.', 'error'); return; }
+
+      if (res.needsConfirm) {
+        switchTab('signin');
+        showNotice('📬', 'Check your email!',
+          'We sent a confirmation link to ' + email + '. Click the link in that email to activate your account, then come back here and sign in.',
+          'Got it');
+        return;
+      }
+
+      showMsg('Success! Redirecting…', 'success');
+      setTimeout(() => { location.href = redirectTarget(); }, 600);
+    });
+
+    /* Open the Create Account tab when linked with ?mode=signup */
+    if (new URLSearchParams(location.search).get('mode') === 'signup') switchTab('signup');
+
+    /* ---------- Arriving from the confirmation email ---------- */
+    if (confirmError) {
+      // Link expired or already used — the account itself is usually fine.
+      showNotice('⚠️', 'That link didn\'t work',
+        'The confirmation link may have expired or was already used. If you\'ve confirmed before, just sign in with your email and password.',
+        'Sign In', () => switchTab('signin'));
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+
+    /* ---------- Already signed in? ---------- */
+    NNAuth.onReady(async () => {
+      const session = await NNAuth.getSession();
+      if (session) {
+        document.getElementById('auth-forms').style.display = 'none';
+        document.getElementById('signed-in-box').classList.add('show');
+        document.getElementById('signed-in-email').textContent = session.user.email;
+        if (confirmType === 'signup' && !confirmError) {
+          showNotice('✅', 'Email confirmed!',
+            'Your account is verified and you\'re now signed in. Head to the calculator — your results will save automatically.',
+            'Go to the Calculator', () => { location.href = 'calculator.html'; });
+        }
+      } else if (confirmType === 'signup' && !confirmError) {
+        // Confirmed on another device/browser — session lives there, so just sign in here.
+        showNotice('✅', 'Email confirmed!',
+          'Your account is verified. Sign in with your email and password to continue.',
+          'Sign In', () => switchTab('signin'));
+      }
+    });
+    document.getElementById('btn-signout').addEventListener('click', async () => {
+      await NNAuth.signOut();
+      location.reload();
+    });
+
+    /* ---------- Page chrome (theme + navbar) ---------- */
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeBtn.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+  </script>
+  <script src="nn-premium.js"></script>
+</body>
+</html>

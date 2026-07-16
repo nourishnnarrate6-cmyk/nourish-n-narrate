@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ============================================================
+    PAGE TITLE & META
+    Edit the title and description below to match your project.
+  ============================================================ -->
+  <title>Nourish N Narrate</title>
+  <meta name="description" content="Transforming your favorite comfort foods into healthier, delicious alternatives—one recipe at a time." />
+
+  <!-- Google Fonts (no changes needed here) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       TABLE OF CONTENTS — CSS
+       1.  CSS Custom Properties (colors, spacing, shadows)
+       2.  Dark Mode overrides
+       3.  Reset & Base
+       4.  Loading Screen
+       5.  Navigation Bar
+       6.  Section Wrappers & Shared Typography
+       7.  Hero Section
+       8.  About Section
+       9.  Recipes Section (search, pills, grid)
+      10.  Recipe Card — Placeholder style
+      11.  Recipe Card — Real recipe style
+      12.  Recipe Modal (popup)
+      13.  Suggest Your Favorite Food Section
+      14.  FAQ Accordion
+      15.  Contact Section
+      16.  Footer
+      17.  Scroll-to-Top Button
+      18.  Utility classes & Scroll reveal animation
+      19.  Responsive / Media Queries
+    ============================================================ */
+
+
+    /* ============================================================
+       1. CSS CUSTOM PROPERTIES
+       To change the site's color palette, edit these values.
+       Every color used in the design references one of these
+       variables — so changing a value here updates it everywhere.
+    ============================================================ */
+    :root {
+      /* --- Brand Colors --- */
+      --green-dark:   #1a4731;   /* Darkest green (footer, hero text) */
+      --green:        #2d6a4f;   /* Primary green (buttons, links)     */
+      --green-mid:    #40916c;   /* Mid green (focus rings, accents)   */
+      --green-light:  #74c69d;   /* Light green (hero blob)            */
+      --green-pale:   #d8f3dc;   /* Pale green (tag backgrounds)       */
+      --orange:       #f4845f;   /* Primary orange (accents, CTA)      */
+      --orange-dark:  #e36140;   /* Darker orange (hover state)        */
+      --orange-pale:  #fde8e1;   /* Pale orange (tag backgrounds)      */
+
+      /* --- Neutral Colors --- */
+      --white:        #ffffff;
+      --off-white:    #f9f9f6;
+      --gray-100:     #f5f5f0;
+      --gray-200:     #e8e8e0;
+      --gray-400:     #a8a89c;
+      --gray-600:     #6b6b60;
+      --gray-800:     #2c2c28;
+      --text:         #1e1e1a;   /* Primary body text                  */
+      --text-muted:   #6b6b60;   /* Secondary / muted text             */
+
+      /* --- Layout --- */
+      --nav-h: 72px;             /* Height of the navigation bar       */
+
+      /* --- Shadows --- */
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.06);
+      --shadow-md: 0 6px 24px rgba(0,0,0,.10);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,.14);
+
+      /* --- Transitions --- */
+      --ease: cubic-bezier(.4,0,.2,1);
+      --dur:  .25s;
+
+      /* --- Surface (background/card colors) ---
+         These are aliased so dark mode can override them cleanly. */
+      --bg:      var(--off-white);
+      --surface: var(--white);
+      --border:  var(--gray-200);
+    }
+
+
+    /* ============================================================
+       2. DARK MODE OVERRIDES
+       When data-theme="dark" is set on <html>, these values
+       replace the light-mode variables above.
+       You shouldn't need to edit this unless adding new colors.
+    ============================================================ */
+    [data-theme="dark"] {
+      --bg:        #12130f;
+      --surface:   #1c1e18;
+      --text:      #e8e8e0;
+      --text-muted:#9a9a8e;
+      --border:    #2e3028;
+      --gray-100:  #1c1e18;
+      --gray-200:  #2e3028;
+      --gray-400:  #5a5a50;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.3);
+      --shadow-md: 0 6px 24px rgba(0,0,0,.4);
+      --shadow-lg: 0 16px 48px rgba(0,0,0,.5);
+      --green-pale:#1a2e22;
+      --orange-pale:#2e1a14;
+    }
+
+
+    /* ============================================================
+       3. RESET & BASE
+       Sensible defaults so browsers render consistently.
+       No need to edit this section.
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+      overflow-x: hidden;
+    }
+    h1, h2, h3, h4 { font-family: 'Playfair Display', serif; line-height: 1.25; }
+    a { color: inherit; text-decoration: none; }
+    img { display: block; max-width: 100%; }
+    ul { list-style: none; }
+    button { cursor: pointer; font-family: inherit; }
+
+
+    /* ============================================================
+       4. LOADING SCREEN
+       Shown briefly while the page loads. Hides automatically.
+    ============================================================ */
+    #loading-screen {
+      position: fixed; inset: 0;
+      background: var(--green-dark);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 9999;
+      transition: opacity .6s var(--ease), visibility .6s;
+    }
+    #loading-screen.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loader-logo {
+      font-family: 'Playfair Display', serif;
+      font-size: 2rem; color: var(--white);
+      margin-bottom: 1.5rem; letter-spacing: .02em;
+    }
+    .loader-logo span { color: var(--orange); }
+    .loader-bar {
+      width: 160px; height: 3px;
+      background: rgba(255,255,255,.2);
+      border-radius: 99px; overflow: hidden;
+    }
+    .loader-bar::after {
+      content: ''; display: block; height: 100%; width: 40%;
+      background: var(--orange); border-radius: 99px;
+      animation: load 1.2s var(--ease) infinite;
+    }
+    @keyframes load {
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(400%); }
+    }
+
+
+    /* ============================================================
+       5. NAVIGATION BAR
+       The logo text is set in the HTML below (search "nav-logo").
+       Nav links are also in the HTML — search "nav-links".
+    ============================================================ */
+    #navbar {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--nav-h);
+      background: var(--surface);
+      border-bottom: 1px solid transparent;
+      display: flex; align-items: center; padding: 0 2rem;
+      z-index: 1000;
+      transition: border-color var(--dur), box-shadow var(--dur), background var(--dur);
+    }
+    #navbar.scrolled { border-color: var(--border); box-shadow: var(--shadow-sm); }
+
+    .nav-inner {
+      max-width: 1280px; width: 100%; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    /* Logo */
+    .nav-logo {
+      display: flex; align-items: center; gap: .6rem;
+      font-family: 'Playfair Display', serif;
+      font-size: 1.4rem; font-weight: 700;
+      color: var(--green); white-space: nowrap;
+    }
+    .nav-logo .leaf {
+      width: 32px; height: 32px;
+      background: var(--green);
+      border-radius: 60% 40% 60% 40% / 60% 60% 40% 40%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .9rem; flex-shrink: 0;
+    }
+    .nav-logo span.accent { color: var(--orange); }
+
+    /* Desktop nav links */
+    .nav-links { display: flex; align-items: center; gap: .25rem; }
+    .nav-links a {
+      padding: .5rem .9rem; border-radius: 8px;
+      font-size: .92rem; font-weight: 500; color: var(--text-muted);
+      transition: color var(--dur), background var(--dur);
+    }
+    .nav-links a:hover, .nav-links a.active { color: var(--green); background: var(--green-pale); }
+
+    /* Nav right-side actions */
+    .nav-actions { display: flex; align-items: center; gap: .75rem; }
+    .nav-cta {
+      background: var(--orange); color: var(--white);
+      border: none; padding: .55rem 1.2rem; border-radius: 99px;
+      font-size: .88rem; font-weight: 600;
+      transition: background var(--dur), transform var(--dur);
+    }
+    .nav-cta:hover { background: var(--orange-dark); transform: translateY(-1px); }
+
+    /* Dark mode toggle button */
+    .theme-toggle {
+      width: 40px; height: 40px; border-radius: 50%; border: none;
+      background: var(--gray-100); color: var(--text);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+      transition: background var(--dur), transform var(--dur);
+    }
+    .theme-toggle:hover { background: var(--gray-200); transform: rotate(20deg); }
+
+    /* Hamburger icon (mobile only) */
+    .hamburger { display: none; flex-direction: column; gap: 5px; background: none; border: none; padding: 6px; }
+    .hamburger span { display: block; width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: transform var(--dur), opacity var(--dur); }
+    .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .hamburger.open span:nth-child(2) { opacity: 0; }
+    .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Mobile dropdown menu */
+    .mobile-menu {
+      display: none; position: fixed;
+      top: var(--nav-h); left: 0; right: 0;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem 1.5rem; flex-direction: column; gap: .25rem;
+      z-index: 999; box-shadow: var(--shadow-md);
+      transform: translateY(-10px); opacity: 0;
+      transition: transform var(--dur), opacity var(--dur);
+    }
+    .mobile-menu.open { transform: translateY(0); opacity: 1; }
+    .mobile-menu a { padding: .75rem 1rem; border-radius: 8px; font-size: 1rem; font-weight: 500; color: var(--text-muted); transition: color var(--dur), background var(--dur); }
+    .mobile-menu a:hover { color: var(--green); background: var(--green-pale); }
+    .mobile-menu .mobile-cta { margin-top: .5rem; background: var(--orange); color: var(--white); border: none; padding: .75rem 1.2rem; border-radius: 99px; font-size: .95rem; font-weight: 600; text-align: center; transition: background var(--dur); }
+    .mobile-menu .mobile-cta:hover { background: var(--orange-dark); }
+
+
+    /* ============================================================
+       6. SECTION WRAPPERS & SHARED TYPOGRAPHY
+       Reused across every section for consistent layout.
+    ============================================================ */
+    section { padding: 6rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+
+    /* Small uppercase label above a section title */
+    .section-label {
+      display: inline-block; font-size: .78rem; font-weight: 600;
+      letter-spacing: .12em; text-transform: uppercase;
+      color: var(--orange); margin-bottom: .75rem;
+    }
+    .section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); color: var(--text); margin-bottom: 1rem; }
+    .section-sub { font-size: 1.05rem; color: var(--text-muted); line-height: 1.7; max-width: 560px; }
+
+    /* Colorful underline accent */
+    .divider { width: 52px; height: 3px; background: linear-gradient(90deg, var(--green), var(--orange)); border-radius: 99px; margin: 1.25rem 0; }
+
+    /* Shared button styles */
+    .btn-primary {
+      background: var(--green); color: var(--white); border: none;
+      padding: .85rem 2rem; border-radius: 99px; font-size: .95rem; font-weight: 600;
+      transition: background var(--dur), transform var(--dur), box-shadow var(--dur);
+      box-shadow: 0 4px 16px rgba(45,106,79,.3);
+    }
+    .btn-primary:hover { background: var(--green-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(45,106,79,.35); }
+    .btn-secondary {
+      background: transparent; color: var(--text);
+      border: 2px solid var(--border); padding: .85rem 2rem;
+      border-radius: 99px; font-size: .95rem; font-weight: 600;
+      transition: border-color var(--dur), background var(--dur), transform var(--dur);
+    }
+    .btn-secondary:hover { border-color: var(--green); background: var(--green-pale); transform: translateY(-2px); }
+    .text-center { text-align: center; }
+    .text-center .section-sub { margin-left: auto; margin-right: auto; }
+    .text-center .divider { margin-left: auto; margin-right: auto; }
+
+
+    /* ============================================================
+       7. HERO SECTION
+    ============================================================ */
+    #home {
+      min-height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden; padding-top: var(--nav-h);
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 70% 50%, rgba(116,198,157,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 20% 80%, rgba(244,132,95,.12) 0%, transparent 60%),
+        var(--bg);
+      z-index: 0;
+    }
+    .hero-blob { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .4; pointer-events: none; }
+    .hero-blob-1 { width: 500px; height: 500px; background: var(--green-light); top: -100px; right: -120px; }
+    .hero-blob-2 { width: 350px; height: 350px; background: var(--orange); bottom: -80px; left: -80px; opacity: .2; }
+
+    .hero-inner {
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto; width: 100%;
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 4rem; align-items: center;
+    }
+    .hero-content { max-width: 600px; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: var(--green-pale); color: var(--green);
+      border-radius: 99px; padding: .4rem 1rem;
+      font-size: .8rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+      margin-bottom: 1.5rem; border: 1px solid var(--green-light);
+    }
+    .hero-badge::before { content: '🌿'; }
+    .hero-title { font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 700; line-height: 1.1; color: var(--green-dark); margin-bottom: 1.25rem; }
+    [data-theme="dark"] .hero-title { color: var(--text); }
+    .hero-title .accent { color: var(--orange); }
+    .hero-sub { font-size: 1.1rem; color: var(--text-muted); line-height: 1.75; margin-bottom: 2.5rem; }
+    .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
+
+    /* Decorative floating image area */
+    .hero-visual { position: relative; display: flex; align-items: center; justify-content: center; }
+    .hero-img-wrap {
+      width: 420px; height: 420px;
+      border-radius: 40% 60% 60% 40% / 40% 40% 60% 60%;
+      background: linear-gradient(135deg, var(--green-pale) 0%, var(--green-light) 60%, var(--orange-pale) 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 7rem; animation: float 5s ease-in-out infinite;
+      box-shadow: var(--shadow-lg); overflow: hidden;
+    }
+    @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-18px) rotate(2deg); } }
+
+    /* Small info cards floating around the hero image */
+    .stat-card {
+      position: absolute; background: var(--surface); border-radius: 16px;
+      padding: .9rem 1.2rem; box-shadow: var(--shadow-md); border: 1px solid var(--border);
+      display: flex; align-items: center; gap: .75rem;
+      font-size: .85rem; font-weight: 500;
+      animation: float 5s ease-in-out infinite;
+    }
+    .stat-card:nth-child(2) { animation-delay: -1.5s; }
+    .stat-card:nth-child(3) { animation-delay: -3s; }
+    .stat-card .stat-icon { width: 36px; height: 36px; border-radius: 10px; background: var(--green-pale); color: var(--green); display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .stat-card:nth-child(3) .stat-icon { background: var(--orange-pale); color: var(--orange); }
+    .stat-card-1 { top: 10%; right: -2%; }
+    .stat-card-2 { bottom: 12%; left: -4%; }
+    .stat-num { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+
+
+    /* ============================================================
+       8. ABOUT SECTION
+    ============================================================ */
+    #about { background: var(--surface); }
+    .about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: center; }
+    .about-img-box {
+      width: 100%; padding-bottom: 100%; border-radius: 32px;
+      background: linear-gradient(135deg, var(--green-pale), var(--orange-pale));
+      position: relative; overflow: hidden; box-shadow: var(--shadow-lg);
+    }
+    .about-img-box .emoji-grid {
+      position: absolute; inset: 0;
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      place-items: center; font-size: 2.5rem; gap: .5rem; padding: 1.5rem;
+    }
+    .about-tag {
+      position: absolute; background: var(--green); color: var(--white);
+      border-radius: 12px; padding: .6rem 1.1rem;
+      font-size: .82rem; font-weight: 600;
+      display: flex; align-items: center; gap: .4rem;
+    }
+    .about-tag-1 { bottom: -16px; left: 24px; }
+    .about-tag-2 { top: -16px; right: 24px; background: var(--orange); }
+    .about-text .section-sub { margin-bottom: 1rem; }
+
+    /* Four value pillars grid */
+    .about-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 2rem; }
+    .pillar { background: var(--bg); border-radius: 16px; padding: 1.2rem; border: 1px solid var(--border); transition: transform var(--dur), box-shadow var(--dur); }
+    .pillar:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .pillar-icon { font-size: 1.6rem; margin-bottom: .5rem; }
+    .pillar-title { font-family: 'Playfair Display', serif; font-size: 1rem; font-weight: 600; margin-bottom: .25rem; }
+    .pillar-desc { font-size: .82rem; color: var(--text-muted); line-height: 1.5; }
+
+
+    /* ============================================================
+       9. RECIPES SECTION — Search, Filter Pills, Grid container
+    ============================================================ */
+    #recipes { background: var(--bg); }
+
+    .recipes-header {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      gap: 2rem; flex-wrap: wrap; margin-bottom: 2.5rem;
+    }
+
+    /* Search bar */
+    .search-wrap { position: relative; width: 100%; max-width: 400px; }
+    .search-wrap input {
+      width: 100%; padding: .75rem 1rem .75rem 3rem;
+      border-radius: 99px; border: 2px solid var(--border);
+      background: var(--surface); color: var(--text);
+      font-size: .92rem; font-family: inherit;
+      transition: border-color var(--dur), box-shadow var(--dur); outline: none;
+    }
+    .search-wrap input:focus { border-color: var(--green-mid); box-shadow: 0 0 0 4px rgba(45,106,79,.1); }
+    .search-wrap input::placeholder { color: var(--gray-400); }
+    .search-icon { position: absolute; left: 1.1rem; top: 50%; transform: translateY(-50%); font-size: 1rem; pointer-events: none; }
+
+    /* Category filter pills */
+    .filter-pills { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 2rem; }
+    .pill { padding: .45rem 1rem; border-radius: 99px; border: 2px solid var(--border); background: var(--surface); color: var(--text-muted); font-size: .83rem; font-weight: 500; cursor: pointer; transition: all var(--dur); }
+    .pill:hover, .pill.active { border-color: var(--green); background: var(--green-pale); color: var(--green); }
+
+    /* The grid that holds recipe cards */
+    .recipe-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.75rem; }
+
+
+    /* ============================================================
+      10. RECIPE CARD — PLACEHOLDER STYLE
+          These show when the RECIPES array (in the JS) is empty.
+    ============================================================ */
+    .recipe-card {
+      background: var(--surface); border-radius: 24px; overflow: hidden;
+      box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+      transition: transform var(--dur), box-shadow var(--dur); cursor: pointer;
+    }
+    .recipe-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-md); }
+
+    /* Dashed style for placeholder cards */
+    .recipe-card.placeholder { border: 2px dashed var(--border); box-shadow: none; background: var(--surface); }
+    .recipe-card.placeholder:hover { border-color: var(--green-mid); box-shadow: var(--shadow-sm); }
+
+    .placeholder-img {
+      height: 200px; background: var(--gray-100);
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: .5rem; color: var(--gray-400);
+      transition: background var(--dur);
+    }
+    .recipe-card.placeholder:hover .placeholder-img { background: var(--green-pale); }
+    .placeholder-plus { width: 52px; height: 52px; border-radius: 50%; border: 2px dashed var(--gray-400); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; transition: border-color var(--dur), color var(--dur); }
+    .recipe-card.placeholder:hover .placeholder-plus { border-color: var(--green-mid); color: var(--green); }
+    .placeholder-label { font-size: .82rem; font-weight: 500; }
+    .placeholder-body { padding: 1.4rem; }
+    .placeholder-title { height: 20px; background: var(--gray-200); border-radius: 6px; margin-bottom: .6rem; width: 70%; }
+    .placeholder-line { height: 12px; background: var(--gray-100); border-radius: 4px; margin-bottom: .4rem; }
+    .placeholder-line.short { width: 50%; }
+    .placeholder-meta { display: flex; gap: .75rem; margin-top: 1rem; }
+    .placeholder-chip { height: 24px; width: 60px; background: var(--gray-100); border-radius: 99px; }
+
+
+    /* ============================================================
+      11. RECIPE CARD — REAL RECIPE STYLE
+          Generated automatically from the RECIPES array in JS.
+    ============================================================ */
+    .card-img { height: 200px; object-fit: cover; width: 100%; }
+    .card-img-placeholder { height: 200px; background: linear-gradient(135deg, var(--green-pale), var(--orange-pale)); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+
+    /* Title banner — shown when a recipe has no image */
+    .card-title-banner {
+      height: 200px;
+      background: linear-gradient(135deg, var(--green-dark), var(--green-mid));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .card-title-banner::before {
+      content: '';
+      position: absolute;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.06);
+      bottom: -60px; right: -60px;
+    }
+    .card-title-banner::after {
+      content: '';
+      position: absolute;
+      width: 120px; height: 120px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.04);
+      top: -30px; left: -30px;
+    }
+    .card-title-banner span {
+      font-family: 'Playfair Display', serif;
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--white);
+      text-align: center;
+      line-height: 1.25;
+      position: relative;
+      z-index: 1;
+    }
+    .card-body { padding: 1.4rem; }
+    .card-category { display: inline-block; font-size: .72rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--green); background: var(--green-pale); padding: .25rem .75rem; border-radius: 99px; margin-bottom: .75rem; }
+    .card-title { font-size: 1.15rem; font-weight: 700; margin-bottom: .4rem; color: var(--text); }
+    .card-desc { font-size: .85rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 1rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .card-meta { display: flex; gap: 1rem; font-size: .78rem; color: var(--text-muted); font-weight: 500; }
+    .card-meta span { display: flex; align-items: center; gap: .3rem; }
+
+
+    /* ============================================================
+      12. RECIPE MODAL (popup that appears on card click)
+    ============================================================ */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.55);
+      backdrop-filter: blur(6px); z-index: 2000;
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+      opacity: 0; visibility: hidden;
+      transition: opacity var(--dur), visibility var(--dur);
+    }
+    .modal-overlay.open { opacity: 1; visibility: visible; }
+    .modal {
+      background: var(--surface); border-radius: 28px; width: 100%;
+      max-width: 700px; max-height: 90vh; overflow-y: auto;
+      box-shadow: var(--shadow-lg); position: relative;
+      transform: translateY(20px) scale(.97);
+      transition: transform var(--dur);
+    }
+    .modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+    /* Modal image / emoji header */
+    .modal-img { height: 240px; object-fit: cover; width: 100%; border-radius: 28px 28px 0 0; }
+    .modal-img-emoji { height: 240px; background: linear-gradient(135deg, var(--green-pale), var(--orange-pale)); display: flex; align-items: center; justify-content: center; font-size: 5rem; border-radius: 28px 28px 0 0; }
+
+    .modal-body { padding: 2rem; }
+    .modal-close { position: absolute; top: 1rem; right: 1rem; width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(0,0,0,.35); color: var(--white); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; transition: background var(--dur); }
+    .modal-close:hover { background: rgba(0,0,0,.6); }
+    .modal-category { font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; color: var(--orange); margin-bottom: .5rem; }
+    .modal-title { font-size: 1.8rem; margin-bottom: .75rem; }
+    .modal-desc { color: var(--text-muted); line-height: 1.7; margin-bottom: 1.5rem; }
+    .modal-stats { display: flex; gap: 1.5rem; flex-wrap: wrap; background: var(--gray-100); border-radius: 16px; padding: 1.2rem; margin-bottom: 1.75rem; }
+    .modal-stat { text-align: center; }
+    .modal-stat-val { font-size: 1.2rem; font-weight: 700; color: var(--green); }
+    .modal-stat-label { font-size: .75rem; color: var(--text-muted); margin-top: .1rem; }
+    .modal-section-title { font-family: 'Playfair Display', serif; font-size: 1.15rem; margin-bottom: .75rem; color: var(--text); }
+    .modal-ingredients { margin-bottom: 1.75rem; }
+    .modal-ingredient { display: flex; align-items: flex-start; gap: .75rem; padding: .5rem 0; border-bottom: 1px solid var(--border); font-size: .9rem; }
+    .modal-ingredient:last-child { border-bottom: none; }
+    .modal-ingredient::before { content: '●'; color: var(--green-mid); flex-shrink: 0; margin-top: .1rem; font-size: .6rem; }
+    .modal-steps ol { padding-left: 1.2rem; }
+    .modal-steps li { padding: .5rem 0 .5rem .5rem; font-size: .9rem; line-height: 1.6; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+    .modal-steps li:last-child { border-bottom: none; }
+    .modal-tip { margin-top: 1.5rem; background: var(--green-pale); border-left: 3px solid var(--green); border-radius: 0 12px 12px 0; padding: 1rem 1.25rem; font-size: .88rem; color: var(--green-dark); }
+    [data-theme="dark"] .modal-tip { color: var(--green-light); }
+    .modal-tip strong { display: block; margin-bottom: .25rem; }
+
+    /* Why It's Healthier bullets */
+    .modal-why { margin-top: 1.75rem; }
+    .modal-why-list { margin-top: .5rem; display: flex; flex-direction: column; gap: .6rem; }
+    .modal-why-item {
+      display: flex; align-items: flex-start; gap: .75rem;
+      background: var(--green-pale); border-radius: 10px;
+      padding: .7rem 1rem; font-size: .88rem; line-height: 1.5;
+      color: var(--green-dark);
+    }
+    [data-theme="dark"] .modal-why-item { color: var(--green-light); }
+    .modal-why-item::before { content: '✅'; flex-shrink: 0; font-size: .85rem; margin-top: .05rem; }
+
+    /* Comparison table */
+    .modal-comparison { margin-top: 1.75rem; }
+    .modal-table { width: 100%; border-collapse: collapse; font-size: .88rem; border-radius: 14px; overflow: hidden; border: 1px solid var(--border); }
+    .modal-table th {
+      padding: .75rem 1rem; text-align: left; font-weight: 600; font-size: .8rem;
+      letter-spacing: .05em; text-transform: uppercase;
+    }
+    .modal-table th:first-child { background: var(--orange-pale); color: var(--orange-dark); }
+    .modal-table th:last-child  { background: var(--green-pale);  color: var(--green); }
+    .modal-table td { padding: .65rem 1rem; border-top: 1px solid var(--border); color: var(--text-muted); vertical-align: top; }
+    .modal-table td:first-child { border-right: 1px solid var(--border); }
+    .modal-table tr:nth-child(even) td { background: var(--gray-100); }
+
+
+    /* ============================================================
+      13. SUGGEST YOUR FAVORITE FOOD SECTION
+    ============================================================ */
+    #request { background: var(--surface); }
+
+    /* Outer card that wraps the whole section content */
+    .suggest-card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      padding: 4rem 3rem;
+      max-width: 780px;
+      margin: 3rem auto 0;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Decorative green arc behind the card content */
+    .suggest-card::before {
+      content: '';
+      position: absolute;
+      width: 420px; height: 420px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--green-pale) 0%, transparent 70%);
+      top: -140px; right: -100px;
+      pointer-events: none;
+    }
+    .suggest-card::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, var(--orange-pale) 0%, transparent 70%);
+      bottom: -100px; left: -80px;
+      pointer-events: none;
+    }
+
+    /* Food illustration ring */
+    .suggest-icon-ring {
+      width: 96px; height: 96px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--green-pale), var(--orange-pale));
+      border: 3px solid var(--green-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.6rem;
+      margin: 0 auto 2rem;
+      box-shadow: 0 8px 24px rgba(45,106,79,.15);
+      position: relative; z-index: 1;
+    }
+
+    /* Small floating emoji accents around the card */
+    .suggest-accent {
+      position: absolute;
+      font-size: 1.5rem;
+      opacity: .35;
+      pointer-events: none;
+      animation: float 6s ease-in-out infinite;
+    }
+    .suggest-accent:nth-child(1) { top: 1.5rem;  left: 2rem;   animation-delay: 0s;   }
+    .suggest-accent:nth-child(2) { top: 1.5rem;  right: 2rem;  animation-delay: -2s;  }
+    .suggest-accent:nth-child(3) { bottom: 1.5rem; left: 3rem; animation-delay: -4s;  }
+    .suggest-accent:nth-child(4) { bottom: 1.5rem; right: 3rem;animation-delay: -1s;  }
+
+    .suggest-card h3 {
+      font-size: clamp(1.4rem, 3vw, 1.9rem);
+      color: var(--text);
+      margin-bottom: 1rem;
+      position: relative; z-index: 1;
+    }
+    .suggest-card p {
+      font-size: 1rem;
+      color: var(--text-muted);
+      line-height: 1.75;
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+      position: relative; z-index: 1;
+    }
+
+    /* The main CTA button */
+    .btn-suggest {
+      display: inline-flex;
+      align-items: center;
+      gap: .75rem;
+      background: linear-gradient(135deg, var(--green), var(--green-mid));
+      color: var(--white);
+      border: none;
+      padding: 1.1rem 2.6rem;
+      border-radius: 99px;
+      font-size: 1.05rem;
+      font-weight: 600;
+      font-family: inherit;
+      text-decoration: none;
+      box-shadow: 0 6px 24px rgba(45,106,79,.35);
+      transition: transform var(--dur), box-shadow var(--dur), filter var(--dur);
+      position: relative; z-index: 1;
+      cursor: pointer;
+    }
+    .btn-suggest:hover {
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 12px 36px rgba(45,106,79,.4);
+      filter: brightness(1.07);
+    }
+    .btn-suggest:active { transform: translateY(-1px) scale(1.01); }
+
+    /* Pulsing glow ring behind the button */
+    .btn-suggest-wrap {
+      position: relative; z-index: 1;
+      display: inline-block;
+    }
+    .btn-suggest-wrap::before {
+      content: '';
+      position: absolute;
+      inset: -6px;
+      border-radius: 99px;
+      background: linear-gradient(135deg, var(--green-light), var(--orange));
+      opacity: 0;
+      transition: opacity var(--dur);
+      z-index: -1;
+      filter: blur(10px);
+    }
+    .btn-suggest-wrap:hover::before { opacity: .45; }
+
+    /* Reassurance line below button */
+    .suggest-note {
+      margin-top: 1.25rem;
+      font-size: .8rem;
+      color: var(--text-muted);
+      position: relative; z-index: 1;
+    }
+    .suggest-note span { color: var(--green); font-weight: 600; }
+
+
+    /* ============================================================
+      14. FAQ ACCORDION
+    ============================================================ */
+    #faq { background: var(--bg); }
+    .faq-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(520px, 1fr)); gap: 1rem; margin-top: 3rem; }
+    .faq-item { background: var(--surface); border-radius: 16px; border: 1px solid var(--border); overflow: hidden; transition: box-shadow var(--dur); }
+    .faq-item:hover { box-shadow: var(--shadow-sm); }
+    .faq-q { width: 100%; padding: 1.2rem 1.5rem; background: none; border: none; text-align: left; font-family: inherit; font-size: .95rem; font-weight: 600; color: var(--text); display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
+    .faq-arrow { width: 28px; height: 28px; border-radius: 50%; background: var(--gray-100); display: flex; align-items: center; justify-content: center; font-size: .75rem; flex-shrink: 0; transition: background var(--dur), transform var(--dur); }
+    .faq-item.open .faq-arrow { background: var(--green-pale); color: var(--green); transform: rotate(180deg); }
+    .faq-a { max-height: 0; overflow: hidden; transition: max-height .35s var(--ease); }
+    .faq-item.open .faq-a { max-height: 300px; }
+    .faq-a-inner { padding: 0 1.5rem 1.25rem; font-size: .88rem; color: var(--text-muted); line-height: 1.7; }
+
+
+    /* ============================================================
+      15. CONTACT SECTION
+    ============================================================ */
+    #contact { background: var(--surface); }
+    .contact-inner { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+    .contact-card { background: var(--bg); border-radius: 20px; padding: 1.75rem; border: 1px solid var(--border); text-align: center; transition: transform var(--dur), box-shadow var(--dur); }
+    .contact-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); }
+    .contact-icon-wrap { width: 56px; height: 56px; border-radius: 16px; background: var(--green-pale); color: var(--green); font-size: 1.5rem; display: flex; align-items: center; justify-content: center; margin: 0 auto 1rem; transition: background var(--dur); }
+    .contact-card:hover .contact-icon-wrap { background: var(--green); color: var(--white); }
+    .contact-card h4 { font-size: 1rem; margin-bottom: .35rem; }
+    .contact-card p { font-size: .85rem; color: var(--text-muted); }
+    .contact-card a { color: var(--green); font-weight: 500; }
+    .social-row { display: flex; justify-content: center; gap: 1rem; margin-top: 3rem; }
+    .social-btn { width: 48px; height: 48px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; transition: transform var(--dur), box-shadow var(--dur), background var(--dur); }
+    .social-btn:hover { transform: translateY(-4px); box-shadow: var(--shadow-md); background: var(--green-pale); }
+
+    /* Contact email link */
+    .contact-email-link {
+      display: inline-flex; align-items: center; gap: .75rem;
+      font-size: 1.15rem; font-weight: 600; color: var(--green);
+      background: var(--green-pale); border: 2px solid var(--green-light);
+      padding: 1rem 2rem; border-radius: 99px;
+      transition: background var(--dur), transform var(--dur), box-shadow var(--dur);
+      box-shadow: var(--shadow-sm);
+    }
+    .contact-email-link:hover {
+      background: var(--green); color: var(--white);
+      transform: translateY(-2px); box-shadow: var(--shadow-md);
+    }
+    .contact-email-icon { font-size: 1.3rem; }
+
+    /* Contact bottom row */
+    .contact-bottom { display: flex; align-items: flex-start; justify-content: space-between; gap: 3rem; margin-top: 3rem; flex-wrap: wrap; }
+    .contact-founders { flex: 1; min-width: 200px; }
+    .contact-founders-title { font-size: 1.4rem; font-weight: 800; color: var(--green); margin-bottom: 1rem; }
+    .contact-founders-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .6rem; }
+    .contact-founders-list li { font-size: 1rem; color: var(--text); font-weight: 500; }
+    .contact-email-wrap { flex: 1; min-width: 200px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+    .contact-email-label { font-size: .85rem; color: var(--text-muted); margin-bottom: .75rem; }
+    @media (max-width: 600px) {
+      .contact-bottom { flex-direction: column; align-items: flex-start; }
+      .contact-email-wrap { align-items: flex-start; }
+    }
+
+
+    /* ============================================================
+      16. FOOTER
+    ============================================================ */
+    footer { background: var(--green-dark); color: rgba(255,255,255,.75); text-align: center; padding: 2.5rem 2rem; font-size: .88rem; }
+    footer .foot-logo { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: var(--white); margin-bottom: .5rem; }
+    footer .foot-logo span { color: var(--orange); }
+    footer p { margin-top: .5rem; line-height: 1.6; }
+
+
+    /* ============================================================
+      17. SCROLL-TO-TOP BUTTON
+    ============================================================ */
+    #scroll-top {
+      position: fixed; bottom: 2rem; right: 2rem;
+      width: 48px; height: 48px; border-radius: 50%;
+      background: var(--green); color: var(--white); border: none;
+      font-size: 1.2rem; display: flex; align-items: center; justify-content: center;
+      box-shadow: var(--shadow-md); z-index: 500;
+      opacity: 0; transform: translateY(16px);
+      transition: opacity var(--dur), transform var(--dur), background var(--dur);
+      pointer-events: none;
+    }
+    #scroll-top.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+    #scroll-top:hover { background: var(--green-dark); }
+
+
+    /* ============================================================
+      18. UTILITIES & SCROLL REVEAL ANIMATION
+    ============================================================ */
+    /* Elements with class "reveal" fade in when scrolled into view */
+    .reveal { opacity: 0; transform: translateY(32px); transition: opacity .6s var(--ease), transform .6s var(--ease); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+
+    /* ============================================================
+      19. RESPONSIVE / MEDIA QUERIES
+    ============================================================ */
+    @media (max-width: 1024px) {
+      .hero-inner, .about-inner { grid-template-columns: 1fr; gap: 3rem; }
+      .hero-visual { display: none; }
+      .about-img-box { padding-bottom: 60%; }
+      .faq-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 768px) {
+      section { padding: 4rem 1.25rem; }
+      .nav-links, .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .mobile-menu { display: flex; }
+      .hero-actions { flex-direction: column; }
+      .btn-primary, .btn-secondary { width: 100%; text-align: center; }
+      .about-pillars { grid-template-columns: 1fr; }
+      .suggest-card { padding: 3rem 1.75rem; }
+    }
+    @media (max-width: 480px) {
+      .recipe-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       LOADING SCREEN — no edits needed here
+  ============================================================ -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+
+  <!-- ============================================================
+       NAVIGATION BAR
+       ✏️  Edit: logo name, nav links, and the CTA button text.
+  ============================================================ -->
+  <nav id="navbar">
+    <div class="nav-inner">
+
+      <!-- ✏️ Logo — change "Nourish", "N", "Narrate" to your name -->
+      <a href="#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+      </a>
+
+      <!-- ✏️ Desktop navigation links — add or remove <li> items as needed -->
+      <ul class="nav-links" role="list">
+        <li><a href="#home"    class="active">Home</a></li>
+        <li><a href="#recipes">Recipes</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#request">Suggest a Food</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Instagram -->
+        <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" aria-label="Instagram" style="display:flex;align-items:center;color:var(--text-muted);font-size:1.4rem;text-decoration:none;transition:color 0.2s;" onmouseover="this.style.color='#E1306C'" onmouseout="this.style.color='var(--text-muted)'">
+          <span style="font-size:0.9rem;font-weight:600;margin-right:4px;">Instagram</span><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </a>
+        <!-- Dark mode toggle — no edits needed -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <!-- ✏️ CTA button text -->
+        <button class="nav-cta" onclick="document.getElementById('request').scrollIntoView({behavior:'smooth'})">
+          Suggest a Food
+        </button>
+        <!-- Hamburger — mobile only, no edits needed -->
+        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ✏️ Mobile menu links — keep in sync with the desktop nav above -->
+  <div class="mobile-menu" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
+    <a href="#home"    onclick="closeMobileMenu()">Home</a>
+    <a href="#recipes" onclick="closeMobileMenu()">Recipes</a>
+    <a href="#about"   onclick="closeMobileMenu()">About</a>
+    <a href="#request" onclick="closeMobileMenu()">Suggest a Food</a>
+    <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+    <a href="#request" class="mobile-cta" onclick="closeMobileMenu()">Suggest a Food 🍽️</a>
+  </div>
+
+
+  <!-- ============================================================
+       HERO SECTION
+       ✏️  Edit: badge text, title, subtitle, and button labels.
+  ============================================================ -->
+  <section id="home">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+    </div>
+
+    <div class="hero-inner container">
+      <div class="hero-content">
+        <!-- ✏️ Small badge above the title -->
+        <div class="hero-badge">Student-led healthy eating project</div>
+
+        <!-- ✏️ Main headline -->
+        <h1 class="hero-title">
+          Nourish<br />
+          <span class="accent">N</span> Narrate
+        </h1>
+
+        <!-- ✏️ Subtitle / tagline -->
+        <p class="hero-sub">
+          Transforming your favorite comfort foods into healthier, delicious
+          alternatives—one recipe at a time.
+        </p>
+
+        <!-- ✏️ Button labels -->
+        <div class="hero-actions">
+          <button class="btn-primary" onclick="document.getElementById('recipes').scrollIntoView({behavior:'smooth'})">
+            🌿 Explore Recipes
+          </button>
+          <button class="btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
+            Learn More
+          </button>
+        </div>
+      </div>
+
+      <!-- Decorative floating image — visible on desktop only -->
+      <div class="hero-visual" aria-hidden="true">
+        <div class="hero-img-wrap">🥗</div>
+        <div class="stat-card stat-card-1">
+          <div class="stat-icon">🥦</div>
+          <div><div class="stat-num">Healthier</div><div style="color:var(--text-muted);font-size:.75rem">Ingredient swaps</div></div>
+        </div>
+        <div class="stat-card stat-card-2">
+          <div class="stat-icon" style="background:var(--orange-pale);color:var(--orange)">😋</div>
+          <div><div class="stat-num">Same taste</div><div style="color:var(--text-muted);font-size:.75rem">Better for you</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       ABOUT SECTION
+       ✏️  Edit: the emoji grid, tags, heading, paragraphs, and
+           the four pillar cards below.
+  ============================================================ -->
+  <section id="about">
+    <div class="container">
+      <div class="about-inner">
+
+        <!-- ✏️ Decorative emoji grid (9 emojis in a 3×3 layout) -->
+        <div class="about-visual reveal">
+          <div class="about-img-box">
+            <div class="emoji-grid" aria-hidden="true">
+              <span>🥑</span><span>🍎</span><span>🥕</span>
+              <span>🌽</span><span>🫐</span><span>🍋</span>
+              <span>🥦</span><span>🍅</span><span>🧄</span>
+            </div>
+          </div>
+          <!-- ✏️ Small floating tags -->
+          <div class="about-tag about-tag-1">🎓 Student Led</div>
+          <div class="about-tag about-tag-2">🌿 Healthier Choices</div>
+        </div>
+
+        <!-- ✏️ About text and value pillars -->
+        <div class="about-text reveal">
+          <span class="section-label">About Us</span>
+          <h2 class="section-title">Eating well shouldn't mean giving up what you love</h2>
+          <div class="divider"></div>
+          <p class="section-sub">
+            Nourish N Narrate is a student-led project dedicated to recreating popular comfort
+            foods with better-for-you ingredients—without sacrificing the flavors that make
+            them special. We believe that healthy eating is a journey, not a restriction.
+          </p>
+          <p class="section-sub" style="margin-top:1rem">
+            Through practical ingredient substitutions and easy-to-follow recipes, we encourage
+            everyone to explore a more nourishing lifestyle—one delicious dish at a time.
+          </p>
+
+          <!-- ✏️ Four value pillars — edit icon, title, and description for each -->
+          <div class="about-pillars">
+            <div class="pillar">
+              <div class="pillar-icon">🔄</div>
+              <div class="pillar-title">Smart Swaps</div>
+              <div class="pillar-desc">Replacing less healthy ingredients with nutritious alternatives that taste just as good.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">📖</div>
+              <div class="pillar-title">Simple Steps</div>
+              <div class="pillar-desc">Every recipe is written clearly so anyone can recreate it, regardless of skill level.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">🤝</div>
+              <div class="pillar-title">Community First</div>
+              <div class="pillar-desc">Built around your requests—we recreate the foods you actually want to eat healthier.</div>
+            </div>
+            <div class="pillar">
+              <div class="pillar-icon">💚</div>
+              <div class="pillar-title">No Compromise</div>
+              <div class="pillar-desc">Flavor always comes first. Healthy food should be food you genuinely enjoy.</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       RECIPES SECTION
+       The recipe cards below are generated automatically from
+       the RECIPES array in the <script> section at the bottom.
+       You do NOT need to edit this HTML to add recipes.
+       Just edit the RECIPES array in JavaScript instead!
+  ============================================================ -->
+  <section id="recipes">
+    <div class="container">
+
+      <div class="recipes-header">
+        <div class="reveal">
+          <!-- ✏️ Section label and title -->
+          <span class="section-label">Recipes</span>
+          <h2 class="section-title">Healthy Twists on Classics</h2>
+          <div class="divider"></div>
+        </div>
+        <!-- Search bar — works automatically with all recipe cards -->
+        <div class="search-wrap reveal">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            id="recipe-search"
+            placeholder="Search recipes…"
+            aria-label="Search recipes"
+            oninput="filterRecipes()"
+          />
+        </div>
+      </div>
+
+      <!-- ✏️ Add or remove category pills here to match your recipe categories.
+           The data-filter value must match the "category" field in your recipe objects. -->
+      <div class="filter-pills reveal" role="group" aria-label="Filter by category">
+        <button class="pill active" data-filter="all"       onclick="setFilter(this,'all')">All</button>
+        <button class="pill"        data-filter="breakfast" onclick="setFilter(this,'breakfast')">Breakfast</button>
+        <button class="pill"        data-filter="lunch"     onclick="setFilter(this,'lunch')">Lunch</button>
+        <button class="pill"        data-filter="dinner"    onclick="setFilter(this,'dinner')">Dinner</button>
+        <button class="pill"        data-filter="snack"     onclick="setFilter(this,'snack')">Snacks</button>
+        <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
+      </div>
+
+      <!-- Recipe cards are injected here by renderRecipes() in JavaScript -->
+      <div class="recipe-grid" id="recipe-grid"></div>
+
+      <!-- Rate Us -->
+      <div class="text-center reveal" style="margin-top:2.5rem;">
+        <p style="color:var(--text-muted);margin-bottom:1rem;font-size:1rem;">Enjoyed our recipes? Let us know what you think!</p>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScGB0JQA7vv-c65fRwx55KJVPVipxNZvfVxurwDjiCBD-AezQ/viewform?usp=publish-editor"
+           target="_blank" rel="noopener noreferrer"
+           style="display:inline-block;background:var(--green);color:#fff;font-weight:600;font-size:1.05rem;padding:0.8rem 2rem;border-radius:2rem;text-decoration:none;transition:background 0.2s;"
+           onmouseover="this.style.background='var(--green-mid)'" onmouseout="this.style.background='var(--green)'">
+          ⭐ Rate Our Project &amp; Foods
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       RECIPE MODAL
+       This popup is populated automatically when a recipe card
+       is clicked. You don't need to edit this HTML at all.
+       All content comes from your recipe objects in JavaScript.
+  ============================================================ -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" id="recipe-modal">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close recipe">✕</button>
+      <div id="modal-header"></div><!-- Image or emoji header injected here -->
+      <div class="modal-body">
+        <div  class="modal-category" id="modal-category"></div>
+        <h2  class="modal-title"    id="modal-title"></h2>
+        <p   class="modal-desc"     id="modal-desc"></p>
+        <div class="modal-stats">
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-time"></div><div class="modal-stat-label">Prep &amp; Cook</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-servings"></div><div class="modal-stat-label">Servings</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-calories"></div><div class="modal-stat-label">Per Serving</div></div>
+        </div>
+        <div class="modal-ingredients">
+          <div class="modal-section-title">🛒 Ingredients</div>
+          <div id="modal-ingredients-list"></div>
+        </div>
+        <div class="modal-steps">
+          <div class="modal-section-title">📋 Instructions</div>
+          <ol id="modal-steps-list"></ol>
+        </div>
+        <div class="modal-tip" id="modal-tip" style="display:none">
+          <strong>💡 Healthy Tip</strong>
+          <span id="modal-tip-text"></span>
+        </div>
+
+        <!-- Why It's Healthier — injected by JS -->
+        <div class="modal-why" id="modal-why" style="display:none">
+          <div class="modal-section-title">💚 Why It's Healthier</div>
+          <div class="modal-why-list" id="modal-why-list"></div>
+        </div>
+
+        <!-- Original vs. Our Version comparison table — injected by JS -->
+        <div class="modal-comparison" id="modal-comparison" style="display:none">
+          <div class="modal-section-title" style="margin-top:1.5rem">⚖️ Original vs. Our Version</div>
+          <table class="modal-table" id="modal-table">
+            <thead>
+              <tr>
+                <th>Original Version</th>
+                <th>Our Healthier Version</th>
+              </tr>
+            </thead>
+            <tbody id="modal-table-body"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================================
+       SUGGEST YOUR FAVORITE FOOD SECTION
+       ✏️  Edit: section label, title, description text, button
+           label, and the Google Form URL in the <a> tag below.
+  ============================================================ -->
+  <section id="request">
+    <div class="container">
+
+      <!-- Section header -->
+      <div class="text-center reveal">
+        <span class="section-label">Get Involved</span>
+        <h2 class="section-title">Suggest Your Favorite Food!</h2>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Main card -->
+      <div class="suggest-card reveal">
+
+        <!-- Floating food emoji accents (purely decorative) -->
+        <span class="suggest-accent" aria-hidden="true">🥑</span>
+        <span class="suggest-accent" aria-hidden="true">🍓</span>
+        <span class="suggest-accent" aria-hidden="true">🌽</span>
+        <span class="suggest-accent" aria-hidden="true">🫐</span>
+
+        <!-- Central icon -->
+        <div class="suggest-icon-ring" aria-hidden="true">🍽️</div>
+
+        <!-- ✏️ Card heading -->
+        <h3>Have a comfort food in mind?</h3>
+
+        <!-- ✏️ Card description -->
+        <p>
+          Have a favorite comfort food you'd like us to recreate in a healthier way?
+          We'd love to hear your ideas! Click the button below to submit your suggestion.
+        </p>
+
+        <!-- ✏️ Button — change href to update the Google Form URL -->
+        <div class="btn-suggest-wrap">
+          <a
+            href="https://docs.google.com/forms/d/1CxOj8zlfUGBFqSco64umxKzwCFaFRy4w4gl40yZlSoY/viewform?ts=6a32edc2&edit_requested=true"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="btn-suggest"
+            aria-label="Submit a food request (opens Google Form in new tab)"
+          >
+            🍽️ Submit a Food Request
+          </a>
+        </div>
+
+        <!-- Reassurance line below the button -->
+        <p class="suggest-note">
+          <span>Free &amp; quick</span> — takes less than a minute ✨
+        </p>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       FAQ SECTION
+       ✏️  Edit: add, remove, or rewrite question/answer pairs.
+           Each FAQ item is a .faq-item div with a .faq-q button
+           and a .faq-a div containing the answer.
+  ============================================================ -->
+  <section id="faq">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">FAQ</span>
+        <h2 class="section-title">Frequently Asked Questions</h2>
+        <div class="divider"></div>
+        <p class="section-sub">Everything you might want to know about Nourish N Narrate.</p>
+      </div>
+
+      <div class="faq-grid">
+
+        <!-- ✏️ FAQ item — copy this block to add a new question -->
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            What is Nourish N Narrate?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Nourish N Narrate is a student-led project that takes popular comfort foods and recreates them with healthier ingredient substitutions. Our goal is to prove that eating well doesn't have to mean sacrificing the foods you love.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            Are these recipes actually tested?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Yes! Every recipe we publish is tested by our team to ensure it's not only nutritionally improved but also genuinely delicious. Flavor is never sacrificed for health—both must pass the taste test.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            How do I submit a recipe request?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Scroll up to the "Request a Recipe" section and fill out the short form with your name, email, and the food you'd love to see recreated. We review every submission and prioritize the most popular ones.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            How healthy are the substitutions?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">We aim to reduce processed ingredients, refined sugars, excessive saturated fats, and empty calories wherever possible—without making the recipe complicated. Common swaps include whole grain alternatives, natural sweeteners, and nutrient-dense vegetables.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            Do I need cooking experience to follow these recipes?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">Not at all! Our recipes are written for everyone, from complete beginners to experienced home cooks. Steps are clear and concise, and we always include tips to make things easier.</p>
+          </div>
+        </div>
+
+        <div class="faq-item reveal">
+          <button class="faq-q" onclick="toggleFAQ(this)" aria-expanded="false">
+            How often are new recipes posted?
+            <span class="faq-arrow" aria-hidden="true">▼</span>
+          </button>
+          <div class="faq-a" role="region">
+            <p class="faq-a-inner">We're working hard to bring new recipes regularly. Follow us on social media to get notified the moment a new recipe goes live. You can also request a recipe to help shape our upcoming content!</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       CONTACT SECTION
+       ✏️  Edit: the four contact cards and the social media links.
+  ============================================================ -->
+  <section id="contact">
+    <div class="container">
+      <div class="text-center reveal">
+        <span class="section-label">Contact</span>
+        <h2 class="section-title">Say Hello 👋</h2>
+        <div class="divider"></div>
+      </div>
+
+      <!-- Founders + Email row -->
+      <div class="contact-bottom reveal">
+        <!-- Left: Founders -->
+        <div class="contact-founders">
+          <h3 class="contact-founders-title">Founders</h3>
+          <ul class="contact-founders-list">
+            <li>Sai Sathvik Erukulla</li>
+            <li>Manvik Tej Kandem</li>
+            <li>Aatish Chittineni</li>
+            <li>Thanush Cherukuri</li>
+          </ul>
+        </div>
+
+        <!-- Right: Email -->
+        <div class="contact-email-wrap">
+          <p class="contact-email-label">Get in touch</p>
+          <a href="mailto:nourishnnarrate6@gmail.com" class="contact-email-link">
+            <span class="contact-email-icon" aria-hidden="true">📧</span>
+            nourishnnarrate6@gmail.com
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       FOOTER
+       ✏️  Edit: the copyright text and tagline below.
+  ============================================================ -->
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>© 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <p style="margin-top:.5rem;font-size:.8rem;opacity:.6">Made with 💚 by students, for everyone.</p>
+  </footer>
+
+  <!-- Scroll to top button — no edits needed -->
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">↑</button>
+
+
+  <!-- ============================================================
+       JAVASCRIPT
+       TABLE OF CONTENTS:
+         A. RECIPE DATA  ← ✏️ THIS IS WHERE YOU ADD YOUR RECIPES
+         B. Recipe Renderer (builds cards from the data above)
+         C. Recipe Modal (popup)
+         D. Search & Filter
+         E. Loading Screen
+         F. Dark Mode Toggle
+         G. Navigation (scroll effect, active links, mobile menu)
+         H. Scroll-to-Top Button
+         I. Scroll Reveal Animation
+         J. Request Form
+         K. FAQ Accordion
+  ============================================================ -->
+  <script>
+
+    /* ===========================================================
+       A. RECIPE DATA
+       ✏️  THIS IS THE ONLY PLACE YOU NEED TO EDIT TO ADD RECIPES.
+
+       HOW TO ADD A RECIPE:
+       1. Copy one recipe object (everything from the opening { to
+          the closing },) from the TEMPLATE below.
+       2. Paste it inside the RECIPES array below.
+       3. Fill in each field. That's it — the card, search, filter,
+          and modal all update automatically!
+
+       ─── RECIPE TEMPLATE ──────────────────────────────────────
+       {
+         // ── Basic Info ─────────────────────────────────────────
+         title:    "Your Recipe Title",       // ✏️ Name of the dish
+         category: "dinner",                  // ✏️ Must match a filter pill:
+                                              //    "breakfast" | "lunch" | "dinner"
+                                              //    "snack" | "dessert"
+         emoji:    "🍝",                      // ✏️ Emoji shown on the card & modal
+                                              //    (used when no image is provided)
+
+         // ── Image (optional) ───────────────────────────────────
+         // To use your own photo, set image to the file path or URL.
+         // Example: image: "photos/my-pasta.jpg"
+         // Leave as null to use the emoji placeholder instead.
+         image:    null,
+
+         // ── Card Preview ───────────────────────────────────────
+         desc:     "A short one- or two-sentence description shown on the card.",
+         time:     "30 min",                  // ✏️ Total cook + prep time
+         servings: "4",                       // ✏️ Number of servings
+         calories: "320",                     // ✏️ Calories per serving
+
+         // ── Modal Content ──────────────────────────────────────
+         ingredients: [
+           "Ingredient 1 – amount",           // ✏️ One string per ingredient
+           "Ingredient 2 – amount",
+           "Ingredient 3 – amount",
+         ],
+         steps: [
+           "Step one: description.",          // ✏️ One string per step
+           "Step two: description.",
+           "Step three: description.",
+         ],
+         tip: "Optional healthy eating tip shown at the bottom of the modal.",
+         // Set tip to null to hide the tip box: tip: null,
+       },
+       ─── END OF TEMPLATE ──────────────────────────────────────
+
+       The RECIPES array starts EMPTY (shown below with just the
+       template as a comment). When empty, six placeholder cards
+       are displayed automatically. As you add recipes, each one
+       replaces a placeholder card.
+    =========================================================== */
+
+    const RECIPES = [
+      // ✏️ Paste your recipe objects here, one after another.
+      // Example (delete the "//" at the start of each line to activate):
+      //
+      // {
+      //   title:    "Banana Oat Pancakes",
+      //   category: "breakfast",
+      //   emoji:    "🥞",
+      //   image:    null,                    // or "photos/banana-pancakes.jpg"
+      //   desc:     "Fluffy, naturally sweet pancakes made from just oats and banana — no refined sugar needed.",
+      //   time:     "15 min",
+      //   servings: "2",
+      //   calories: "210",
+      //   ingredients: [
+      //     "2 ripe bananas",
+      //     "1 cup rolled oats",
+      //     "2 eggs",
+      //     "½ tsp vanilla extract",
+      //     "Pinch of cinnamon",
+      //   ],
+      //   steps: [
+      //     "Blend bananas, oats, eggs, vanilla, and cinnamon until smooth.",
+      //     "Heat a non-stick pan over medium heat and lightly grease it.",
+      //     "Pour ¼ cup of batter per pancake and cook 2–3 minutes per side.",
+      //     "Serve with fresh berries or a drizzle of honey.",
+      //   ],
+      //   tip: "The riper the bananas, the sweeter your pancakes — no added sugar needed!",
+      // },
+
+      {
+        title:    "Date Ladoo",
+        category: "snack",
+        emoji:    null,
+        image:    "data:image/webp;base64,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",
+        desc:     "A wholesome no-bake Indian sweet made from dates and roasted nuts — naturally sweet, energy-packed, and completely guilt-free.",
+        time:     "25 min",
+        servings: "12",
+        calories: "95",
+        ingredients: [
+          "Dates (non-seeded) – 1 cup",
+          "Pistachios – ¼ cup",
+          "Almonds – ¼ cup",
+          "Cashews – ¼ cup",
+          "Pumpkin seeds – 2 tbsp",
+          "Ghee – 1–2 tsp (plus extra for hands)",
+        ],
+        steps: [
+          "Roast all the nuts (pistachios, almonds, cashews, and pumpkin seeds) in a pan on medium heat until the cashews start to turn golden brown. Stir frequently so nothing burns.",
+          "Transfer the roasted nuts to a grinder and pulse until you get a light powder that still has some chunks for texture. Don't over-blend.",
+          "Pour the ground nuts into a bowl and set aside. Clean the grinder thoroughly before the next step.",
+          "Add the ghee to the same pan and let it melt on medium heat.",
+          "Add the dates to the pan and mix continuously until they soften and start to clump together.",
+          "Transfer the softened dates to the cleaned grinder and blend until you get a smooth, slightly sticky paste.",
+          "Combine the date paste and the ground nuts in the bowl. Mix them together firmly until everything clumps into one large dough.",
+          "Apply a little ghee to your palms. Pinch off small portions of the dough and roll each one between your palms into a smooth ball to make the perfect ladoo. Repeat until all the dough is used up.",
+        ],
+        tip: "Chilling the dough for 10 minutes before rolling makes it easier to shape, and a light coat of ghee on your hands prevents sticking.",
+        whyHealthier: [
+          "Dates are naturally sweet — there is zero added sugar or jaggery, making this a guilt-free treat.",
+          "Almonds, cashews, and pistachios provide healthy fats, protein, and essential minerals like magnesium and zinc.",
+          "Pumpkin seeds add a bonus of iron, omega-3 fatty acids, and plant-based protein.",
+          "Ghee in small amounts provides fat-soluble vitamins and is easier to digest than refined oils.",
+          "The whole recipe is gluten-free and made entirely from whole, unprocessed ingredients.",
+        ],
+        comparison: [
+          ["Store-bought sweets with refined sugar", "Sweetened only by natural dates — no added sugar"],
+          ["Artificial preservatives and additives", "100% whole, unprocessed ingredients"],
+          ["High in empty calories", "Calories come with fiber, protein, and healthy fats"],
+          ["Refined flour or corn syrup binders", "Dates act as the natural binder"],
+          ["Little to no nutritional value", "Rich in iron, magnesium, zinc, and antioxidants"],
+        ],
+      },
+
+      {
+        title:    "Whole Wheat Veggie Pizza",
+        category: "dinner",
+        emoji:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/9/91/Pizza-3007395.jpg/960px-Pizza-3007395.jpg",
+        desc:     "All the comfort of pizza with a whole wheat crust, part-skim mozzarella, and a rainbow of vegetables — fewer calories, way more goodness.",
+        time:     "35 min",
+        servings: "4",
+        calories: "290",
+        ingredients: [
+          // --- Crust ---
+          "1 whole wheat pizza crust (store-bought or homemade)",
+          // --- Sauce ---
+          "½ cup low-sodium pizza sauce",
+          // --- Cheese ---
+          "1 cup part-skim mozzarella cheese, shredded",
+          // --- Toppings ---
+          "½ cup bell peppers, sliced",
+          "½ cup mushrooms, sliced",
+          "¼ cup red onions, sliced",
+          "½ cup spinach",
+          "Cherry tomatoes, halved – to taste",
+          "Italian seasoning – to taste",
+          "Garlic powder – to taste",
+          "Crushed red pepper – optional",
+        ],
+        steps: [
+          "Preheat your oven to 425°F (220°C).",
+          "Place the whole wheat crust on a baking tray.",
+          "Spread the pizza sauce evenly across the crust, leaving a small border.",
+          "Sprinkle the shredded mozzarella cheese evenly over the sauce.",
+          "Distribute all the vegetables — bell peppers, mushrooms, red onions, spinach, and cherry tomatoes — evenly across the pizza.",
+          "Sprinkle Italian seasoning and garlic powder over the top. Add crushed red pepper if you like a little heat.",
+          "Bake for 12–15 minutes, or until the cheese is melted and bubbly and the crust is golden brown.",
+          "Allow the pizza to cool for 2–3 minutes before slicing and serving.",
+        ],
+        tip: "For extra protein, add grilled chicken, chickpeas, or tofu before baking. Whole wheat crust packs 6 g of fiber per slice — almost double that of a regular white crust!",
+        whyHealthier: [
+          "Whole wheat crust provides more fiber than refined white dough, which supports digestion and keeps you full longer.",
+          "Part-skim mozzarella delivers the same satisfying cheesy pull with significantly less saturated fat.",
+          "Bell peppers, spinach, mushrooms, and tomatoes add vitamins C, A, K, and powerful antioxidants.",
+          "Low-sodium pizza sauce reduces overall sodium intake compared to standard pizza sauces.",
+          "The vegetable toppings add bulk and nutrients, meaning you feel satisfied on fewer calories.",
+        ],
+        comparison: [
+          ["Refined white flour crust", "Whole wheat crust — more fiber and nutrients"],
+          ["Full-fat mozzarella (excess saturated fat)", "Part-skim mozzarella — same taste, less fat"],
+          ["High-sodium pizza sauce", "Low-sodium sauce — heart-friendlier"],
+          ["Few or no vegetables", "Loaded with bell peppers, spinach, mushrooms, tomatoes"],
+          ["~400–500 calories per slice", "~290 calories per slice"],
+          ["Low fiber (1–2 g per slice)", "High fiber (6 g per slice)"],
+        ],
+      },
+
+      {
+        title:    "Chicken Biryani",
+        category: "dinner",
+        emoji:    null,
+        image:    "data:image/webp;base64,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",
+        desc:     "All the aromatic depth of classic biryani — marinated chicken, warm spices, and fragrant rice — made lighter with brown basmati and extra vegetables.",
+        time:     "60 min",
+        servings: "4",
+        calories: "430",
+        ingredients: [
+          // --- Chicken marinade ---
+          "1 lb (450 g) skinless, boneless chicken breast, cut into bite-sized pieces",
+          "½ cup plain Greek yogurt",
+          "1 tbsp lemon juice",
+          "2 cloves garlic, minced",
+          "1 tsp grated ginger",
+          "1 tsp turmeric",
+          "1 tsp paprika",
+          "1 tsp garam masala",
+          "½ tsp cumin",
+          "Salt and black pepper to taste",
+          // --- Rice ---
+          "1 cup brown basmati rice (or a mix of brown and white basmati)",
+          "2 cups low-sodium chicken broth or water",
+          // --- Vegetables ---
+          "1 onion, thinly sliced",
+          "1 cup peas",
+          "1 cup carrots, diced",
+          "½ cup spinach",
+          "2 tbsp fresh cilantro, chopped",
+          "2 tbsp fresh mint, chopped",
+          // --- Other ---
+          "1 tbsp olive oil",
+          "1 cinnamon stick",
+          "2 bay leaves",
+          "3 green cardamom pods",
+          "4 cloves",
+        ],
+        steps: [
+          "Marinate the chicken with the yogurt, lemon juice, garlic, ginger, and all spices. Let it sit for at least 30 minutes (or overnight in the fridge for best flavour).",
+          "Cook the brown basmati rice according to package directions using the low-sodium chicken broth instead of plain water for extra flavour.",
+          "Heat olive oil in a large pan over medium heat. Add the cinnamon stick, bay leaves, cardamom pods, and cloves. Stir for about 1 minute until fragrant.",
+          "Add the sliced onions and cook until lightly golden, about 6–8 minutes.",
+          "Add the marinated chicken to the pan and cook until fully cooked through, about 8–10 minutes.",
+          "Stir in the diced carrots and peas and cook until tender, about 5 minutes.",
+          "Fold in the spinach and stir until it wilts, about 1–2 minutes.",
+          "Add the cooked rice to the pan and gently mix everything together, being careful not to break the rice grains.",
+          "Sprinkle with fresh cilantro and mint.",
+          "Cover the pan and let it rest for 5 minutes before serving so the flavours meld together.",
+        ],
+        tip: "Marinating the chicken overnight makes it even more flavourful and tender. Serve with a side of cucumber raita made with low-fat Greek yogurt for extra protein and a refreshing contrast.",
+        whyHealthier: [
+          "Brown basmati rice provides significantly more fibre and nutrients than white rice, helping with digestion and keeping you full longer.",
+          "Chicken breast is a lean source of protein that is naturally low in saturated fat compared to dark meat or lamb used in traditional biryani.",
+          "Greek yogurt tenderises the chicken and adds protein, replacing the large amounts of oil or ghee used in the original.",
+          "Carrots, peas, and spinach increase the fibre, vitamin, and mineral content of each serving.",
+          "Just 1 tbsp of olive oil keeps calories in check while the herbs and spices deliver all the flavour you expect.",
+        ],
+        comparison: [
+          ["White basmati rice", "Brown basmati rice — more fibre and nutrients"],
+          ["Large amounts of oil or ghee", "Just 1 tbsp of olive oil"],
+          ["Full-fat yogurt marinade", "Nonfat or low-fat Greek yogurt"],
+          ["Few or no vegetables", "Carrots, peas, and spinach added"],
+          ["Higher saturated fat from dark meat", "Lean chicken breast — lower in saturated fat"],
+          ["~600+ calories per serving", "~430 calories per serving"],
+        ],
+      },
+
+      {
+        title:    "Banana Oat Pancakes",
+        category: "breakfast",
+        emoji:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/Foodiesfeed.com_pouring-honey-on-pancakes-with-walnuts.jpg/960px-Foodiesfeed.com_pouring-honey-on-pancakes-with-walnuts.jpg",
+        desc:     "Fluffy, naturally sweet pancakes made with bananas and oats instead of refined flour and sugar. They're high in fiber, packed with nutrients, and perfect for a healthy breakfast.",
+        time:     "20 min",
+        servings: "4",
+        calories: "235",
+        ingredients: [
+          "2 ripe bananas",
+          "2 eggs",
+          "1 cup rolled oats",
+          "1 tsp baking powder",
+          "1 tsp vanilla extract",
+          "½ tsp cinnamon",
+          "Splash of milk (optional, if needed)",
+          "Fresh berries for topping",
+          "Greek yogurt for serving",
+        ],
+        steps: [
+          "Blend the bananas, eggs, oats, baking powder, vanilla, and cinnamon together until you have a smooth batter. Add a splash of milk if the batter looks too thick.",
+          "Heat a non-stick pan over medium heat and lightly grease with cooking spray or a tiny bit of butter.",
+          "Pour small circles of batter onto the pan, about 3–4 inches wide.",
+          "Cook for 2–3 minutes until bubbles form on the surface and the edges look set.",
+          "Flip and cook for another 2–3 minutes until golden brown on both sides.",
+          "Top with fresh berries and a dollop of Greek yogurt before serving.",
+        ],
+        tip: "The riper the bananas, the sweeter and more flavourful your pancakes will be. Spotted, very ripe bananas are ideal. You can also add a handful of blueberries directly into the batter before cooking.",
+        whyHealthier: [
+          "Whole rolled oats replace refined white flour, providing more fibre and a lower glycaemic index for steady energy throughout the morning.",
+          "Ripe bananas naturally sweeten the pancakes with zero added sugar, while also contributing potassium and vitamin B6.",
+          "Eggs and Greek yogurt boost the protein content significantly, helping keep you full well past breakfast.",
+          "Each serving packs 5g of fibre, which supports healthy digestion and reduces hunger cravings.",
+          "With no refined sugar or butter in the batter, these pancakes clock in at just 235 calories per serving with a strong nutrient profile.",
+        ],
+        comparison: [
+          ["White all-purpose flour", "Whole rolled oats — more fibre and nutrients"],
+          ["Refined white sugar", "Natural sweetness from ripe bananas only"],
+          ["Maple syrup or pancake syrup", "Fresh berries — antioxidants with no added sugar"],
+          ["Butter in the batter", "No added fat in the batter"],
+          ["Low protein (~5g per serving)", "Higher protein (~11g) from eggs and Greek yogurt"],
+          ["~320 calories per serving", "~235 calories per serving"],
+        ],
+      },
+
+      {
+        title:    "Strawberry Frozen Yogurt",
+        category: "dessert",
+        emoji:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/d/da/Strawberry_ice_cream_cone_%285076899310%29.jpg",
+        desc:     "A creamy, refreshing frozen treat made with Greek yogurt and real strawberries. It's naturally sweet, high in protein, and a healthier alternative to traditional ice cream.",
+        time:     "10 min + 3–4 hrs freeze",
+        servings: "4",
+        calories: "180",
+        ingredients: [
+          "2 cups plain Greek yogurt",
+          "2 cups frozen strawberries",
+          "2 tbsp honey or maple syrup",
+          "1 tsp vanilla extract",
+          "1 tbsp lemon juice (optional)",
+        ],
+        steps: [
+          "Add the frozen strawberries, Greek yogurt, honey, vanilla, and lemon juice to a blender or food processor.",
+          "Blend until smooth and creamy, scraping down the sides as needed.",
+          "Taste and adjust sweetness by adding a little more honey or maple syrup if desired.",
+          "Transfer the mixture to a freezer-safe container and spread it evenly.",
+          "Freeze for 3–4 hours, stirring once halfway through to break up ice crystals and achieve a smoother texture.",
+          "Remove from the freezer and let sit at room temperature for 5–10 minutes before scooping and serving.",
+        ],
+        tip: "For an extra smooth texture, blend the mixture a second time after the halfway stir before returning it to the freezer. You can also fold in sliced fresh strawberries or dark chocolate chips before the final freeze for added texture.",
+        whyHealthier: [
+          "Greek yogurt replaces heavy cream, providing significantly more protein and calcium with far less saturated fat per serving.",
+          "Real frozen strawberries add natural sweetness, fibre, and vitamin C, reducing the amount of added sweetener needed.",
+          "Just 2 tablespoons of honey or maple syrup sweetens the entire batch — a fraction of the refined sugar found in store-bought ice cream.",
+          "At only 180 calories per serving, this dessert satisfies a sweet craving while delivering 12g of protein.",
+          "No artificial flavours, stabilisers, or preservatives — just four wholesome ingredients.",
+        ],
+        comparison: [
+          ["Heavy cream base", "Plain Greek yogurt — lower fat, higher protein"],
+          ["Refined white sugar", "Honey or maple syrup — natural sweetener"],
+          ["Artificial flavouring", "Real frozen strawberries"],
+          ["~280 calories per serving", "~180 calories per serving"],
+          ["~3g protein per serving", "~12g protein per serving"],
+          ["High saturated fat", "Lower saturated fat from yogurt"],
+        ],
+      },
+
+      {
+        title:    "Veggie Noodles",
+        category: "lunch",
+        emoji:    null,
+        image:    "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Mie_Goreng_in_Bali.jpg/960px-Mie_Goreng_in_Bali.jpg",
+        desc:     "A colorful noodle dish packed with fresh vegetables and a light garlic-ginger sauce. Lower in oil, higher in fiber, and much more nutritious than traditional takeout noodles.",
+        time:     "30 min",
+        servings: "4",
+        calories: "320",
+        ingredients: [
+          "8 oz whole wheat noodles",
+          "1 cup carrots, julienned",
+          "1 cup bell peppers, sliced",
+          "1 cup broccoli florets",
+          "½ cup snap peas",
+          "2 cloves garlic, minced",
+          "1 tsp grated ginger",
+          "1 tbsp low-sodium soy sauce",
+          "1 tbsp sesame oil",
+          "1 tbsp olive oil",
+          "1 tsp honey",
+          "Green onions for garnish",
+        ],
+        steps: [
+          "Cook the whole wheat noodles according to package directions, then drain and set aside.",
+          "Heat olive oil in a large pan over medium heat.",
+          "Add garlic and ginger and cook for 30 seconds, stirring constantly, until fragrant.",
+          "Add the carrots, broccoli, bell peppers, and snap peas. Stir-fry for 4–5 minutes until tender-crisp.",
+          "Whisk together the soy sauce, sesame oil, and honey in a small bowl.",
+          "Add the cooked noodles and sauce to the pan and toss until everything is evenly coated.",
+          "Cook for 1–2 more minutes, tossing continuously.",
+          "Garnish with sliced green onions and serve immediately.",
+        ],
+        tip: "Add tofu or edamame for an extra plant-based protein boost. For a spicy kick, drizzle with a little sriracha or chili oil before serving.",
+        whyHealthier: [
+          "Whole wheat noodles contain significantly more fibre and nutrients than refined white noodles, supporting digestion and steady energy levels.",
+          "Loading up on carrots, broccoli, bell peppers, and snap peas increases vitamins A, C, and K as well as antioxidants in every serving.",
+          "Using just 1 tbsp of olive oil instead of the generous amounts typical in takeout reduces unnecessary calories without sacrificing flavour.",
+          "Low-sodium soy sauce cuts the sodium content considerably compared to regular soy sauce or takeout seasoning packets.",
+          "Sesame oil and honey add depth and natural sweetness with minimal quantities, replacing heavy, calorie-dense sauces.",
+        ],
+        comparison: [
+          ["Refined white noodles", "Whole wheat noodles — more fibre and nutrients"],
+          ["High oil content", "Just 1 tbsp olive oil + 1 tbsp sesame oil"],
+          ["Few or no vegetables", "Four types of fresh vegetables"],
+          ["High-sodium sauce", "Low-sodium soy sauce"],
+          ["Heavy calorie-dense sauce", "Light garlic-ginger sauce with honey"],
+          ["~450+ calories per serving", "~320 calories per serving"],
+        ],
+      },
+
+      {
+        title:    "Garlic Chicken Noodles",
+        category: "dinner",
+        emoji:    null,
+        image:    "data:image/webp;base64,UklGRmJVAABXRUJQVlA4IFZVAADQ8ACdASrkADABPok2kUglIyGhNvxsmKARCWwAu7JZ1t5pfy/M75L7Ifnn3r/J+tfoT7D8r33Pvk/9D1Tf1n/Zewf5pvS55xPNn9O/9Z9Qb+idU96M3TMf2q1e+HX6rwR/Ivn39B/c/8V+yft74t+wDUO+YfjT+3/jfQ/vb+P/037Bf5L/UP189XB+x1X+9/av2FPhz8f5pv3/nN9svYK8y/+r4iH5f/mewN/Uv8Z/6/9X+WH06f5X/3/33oJ+sv28+Ar+e/4P00f//7g/3C///uhfsJ/9HQG15hxT8nKKKDglXjk2HXkf4iwfpD/14a//BkuCuAj1EYse1h5h257Vq4NrChH8WPwn2VTtrcORkLFNlUG9RIS3MQwJiZan5quNUgidK9w/qvhqQnvTf0xIVltgSxKCwL1CdsHGR8/ijUlJvVpLyEE4bXRKiP5yu5pf8oqVphrtUOs3QtPPSSZnnnPRghpaprcjs6FnUEe21rn4XHrByxUJs1BaLYSBtQYmjlUTwY+T1Nw6f3caTqn5d+AupCCR9rgQYn03X5PAuShgOoIvtMTaOhYVkm6TKNfjq2V+Glg+/VziYPn55PVPtRxmhZu6vOatmtsRcmvr3pOiuH3IBgReDM2oeWEbgsT8h7NnSAakCJijKaZTG5jdrNnXKvJFdRSLqOihkvF8fH0rER4y4MKKlTvVUMPepotITXh/JTu79h67ovoIZytTitQejvZD6r7VFNr6JPTHgirUvp3xkPVx19NKV3UnzFGeEjRf9byzuHMHWSC76j24bIzBBssC5KiUER4NyaM/z/SpTcQis+Xkljn2xm+fE287tnXXt8eSjCmu6Pp+rzLukvOPYxov+ZxEaOoX0XGwlXvhZ1PXoVvp5cd0HHQ7VzWE041YuSt2zCGlczRMIubJ3UdQSqjFHo8iFz06QkAumzbmnjleYmCJTBLhb8f4rk3a6apEJX6PbO4lTtxFZMfnG/WK3Ij/Ha1FBtz0Q3zZDPkKYY+vvnzsCvD94WAeA6uexlwwbbuahzERxv8csqCb6KqrXSzQiXeJ+isaf512FortthNaw9WQMJglBfKRfMOAy4r/0jpZSld5o2vGVPdX1PFEgwqh3dcrbc9wMoupCacNB/NGwGwwsZAOOd4BHx0I6KABaHp3LuOOORerWXHnruEPuJR5J1CPoe63N//fNLWXdRut3U6yPtIcrerRLrXEaaPX+sQBwG5S3W+Tl503d5JNsFVlor3jJBXrmO0pNG9OumCsqZcC97gn4mebN1Mh/nTlzos/RN+WFcSNor6d/msOFqdJcNXW7fnEdkVXT90cwMbD3avPctpGeeXhruax0z0adJ3xsLgJiRA5C3FwLIhKWIWXWNHI9b6yrqeYInNjzgB28esSAO+f+e1Eknn7f3qPFlxzCSYpgfMf77ldHmWBh2xH7VSLosiVTZLvnjiLO8A47hFj4vqral2udIg531Oi2kYePrslu51O/kNzgvoYEYqnM6dWtXBCLzU4eKndnqOKYUwtVk3PkhPezkJGrekQX+qZHR1VKiTEG/S2/WwemKWiWRqLDmyohHcVgkViLUJp2NPFx7/ei5mkmDIJ4mCnhMPucgsEHcv00fbOTbOPEiQvf6J7UIGQ4T4OpxgRjw++Rj/DZW3JNchno7pBfaYvQk75u///3q0YwGdwdARkZmsEAt2934JF41kr3R1yupKApLWBPg3096Ig7q/X/NQZs+1S/ZnX9zItqaAuBbpSgs2RSPz+F8G7NBhXNTbMe9kFd1SH4bt7nvk5HaWHypSBmq41Uh0QnSYLj1dE17+clS/L0SPtBy5LWWaM1TXDizhpt23Ttu32QVdeKLTRRguOITPndNv1qHjP9gwK5J1DZV3m1Z67YzmZK6Fm+QPeCX0+TO9cekpEsC31n68vPUTFyFk2ez9+zRDmf3Win3KyqsZr8tB37XgP4LXarAr8nbHZQ9ollZieo9gFj4GjXCrzS6iScqkKnxAzRBavCOf3O4jzvuEQmzbeV4iXEzBucO3ZEN9bMOYmgjbGyPNdOHrUEPsF5QNqVT/eFKF9e2+g9bF1PZZUXAoJhUjgPVDh72Gpo+4AXawtbkqpP+HIZRtklqprYhURoiHYKnlzSYCW4XLBfvwAX0JxEQzj9n+6xlAUU3AVQgH9FoA1ysgH+PBqzgf8W1Xo65X/8QoXxS9GXPLcyE4gIlfO4gRcMvlJ1LeE0j0I0QSqX5+pq6dnrYHD1n9LykIJBifLEnl1Q5h03U+zaG/ZGFA94Skxf2HNOHGPjI0tpeEVQp3+Zv0eg9beD6cBwPjwXbztg2uTD8q2JoQ2SpJCqLGxXaObk7L7QcWBznsOfWjJ1njkE1+mEv9HyI2Bz/jh2q5SqP8cPBmjI6IwHeO3PhAkd2dtHqtztjUKi+qDbb5/N/Tvm3XycIfCnUZ1/2aN++PS1Oqfq6WvaIaYbdChNRQbDIY86gUfvg5oPiAh/Yy305aaDRI3KIEiWYgxuzRh/GXPhncTeWmgmS14sGIRY+/8BZvLy8JqXplVQVhW48+qN7HG5FZf0MHzQp/hTpOWbcm9mgAA/v6V3w93fNN1KeoA3HAZ6rv4KJXRMaRRk+Iv0dnIgVaea+QrYOrArY2rN2K+Au3YUxlcHPA/fO0rEwcrBlwzj00VlBgFIdUPRWLbo8IU4kekbcvnVTu7xCrMkYX52obuaEEJnjA8av+PTLXmyI9oA4xkmqtmiPxY0WvRNyWmSMQbW/mBtZ9gOpnANRbG22i5vXgduEIC2lY8EWgDzz0qkltRrEGUHq4Ge4Rsm+CFo/Qn2B7HOA8HAA8od90m0iLc1dlV+i7/fjGSBYQAD5FMgFQylKvzSeiEWm/KYZ7V8ybF+dKCFeQ1YnqOYKrEApHDuI4+kDwMx4oWLlDgoVXV8ZLQBylezVNA2LoJLcTm3WnFVuj0tW3UgLy+RtlHHujItPKVJ+IjAUdEGpHFLRq1RYDVmmv4npkAeHYIeDnAUQnMASkuAKn/Av7dlRI/2foD33HW2CV6GiNrd4lB/tU0rD58Ga6Ms/wYmyv1vx3g0N3IVZmOOOSj2jqRVNexG0IRTQMh1vCcYBQA4cnzEOh67nrSBvKxL1MM1vBkGfugYq8iKCEVKZleUty+W2OkWIk4s8uBV8czUcO4NT3RhfHJfp+Imi9DX39pTX+HT8ICqMMvSO/ef7t3yVZP+9Zzsk/cALgZfDpduS9S1iHaN18SDNDjwy6VEkrcyHuTYXQrCk7ECZXaZ4vViwwmSrQN8FxXuHq1ofzJwyoeHUoXGVtmibnX+T+yn1ZqroZShVl6uB7IJvif8oDyMNDdP1pUZNo1gXUJJDO6v3lKJVls9FKc4MD64vJzKr+lxakIRB/Pp4B8zWqFgc6eZhAILhDikyLik0jvU/RnuKIWyPAz90XDc3Gn+92m/yalh6XiGJyolPRaMUkqENLT3THVChMb3Kkl4RoG3z8sDhqnmvmxE1+11g9tlFKT+PjR3hHqCfCU21HNZNKA+9q4zS8CSyI+/KgOZ6bEaaZtIpV62Zct1KRU7wUejewHaAhWlu9AQ1j0S26RReMFLqPp8jIovlx+XvHfbpbOcq8ZQNXcpZ9D7+zzISkN7avRL6LUePpaLPSaq9OXTw2m5uWWToAzyoZfuFS6vvcr9qiqIaUYopSxCCZWx/kDYYiHAtxh4K8rTWp10Sg+rh34pH5aD7SqyJE9jomhzwQU0JqBkVYQOc+FX+bPWc4kpAmLfjHkEF1ehr2dMOWAuLQSH1STxIQKaKZ1RfH6vggFF2ae+/MXa0kJ+Jg5MmYIiVTj0T3hlKoFZTXa/5FfhKHnrn4S4eVpmy+OZfM94eayxNA9EnY2TQacuzBa+97H35BXk4oHla2ClzOXBs0+feufOCDhc0s8D88C4vi9PlBvdmNbHEP8w0wdiSsmFzdLbywQNyN47MfesAknxm6VNFTIas7V50qIDrgUWJWHSLRKpwA+j+mImom4yH0DotUmv6CfjxIFiiVUsTTKSwCD2UIq6WIesRtqRal+dYkBV92BtiAUy2oghuIk4lftF90z9XuxSuwYHpjREnBc+DeoHruhBEajcfoOIRTpUve+8JtG0nuDTJ2t3XHDZPPwK4vHSIdTbk1iH135EMpxe15PwCOMU+5p1iMAZu9DH0XO65zRHo6O566JZnlKC/qe/tIJeAR4dww5tcodA08mo+oCY3iVzs2KfCK9EodSO4upzCUv56md6e+8t4zvfpr1y5nzc4yjA3FCp4fSNbxR3ieD9dyF3dOGUm60cExVv+lB4I5TOHNEqRtQ6I1tMna3fyEtyqNTokGdqhNqAoEwnWS/38yXsZLBqHohn7fpiRDsMquuKRiS3s/KjjVru9xwFaxZ7ckm3/Az3ne8eZX7tApkQPp7e8XxPB2P1cEHpiKZOElB3DJFYnAsxoL/MkYGMQvexdS1vQNqpLeNVfC2gW7r+14JhMYEA+0TfJirNw92Pq5qjI01FfZvCbgEDP5HNaFMwX48F2pcKkFwX+gx2Q9B4ECSLOO2ymJReG3H4kZg4Ghfishh/b/G0k8EB6M3tP+mDOlQqBdAm7NwQ0XIqF6JYJUfpziMmTNXX/4+KJA7lFezDfI1PbUmhiDT6oGi7vS3FWK1TMkX9QbV4X4Qw0nARA2rpWJXRQyT5Lcdo5c2poz6sOAMg5FOKxad05YbWolH2FByyo609dwmXkD8lmEb7dxhcmtior5mS9i9l5Zu3GswMJmnOPJfN7npZUQJ8cZ+RJfwDXUO7qkAW/Ui4kq3vKl8FJyT3oY9XK9jG41uCf18hbK8FPaq/mRczVLRUlkHkNGItRYDPH1TMYOAM/Ccbm5h5MEQI5Pfwss8XNqRuB7BCLfJKonIZh13DhfePV6NDLWxynN0nK9GtHgvaKOiAOHvUAItxTSP9ziJvUzlnMitsjFkKDJA5NkO3ch84rDCnIE/nafjF+UYblSU7T/FYrxga+r4hF3wr17RUsDpaqiMFMHaCF5M6ro2OEG9kfkUVfZrldP20F2rAxJW1hHnSQxvE2lGsHPfQ5ZeKc4AnYamxC9zz4CXI82QAFQZua+yLjO2VXD4U218xcsMjq6csq+fWHOLTP3gy6D2N5njASzpokMIzcbCgCHnnknDhcyXngwGhL3G4+K5c75KeJxjK/AmyOqlipf33oLjQUeulUmUkzlzqWeqFZxHj9B7ovlb2XRS9cMbhQpUrrnqxqqRQwWcpPNphRFIl+f6JURohj2+3OWxQ2gnSkBTpavVo3+RxTKqQ05TMKcdBbcBnJVWU61UXE2MDVJiHibiqJr6Co6Dr4sfGo3R007n9gOJQ6dh8xKOHJF4H8UtuQbOE1lmL6BsUN2q0R81YkvesBmza8PN0pI+3c1GnI7tu043uHRDTpduZy9hkZw2L5kj7oQr2WmugeRAg792kKcWnJuVQnxUmIK4sYu0wFMi2x2bB1BnVOVhHLvTKZ4wSkE5NsqWfmzUwF4nVdRO0psaqac/WWqdd9/CQiZ+Yj8ZpZnczAf0h2rYQUS/M7mlAi6c3KKe1StDaAg7wo0uQ9f/H9yVLi8cnnyLC44C2xzTB2V46BrI5JUKo9xDMAegP7ssbbn0HWoe7HNZ53Uh/UcyJzWFmXjIz9fDJs5rtkIApOh2BNhbmie4UnnM2Xj/i9TF4s6zUKX2m+Zq5mrqfPxxJgfti3v+My4Ov+xONeMgkGnqxtsKM0HCxSd0p+gKybnk+333dMR/zcZcJ8hKs3++tcjVY0pZ9huVmm0x81fpqPKhRxJcZeWHi2zL54QCgmShQU3+uzi4RoyImIbsch0Rdv+EeZt7ENaD2M9n/g7uJoQ3+W2SjnryzurXAv41aRccyIYQRRVfTPLBxEePcOqsJgHe418p8w282G56LPNqDtVsP/KWjjwGpiIanxsdEhTXWQRIkbCMYGf0DSXfGmaPLg8G2HqxqByM+CHVzFtyaJm9Th+NgoQzEJl5HLhY2i3ewXokFxHQJSvKqiMs8WjpsjMEfKIWO66JO2afulJEYF0iMISX+1ccm7HZA9sHOOrCAdwpFBR8pNPoyKDs3c9c8vyZ9gjoqS3LGRN18z3YtvSlJk0UdbNXt3aM0g9lErSrf3TrnCU8P2rfx2lcOLKjoqwmqw54ar4eyh8Lsa0KeDcwWX4ArGVuiCdYRuO257aoEyrCQfmMko6Up6Nt5pnOwynxb0L1QSpQAIrZdqVXFbzmc6t3VuNY7JPfctI4zEecxLgQG7BCjbJDKSyX1WP6YcJmnVQjrJhlEbqlNHhL9E2+e6AOsLbTeQtGJf05NBFGUGMNWWW0b64P2dpD4u4mYYCVJ69MuhB74pKWbnScfbDcrFzyuq792+PZpBA5xaBCNEL2+ewJIWOS70zMzlBGfaCtea+v/J2Jehw1ZdZQ6OGh9MjZiAccasyXGGnkbClKfBZQYB4UdtXRpd41LHUc6VcHk1E15Zhhkm8+jTVMVTNjIYAV+fSMJe0I9OWke4HldFlJdfIm+mhRNRFLrJ48klFJ41prOb+X0cMCdc4E7/Tb+DwNky1OwS/tl69fPcsooS4vgWyE9Tt67YoVOcOt4Z8gjxhHexJ1VGbP3b5q7Z+yrtVLf8lrLLCXQ9V2883wXenOvmi/tyrw4s/Gr3Bijod5Xvwi+1t47/PEd+Xj+TOsUxDpALGkTcYsK/XBWcIZfHiYZM4tdoQVjrZAOYGaz5p4ifSXMUIzY/0Ot9lC6jfCoZxJFNBM4UYlKUYAj/JEI2arHhOG9UmNKUYel+l0vEANNyATOi0Raibq/DevYC8I79nsPWtWBUZZuuXIwEZw/uwUAqRjrFCrc3Y+7R3SZrygpSsetEGbapgy5KKHFAm+eyjV2XF51kxU4OP44OTwY4c0DdUgsT3bT5lq658UQmlhsKeZv4F380saYOnBNaYgEifldt1NuAT5Gy1g0bB7DGz6bZ9cOD2wcxPvhi8fwj6wXQEgEhngtNwzmXuPIqH+qq8PQFuujUZ0iJ1sPw/pWy/aRRFCrnLU7X9vBWcQO6jlGRKMh3EfERFf8gMl8qfC3ayT7Or86WhBNedFki4u5yM7sCdKt593xUv9qY5T4bOjP8OgGSq7NCjRwqIlSla1QaDdAg0x1QDKCLr7W0xSM3Afy+Xo4qyDq2lA5CdnjMj+YqI4bVsL+8GaL6Cd5t6PMiVY7wrQ3ZN6RkJMI0CCdgu2slkhJBxh/Nhme09Sng32RK8UWf8SUZtjskOKli3WH93D/1z0EB3Jd5zg3++1vcazAW6Xn+n4B5iVeEJQMxU5EBRocqFenWJLTELl8UR50zp5jOTup7mweH5m8RzSx366cJAUo/M5GZcnP1YjztT331CVuxjVpIPeUChaxMkOeiTG+fL1InbFhuNtuoZpcdz/ijqx+u4JBsidaaoZHj+6qK8tUsrtaxlRZugyU0jxhrdW7Kqj+e5rhDqL9X7LSaEPvY+mqbaROmTQIXgI/QJvp8tB87h7oKxBsxekHEp/Zn3SZLnpZKxqwuqZBZD/l2KQUiZ1lO/SiLtF6HJWFD55WTQh5wDXMUUkbCDiWLbg+CbJf8lkfLOE/XypceqLnar2a0j8eAw5cT0BEh11A48NVEPXb7viGRzHrfklJ/CXRrEP/kk7SwKHGoTcB8suigSCUiDVD+GCRllWUV9SVY7cFuOMCrcpJGSFpNyuHEoJaT8M0QD3Layk6NWXCF3Y/TjIxz5AuQ1EteleDpkHuPl4WPBIU9EWP2A+JyOwu8wW1wyslBl8L19KMIj9t5SqWilQvBzmV5gyRFXa1Bcub4z7/EmdJf2rAds/mlX7s//IPJveXma0/ltZRmEzI1KwzFbcnqD8CwlCYR9g/VPjXn/3JIGiAk2EFEm7iJdkVNFoQ/IO6TQOlB3QlGDScKYgtHZa3d5z0Cwkqvj7Y5mtTY0RP1dGScu/GwkW4aQeWmF7NCPPB85Rr7HbLf+PX/BW+RZHZIaie1neRlzx6C4fC4ms4jH2m5ekYMCZ/eIq8tz6xl4FVVJyq61e16+8KdrW+UdQMcEJTwvUqioYPHrbhOwyFXZ54hsSBLhdJn3DwSbilJmISZDgXx+4lnSzHiZ69LbqOTM5AY9E5lFC1Bb7Kay6LAvt7kVsR/hIrrZ5KyQuxTK/yg11CutuCQ6EuwAR3IpOzXU4U89c7ZyJqgjpS+ms3gUuMlowygeRezhVOK1NjKw75G3t4ibBv0J2lZ6L/dvdvsCaJ1S5bexobo/zmM1FAek+T8vw5VrOQGrxfXybtpyLHYmJGmNE+t8/Byr6PaFvOM/mQVz1ypSEqqhNAMOSoNT+DDuNQA3Xye/d5d761jcjcyl8VYwVgrqPJCHaYtu8HrXBk72NYyTYwJ3N1jUbQUjdkTo29ntaDsSa1LOsmpSy72tzipHKvvPrSayjEzkpOeVMY5DX4jF0Ck1OBVXH1gvmcRa3k52LHA7tJeXaqrpdBHjOx9TKgCZtBiDP20kxGB/9dqM8MV6ikMWzS9Xg96pFkkxXIpuxeLcnxMXzKd4sBsbzwaDOUCtWvSTc/a4C6L/BIswyycM5OoS9YKWVKFFU2KiJb2MQPg/2OfFiiGeVDdVy2zE59PnTsvP/2GqJMGSEK8tJ4dVpg9g0o8Dvy+ku/d4jeU1jytMH+Mp7mu1sUP9sM6yucmdrBH6uPB9YC/Xl2CSeMZ8ivsKjxp/OPwaZiRX48GxWX3vJgGDbJAuyrrFBLLOp5NMWU0bB39FWF+OHcEuRy9Iw0qy66jkJjGv89PBw3lPLhy+ULMlWT4HF03Zaq6aqj4UB7yWW409ChYt8B8EmC3zwO6pYGImPiVaUGrA2SbsX0LWfM+ekCZ/vs7OY3EVugW5rgUtXgxuHOtRC9/6YPUQNJtOp65gJ0BvLtdnxjaaCquRjSmwa1Yl0VmCZnDHs5EEzUhf4SQf52Y1CqFh6Kjm4ow4hVIjxJVFKJAaRd+JOdNBvU7Q01EtqJQ0sS1kHf5AoUCFLDOZBVRTmrDtMFSDBdU3HDyvegCaX6E5EF1oe0L/M4cC75kn4GHBQSzExQaOCxGmlzYoGKHqeXsDUmAVnBCQYKEaAdQY11wGUsLC/pqFjvkELT2uUxAD8Nj+PibUdkckYAd7vkgaMgr5DL2exvA5ot0xOGDJaziH1bemJ+W/D+hw1Cn+7kdvG93SJ7CYIDjnGon+CxfKjZYZFKf2qfmjGh1sY3tZv/k/EzmQHy48+y5lMVKPFGxlS4c0Poe6R+osdcBdTWnS3RDuBdFP26cx+NsosEglcbp5IgTpUktQg4QWVcQJFObXjwYXyhifemkRH3Eb6FAivGCqKC93fUcvnQD7smb5h8RVW5LpjW8dUsljG+hU142wvYqNqtm79eMteaoTtre7rwD0i1opQsWYZT5bO5bBVKcAdsBZB+zIWvxm2SnLIZgJDLgO0N2Z1+/RQ33bb7HlxM0WGSY4bhwMOluxKNAi6Y3rxdHG4LSRSN1sq1zr0QQR3elvdJ3YwUov7c1XGUucyIzyGvlG2mQxR8TyQLk3DsIujScNcils2bGRx57N5PCHBYiY4SC+dcXC0xr7WnKaxHvLPcto1St/WmZz+v1yV6GegNvk3DKiC/ZUWYNF3IDngRc0+VgEu0MsHGq4Prb5jnC2JoRkm2SiSR/ES4dD5h1kFMrSi9gsoXmcQTHohZZmfApeJMfxEmCU3ohprf4YLD4NbOPlGIjucQ0xN+qHJgTu/pKM4FMLQbnHspBVO9CPimFqvegPDWoZYPr9gsKqrrY9MrGsKzQ/iBkQdtOAFk9g486OTyPv+SfcT0ohuprC7rkX5V/ETTxorsuW60dIk8uv+PayLJfFWAHk4Be6iFdPIbusP3jzy2nTTB5Y1opW6AxWWSReytZIjLJVvO9Oq4AJW7C0b6L3x993UI0JsnCOxAAN/mFGCp+VrETbdIC9sIimBvhLj5udL+ZkWJYCm4r8QyzBPnl3YYLjXHCbShO8CbBV3RnIEPHLyWARSQI+3SW7ttnuyh4jHK1E6wxH8LZ2s5DIHpuDB03mfP5SI1XnKoC7rcq5rTzL0/8mbWk/4H2hL79f9LjrtRovpAeAWQCAZ/anclkWmAE4/3nALcPEw5TzljqNISLaEcw+vCBDD4w2djwO2rlC14FwfX1abe6qS8yR2qjrzAqcCHNsMswMLBmQqpj4PTZvYKE/EXwaLJ+H3e5Rl/6a9325vm/sUDV62NcVBeKZ+dVzRzh1fgj0tqNuG2z+pRTmKkTa54kldEor2U/E+2fDwxys2WLyQzfYRNMuP0oGfl73E+xGfmc37OcG52fZbJWjII3Xw2mnSNQvkmV9vKNmyfzwlR7j0iDAm2hBVWEw7Mg2Ok3tC7emAR4raajweh3igU8u4/rVOEU9SF2eJctvOyZLh2vBm22rIumXIBEk0mtgENmOFqP+hmkuU6tX5CbxN1FETvBYeeA30+kMedOy0LnzbaHEzNDzR6LeezVtLlEzfFHZK2HawQmQruEE6RJYlNP9teQOAAY0JVq6doqKhjsHNPAP/e+lGsax4Z/dfs99thJVTYclpIpcSfhfKhY0vRaexudX2HuiKMxq7qBGuFBYTlcxLY1aWwmI+DLy5ta0TLI7Hav6RmDvqgvl0CKqLWStSU01Dy+dsBrxHReBXSj1xWlg6BdoVhnvxFxTa1S9qEn6IUc5YrR2FKNJB4TBpwvuRL1uMkwGnFAXJ2y7J00iME9ZyKwNK5XfoY/UHz57rGw19v1CKghJGDxPEgnpqnn0uQr1KZjBwGmY/ERVhVSpvw49azHsdqPjVQfQ7Kdv1ooy40ntLoZNcvpDpGZlL4iDl9xHOwI2cwLDUbYLrZvproytakH8qSWeM8bgIk9CMtjnwp6w2Wz8QW3gZtnHXZmj788/DdOmMSLHpjwKEjJbG1iSSNaokcntIWrhsk6mBFkGGA5ZurB9g0Ddo/68OMTpfjk8MrQ2zslBgpxV7ygGnP7OkxX0xyAu1YF3C7TZdOahSKKboURqr79xfukeRX14z02fcG6uYimipUobXUD5P3+FL74Nrc7fTxQWn2mFg7WKXdkER2ZFpDukTWREAcZBlDj+3izO+YEislNleFAWx5pOgYsoiXJV9OATZBEFXiUdR0rItaY6mkeATzM0RObikyg1cnG+u2AOJoPehwb8qishrGGUP+KjipI6e7+ZZyx/0Sz76lxoJrKTqYTTFfXL1ogAIRRttQqfpfeQg81CQZpIfYyhkNnoYEo5I1U3Kqcgfs5YvmCKuE02yzQbBFr5i6quXCKS3tMSAe1BxlaoxwXxHaqkExsqzKwD2IaCD+dz7Sw8J/QqwwxV/aah54QofeVcueKSU/SZDbQlhs6nu3CnP1bfq4x7J/4H1+K9kUz4eeAxRpJkRkJRkb2hPLfmJerPZGL99KCukt90FaD9RteOPfXieBzjLgR2/xT/5TT5kVVe/UXSjLXgc1xAGhIKi2gAYnwyjN7LCqHP72rcGP+jgU67ChW9GtKo4feHXwT3IRD7dhUXKMdF2MMPYJksGe5mOcqVM9dZZJYq9b1HVz4vPaBh66w8YJ7U6UIQGY9d+PqRL1tRPMlRv+uAztvD36hlyFpSllWHMfK/QBjYvVPqivu/mZpMhYgc82HcrA5FUH8Ftz3tBb6R1PXgZnUBJ8LcMSM7ZTYQfhT4ScEFIGNkbhMOuBxgfZGxSbEC26xp63idcyRvgavF+XQr9BFGphcpgjQ3LfChL+wns1Q9zutwa/1p7INmGvuQrRQnpLTb+jkAxc/Fpbc7ARHwUN3S5JB5J7/KE77pKgejj4V5cHKou3kSFxclZ6Z26fSA1T5pK10dcaZ7/0OlehvtsqlqrocRzj6rnOBG5x/60+hbs2mGkL1C65fdwv8vVLtpkQdfnVUC7ZX+n4dX9PTxl/xEuJ7QH3IxZePOmzCHzJDKX6OMhawEFdPv59sSEE2PPFF6jlO2b4cGoTNpMyk/vqoDFxh0eBV0JMnOX9XBnku6jbsi/SkcHMsJ5oCrrXKHpc+fTnC3PSZww/mwPoq7vfEd/v7ddaWRx81LlOvFzo5udN8FzxwULoW6PTG4dRc0r5Dx4Bff7gXu7nDe2hBysdKgd5wtl0W3hZvRy5OCbR71T7DGbt7lqyd+6FhXGlffqYy8ZXFv9yZb/C3SUNcSInqGuJf36LrGYafi6XvLIjtl/99kn6zxPuthiK0/ZymeSvTR/k5shd9AbC6N+0gUcidH7aemOIVr/pCxk3MtUiI0Y7c/b9Tp/1nEzaQmKSM/q0MRxbdvzsgIXK4nS9f7HVIzC3tkJ0z6kTiLPmMvodpuPMP3yE8SqoPpyQWESv1JdTI5QJi0TGHXFju6vXjGVpy6wWCJZzqzKig9Z0MGT2/TIWSlbBTr3oaHCwC9gj6EOdVLWAlaHC39lx9iN6S3aw+h4aXpyf21FuJDTHMCEf1gDsnb79OdEOVgKOQrEN04sL3KZCWV8KkjZF7cm+PslvLM5K2FHNvh4sPY/xXGXHrGNFAZTw7EAU40QG2jdrCOKaxWLKbFUC60FCY55lceHGz0UVk3blZfZ+G7JOwBNcSxiCJvg9p5VgUaE4Q4Jbcj+EZha/7ShrPgY5GnQbGZeQJrAjnyuYYTgYdLzNEkVCzOOKPr3flYbKcoFMkuXzUCtzlayd7VZ2LGAPpNj8EVbKho9c8TCVH7oUeHhwV5jRBkb9DV9/iePE1g4p8cFWlLI0mJm/uQjTp9CX+LUO61cLLGV6PJlvIjhorw0hWf7FpBJei9kFcEm2ALBFgUGhmw8s/uE+QKTEPbi8Fus3bGWbxcx2zOot/zdsgbqCkv2gwz0UMUWN7MKYv3GcaoGowk6YNX9t9HGG4OWS8yG+ep58XJyWvoJIfO/QI0FvAnocyaOtgnZXlV7Ov9kyxWy0IsszSCZXEj7wxcYpkLCUA3JJxNNP6WN7Nmt6Mmak+5JfiNu67VzcpAUPfo0DoJhwdwBxRJ8ztEtNO5vsFZj0SJ5PiCnJKb1APP4NNV77AZ/tPSG+Lg3Uswdrq58HTb6a2wx2/y5pfxhKTHFCvjGB2TigRuU4SF6IrEkIAxkJhupCG50uot6Xwa08ApBpbGI7UBSTMZsKFGF6rlXnmN8hNBDqc9YeJcP9kduhQ4pGly8nN6x9USu5y7yuVyRgNWUjRT6QhcPYmcypRUo88xunzgE2pL69rxeWsr1++zv4evg/ihEETUoxQhBOjPyQENTwaknMJAVeKPf+lxIx4O+t5dwsxiAtMacWCX/QMJOy2pVKPJyCys9f+dgxsTLpxTi8JCIgk+dhS9a5VqcU5VG9yJn5DzyBEnPWnTXhOfN9aFKUHNuC6QpyK44pdL/2rmkN1I/mymEwWaZ0cbUy644sA1VoD9PcOQwK4iJ5LWNGrtWjqiO2B72Oj19cm/ILPfQrrRoQ+8cUzjIUIcenpFPYorlKG1H4Ya3mudTkusbN7tm3noKSbfHyQ4VflR+YkOCpc3gXMAF5rAtcL68uBfrXdEORs96yScYTFAAV5CCS2p7BNmoeK3h3G4f1RoE+hPR0I4nJB4K/PAxJz3bv9YUd3HhOYwKQOTfsCuZfz0G/7MTTxsx755NO5ti0mEfRgdVsHog5lKggA+PSN24LMqHX5/jqg/yIzk8H9gN0OrjtH7XSr2/acur39zD3jty0ftb/Wwd1vJqSe7gY+NnADzqYyQ4wIsYBPRTTsh6UUEHKqYxHcAmzTxYj0X4ugt7Yl0nA6xrtBAcT7kTfATMyJ8FxWQb5B9/IgF405g585rWxRCni2PhrBbgbgfJJim+q66jd0rvVq/g+oIPtAfZdsce3xgtTXil+2aMwSIiGcImLd0WUD4rsOf0scoLn64h/YxoxegeFOIr9fBQj52nDdBw9Z6htu55h5ly3d1m0ZKZvdK42RIvWLFwtOHRSzw2J5NqvAioG+tLTbGUWsPV0xJ1/au2qdIzctMzOwDNiWo7UA8NMx7wPGegS59YEqxSlU8H2uVXb60Gtu3b3rRp/2vhC/9DwfqKdnzwNnbYcKQ9S87aDxgpbhG3dv9h3/Fr+vl3yF37e/4CF7VK6JE9Dx2VAOc1zemFe7at9V+lyQsgsxDlbm6cTMGNZrS8YhD2Sll1bdjCV5/LXZD5S1+GUX2WnIBv7sTxUC0U9fP7f/6Bv8wmW18AYALB62hUE55bA2Ih1jqg5GCOMHdjQH31lHR8NgXGdzApuEfbwKc9uXJ54UX5OqBY+PDi8nhK2ThDfJksTUE/1zd8IbFt2JmDRLBGq68BDMllkks/UtGUNl2c5bF3hdaD6NC7Cpkuev5RPxxgQv71dmYcDhUqOSTUdepjfo0yhqMMES+NWx1PN6i0nKyNDJ7C1ogFr+peUMi6yVG4fttnIjlqEczMK8rkz6MxIaSx9wJo6DzMAWakWI7r4QevvskAPWLa40CSzI5iGXp3XaHOmHGKufC9N7+mYVrbLwJlyiA3KkQ3m7F8StY21Sdi09fYVdw0vuhnMHsHUXaMPZad0Rg3kbZL9BZEeHpdWsvX+2+hTVhQMxlueUQLyhLm6MUUdlhIV2ezleH09LTkf0fifI+GZbCWRPB/DNCGly/q5wcOYcKcLu083kBOEgLNmvVATvmONkabAg/TfFMMSjqVYAv4s8K2NIMPb7J6IfNaO1jE6wJCxehX9Gju2n8pX4Ze2ZmbuNV4MpBxGDJvzD1Q7yJI8JReswnl610WyLSFEWFn7OmKzYamtlJ4jlierRAKrJOrI/SOZU3EQ04lfEnOkmvn151EC2dvhf5WQTk8HAVglqzTPNpZaPNh+wCY0PQI6IADrPmJKUgW/KtfvkhQxHughc+HI1nMc3flDaUX0dlgsR+KR08W1xKJA4m0YX8T97/RoKbFp9cFbRO+8mFoDwMlTU4jXl+8AAzT9Fv8qQ0nV1WzPHCIYWdkQyOZXKP4Q71TXZ+bETM+SwlT500FpC5+vpujHGhyfMe++/4jRvbRXM4IrK2z88TOa6tagCZO8HcPZNSOP6hvPjBW4vRsBIr9yig2dETln5CNnF2He3W7M2NpiZ66GedcFFX7VaBQagNqg6J8mxrHeKgRZ5Ht2OOH46/ses6QlO2IAbYpUGsTyHkK+8mmVAL3d/0UHstJyXKNnp8/19eVt9wQ90797ml59ihRe7+mwvfXB5d+JKL5kYD4kKPFuAIQc2ttRnUseG5+1vpJrcsoNsu38TTdQgI8vmSbfo/2ZL+NVvgiGPDU0vBrxzOZi/Jyc0EsR79Wb4LDlNipbMyN81BhHqbL9TYyHbV8nbsL3a4XtKjCaKgbeb5t11x0nNGkLFv/vJuWohf8qYQVMOdznber80p4vTFTL+QK/6zIBXvC9HPI/G3EUmU1m8eSHrnho+7KaAi8NnZXlanXhSMsHmzNTzC5rtqvXJX0DTV6lrsrVsG1n4/zMEWSMaGwVxoMc0+S5YZ1//GFPD+u5MFesI2buDbjWD9fYH/QVuUPrbclOqyE4bXyW7M/04yF6B3glC64YmYKp3ynBPsKYzsCrKHefMSXN8pmwfDYHAyUZMox3zWFwzrkTLT+p2nKgwAA6dfRoNXInVUOij0JgXOAX/+a5V7AW59yZNiFRxjakT6DxZ4zM5Pc/GlHTVJ9+2wS9aAGoMaCF5osUVGpHgB3dausyvFJwmVLauciIYDS6zaatTWJ1SQln89uNxKGzuo5PcHsVrCRMaFs9ko8j0Wx1f5q/kimq6cdnU+uPglW8nX9vsOx0iFe5HcywSJ7q3173I0HzRMXd2i4smDvbjfZVI8D8YVldWlfa21cwzhaKyM47xbiwylPGWQQD2bTRcW9ADmh5s4trgaoFDJhe3vqXkVcgFPAzKSNjdj+MFI6XpfSz1nB7aVLRhC0VZ5hYBlAS78hTko3OKRkQ3Weq1VqR8txwQwGDdiP+eZs3XSaBMVsIOGe6sBOzzPqggCxMBUXvD3jrryHfN9wahfKqmwVBI1fKeTA+h43kSpyW1XPIFlVQ2GzOE+MjptfePD+uoAKbjj8A7v3ID13gIkkbGVp7sgq9OQ0GCGIs4ACh1wkiAiE0+jw4WYFLlvGZEAhNOe0f8iuR4mJ0swwz9prGumj/6AYWhEAMqS8WzFmK2LoLFWfiTVWyIRYjriIs1RfPP/GPDgUTuPvPMgwFxbrOJOSrLOBIjz0knBymjBKB7xx7hFvy7KYBHh8LHyMVzwfKT7FWr0ObUb9FPbOd3+BL52UlqQ8JyTPDZmiHjokhmvQlfckmM5ijBD1t4jJXrl4Zxfl7ihbte0iqhIMLFBltTTfmlr8IoIfIim9rnDI2kzeY4w7XSa89XnfA3qqDJM+MhBAAYsblMUDm4gNGa6sw76OLzCgUpoi5RViB1Pp40KY6WN90LMVpS4nAfIvT9sEKUr27fmwv0YFM+KMcF0jIH1xyJOkFaMS68j5zkkxpjxxzB24phX3PGNAo/I49B6xqoiuaS5rsBmRdFjY17Xg20fOZ/DkBtW2pWipPeK4Gp4sgeTMjm2SuaNpYbMle2oTxjJSbWRZOqrk9cvwgZ4ea4fmEQtxCkSTfBfIK6glbISZNHT9bLj4k7mIpf5Njp8h6O6ILHEQcj5TYbwyJs/CNjSpHhLb1PgRAfKcMi89Cx6i2m6daja2CexhHWAkRXNHiFaPMOdGPUw4XI6KvjJ9/PHAVsfNGVw25eRLIJ7leERxgOIVF9YwYjcdKWGO2ZbRdH74u3raWUQoKsJcDSiWL2TWqWldpOJc4FNzr3mS3LWnYuquWawWQGheN95l8oKuKKvloLzgWJSHeiPugUYwGyR1JbT+1IsvrRuSRRH7Dy+NXvjKXB53gBC/K2233kX/6BwFmv51l/oDHk43lbLXrgEWiAUhiAC8NVQZqYmDOQMYCVUftvo0PSNFGewrq+dOcMWSmY7ttqtk/st0W+50HDLpIv0X6lwBL7wSZIdIN+4IVfqI01BHhzZBvMYgsvjbLLsvNQkY3qtoE2PKI5DzR0/pEBLhfvY/0uot7vgylv53iKzqef1yNWIGrieALMEgASS+H7gW9JTQ0UCRPnEJW6eSbR21ZrSPDQVg6DAKe0hSrDKE2VY95DRvwzr0U2YnGg3D/7Zq3aRzjSwhP0zYULhWE3CuN2umfDe2h5U+0KhOaLanjn6wPVXUYCmFqjA1AelQlp/uRkXBKTViWo3QS0/5Y+M2KFcZcd+NCZ9jDUdboie3TfJKC0HQH03Un6+VYXNccImXvfl6JiB0G8yw+Mq7IMVN+FZtaZ2/EqN1DXDaUxkGCXDtIfyLlt9d+zWlNAuChjWUF57rGhz5x6vKjNQD1MsednZ2i/kVO8aofUsK3EqY0qp3AowSiKQFKjJ6YmldXYR4FdkA4QnDqJVtsTKZlqn+sbqu9omY0EkpbT0CSmPaijLfpXrfejj8Q4rizOkdd3/887Kq7wnLu6lgbKK+FQ2RqUPxnzsFfDZn2erS98pgAcSXXAct8uAHnwaDmmvqADhKET4AFyMaOziLudMAtn/xK8tEzlqOUp3FTFloZR32W+Dqg6ipCeGe4xApmSa/1YU/PgoTkvf25C14RU2IX0cvnILpPnatitPnr7CPQ7UvFwWSFNPfQzkeYJ68gujaEavORpojA9IkF4pgYFA1436joITZUD45pQ/sMc0YoKzM5HQUv0zbQ1W6UqKfhAQX4b2iKWhA8j18hHHjkAA5KK+NZoBvdiwc3wRQdRsW7lPEi1j8a1QAdtfpTXk3WIK0xlFj09HrB4m8qPn05TZLM+2ecF+Yj58dqif4ELKQRyADoD/YOkUTgIFmwhkj/mN/Wr6rzKAyCfWxQH2YE46FlU6TQxTmwWziDXgxsebudJAnFQl2qF1z3O/RwK689gyiDNjrNBAiyrlWp1ELZGpGcN8HggsqrJziVxlA9ALmXG43nUEWw1MB1TibVReli7FZh61uj36rR3fj1l70SHR7u+ZBCdthcu+7xKghDesv7eKRy1jMXbXyNGj/eUNxO6CKYRAPPSnSnbReI/aOEuY3TQddQBkiN92igxwwGgSYcxojFsqpTjrnH5hl1haOEMUdw5EsLmJZLC7ivs3UvK4bgkdpvADVu+Oop2WepkCFqGoNSgk34Ligr9wuNz3gibEv6cOlq9kJyvzdtA3y+Qsi4wUkttyqV8qjjDPbmAubAeUoojiNyVqHvJJB57/uUroAyWp5CLFgtyve/YGWk4Y2sFtyuFuYMRvhJ3z3hZpNkNduIUTXhKMZSwz8F6LHH+L2p4AV+HYI8cfDm0vW2mpwgIP3xyR1IG0J99kjBab7eJhYMy2PrV3DyWxgFcJ1CZSReSByh2Du0VhgDUsxq5Q1Agdat5DcLogp8imqkt7oYI3De/pmsqBhF+5R/B3TLcoIpUkdk/PIMRdxNg55C5uxFEhoyS1hyiYFJvxw7j5rh/P6Wu5XWKv1Fs00I7CPW785P9lhBzWTrs+dwLfHFASMwTzl0j0E04QjZENUDsrpDrtb7eJMgiSEYvm/Yg1KemEpNvon+qf1m7Ip5CTCIuDBKdLEV5eqjsuoWGOwml1uCeojtML2Lyy845WH2wSpCotW9L/FAkEKG9IBHpXHEO1KsgI390HXRznGv0N35jfybtaVJaZS7/0ohKVugndi8aszzvckAmvIZcsLnB7mUiWCK75yWwAD7lbnnYs9iYewoxIU43U5Px55HEae+OFXDlYglqwUyxUsfK/6Hci1FfBEux2qrPvnk4PdNCZ94XljUj2+6JXDt84gIPbC22pwT1idcbeVmlRJCvRMC8iw89Bal7VXpCr76Z1blRRHttR8RJBXN6cv/U2hancTYcXvRaK9DZdlIgSjnvVOLGnWChUkWDIdeNNU1MfgXZoU6g6eGXnQPagqmNplAUlHotwGD/N/x0MS6hPToFTpebyxInL80nlCRW//hH7JWGXvi5/966Qg84Y8X6mcdd+IQ6GPdb9chXLZ3VobSa7FSwSR65KdpRuxmG1l4Hogd5MXz9s5FPrLDVxsZTER17Ml+muOcSTLWsu9FUZVkIYkMDQu2Y3mOA54cTi/4SbC18c+ym30+oXqT4dUkCEaRllwj8VKl88DuLkwCIUPIdUun6KtfUQ3Deacz/dfrdy00Q3RM5EXlP0ndYEzXyGcQ8P6BH/6/hnk9NXvgm3jX51NA6GLhuJx2x2WcTcQdKDtiiPLwYsnF0sXZBxw2SZzgdP0BbC/Sj/xiSykayRORUkPUo8KAxHlBkp+xOpmQWYlCG2GwXX4a3p2tmS6cd41IthjML7M69J9qpylUARvyOlEKnqlXEQbRvH4/k52iAGxZp6G6Byx2paE/kbo9DFjMAWJqtXL3stdl+L/0SIDtr0wWZMzjsvbTzjoUV3DcVqQW28jLm9Yd5HlsvrZcTzoGlHI5xSIctP1avH8Ujy74avr6m/5LITFxCRzZkPqVyVwWguXOQ6GEdKUM6lI48Fy8E5cX0MhtzZKxF9stt3xMK3hVnCNqZ4lnGb5vAvdtY38ocH/dQB/1XZgyC8f85x/9bAQSfHfOerdHZbWmEnsA3CSxfhABLUI+MJ7CymORdgrQXQXJaaK/zeR2U2betzw6dZf4sdxbTgIMgtFfAdUHu7tTicyDjI1YYywdZtgyKGRVsTWn8YjM3aEb8Y6nKi1ag5f87ViNqo/9EM8Axc2MTU1awHHxF+GEaJCAlL+UeCu438eP5MVKLzSfz/aoEv+rA3RU6ku3CsP1LV3gI5XQyv8v6GR1gDg9nrTbdNNijmavMGnt+fhYLUfDoY8Eb9HuthgiDukC9wYVx+VtGlKIVoReG3FV/ooL5RQXcZrfn+YdxxmES5sQR2q3pw/wJde+iU0dYHrttt76v/ZgjveNmSBpl9c/3IezUwBzs+4rDicDPkB1UIKkaMcKI3/1SDgJXH56fek5NP/FP8OWs2Yx4EhwD5/lUEDTWeDdZMVQCLWbJ/VMqQo78B7jHbrqSrxytMykAMi5DzQ6zmWKNUJ0MauLRmPm/jB5iawedL8X8bGfmrnlI20FhkVRIMUbujaA6nWO8J9nIC7pEE8HkqOeCCriTuNAxYLfes/cCPvH8qKoel1jq5+p1lFnxRb89qj1CbpETTLermEoQJRl1SU9AhqKN6wAbMcfgiyWRoFivOYM9FrlH5J0LQ2O4b+pwmMybXR8Fc8O9DwOQgH8fzmDXPswCn+HHQY6FqUgGEWsCw6uKmnaiF1krapLp90Uva714KWb2EXN5+F+BoxQaHY9XOO4sTly/ri5AhIXsNEjGiBI6AXZwK+oNpsdhJoe/6uVg2uOy0AZd2zg6QIlRj1f1uxNOHBsVPiT09CbXsYUigJzCTuJEIqzHPxQo9+GGEzjkkooSDfPwvKkJ3K3fGsaJg578h4kby1vA/Dtx2mtl7y9SJfhVe/QoiMbkZfQpTEnwpJd7a877Rl5bp51LKlDv4FnBd8gQ7BqGCDoZgzp+jB+tD+G2CJhdeXhK801/nnuFqT0WBBWJB6BbVK9PMVhYs6qAuiHTXaAGd10WZVKKj7nDLsYuQPOYBPUQoH49tj3F1HzCczgfJrHbwNkwetCBJ6IcfeVDP1UJN/uMCr8ngvInwtArdRB7anoDv9+bx9OWRQGjwhnLlDBz1C9kar5A/ef9mxKNAuhIM/ClEw0Du5Iq84i0OYHVCMYVGN64jHKpEpvF9sy3kRNfdssYvW4Mq/L4gxOSmBi5cK2RrHqLSV5g7yOMX7zR6GS5LXkDwc7OWjmpxE0SMhCaf4yaAW0uBKZnBPobton7yj+mDvpX2B7HdNfdw+MO1ebvKe60umC48390bJzsOrpLGbF5ogwhf9HLLHZAPVlrkK1urK1QVNABZQmgF4owAI5YLY/ln3ouCnh0IVUZTteNrvmocLMnzgjVkQn0TSAbvwEhSDbatVGXwg1dZqHwVwsp0kvoVdobXMg14tK7QbZzNB0eHuMc3erfaL/XjkTb3PNHVPwxbry74lgnb2X61kf3hIp2NAgUMNySgWPWYyXsNaBTqFSHaLonkHFZRLZa5rGdWEVeijq+LWcC9hcgsVE0jzwczOg4fbywSXgTkKkBWMSSVtiPNg39rpZBoTTW0JFhFvXUFyBT1x//Hmac46CTnL13ktzgkDPbKHM1qyjlrfweeee8QjG4ZBJ7mPLLbJOnbX5+IAzZwKa3rfrFM3y8x8wE0IVtmsqgoS3ziFiwJM0MW01vc4v9oTw+eFQLZJtN/gms/JDjnB0LbHCP1/sFJtn4tzlwPGdFoMfUZdFHyT8EvHinQtW6rqyMm+HEmDCI+SijXn0tH5/nGgFnY8XlCagbX/V8Cm9jiB1zj03xkmQiEwREMf8826R8d1TNLKQliNlUusDmHSlOsUqrSfixDwa+DpE2yyaQnCyjX6w0rAQIrU2m/tbYWMPtXhRccI54BR4fZ2P1Y0iC6VAKDID+qANOU4eQ4NTbVF4mNEJciJfd9vI4KHx6oIxSe5QGqmxORZTv2P9KqYwjixoB9oBSBh9uxgMXmidgQj39OSI/+1q4KKeW7brIkxjXs8jmEmxwSCJxpzYmXzOkPtOTWGIUjzkNu7i//0Irgo5g65eGbI58S8CGMaGNRSJqxauhWUZjCvVXv+e3srY8NDuW4WFRBiJLVKGh52q1RFptb80937pJ6u3kqUKkuYDudqOtwxzu56UveMmHMykpzK37nwqihaAItr2aB6gIiXYZqSJCXMKH8P/rJxKa42oK7Uq4wf6cmcL1LRZemuM4obuJJIdOoOXQmwvjkDNHHF7eFtkIqxrZ+geR7Il7DS0sEFOshAcW7XqhJiiJ/AmggbpCINlkqrKR630w+vuUUkNtolxQ5xHvP8PROKeEbU0+fr5e00LokM6EsgGVCG/WeIX4X0FrUr8OZX6XilblfhxeGi1rqaYjuJCrbOXN2NbtFN5c+YFe+DeMrKxtlOr36ipoAwLJj72kpAu211Y8sqOTUDLcIbZh9ZFVkruP3FDjzULf4met+/XB4SKZmSozKMKNUhFwZD6XyJCgxdw5oa9qFUGiCaUCIBsUgCVfVyZnw6jdLgqjtQ3blnv9lMvRjaZFEkK+MSeTBu+I2pwMTh/tRw60S1PD+CUV5O0NJgvFVWK7yUI+b614e0NfEwR3YBX5OR0d57KjQdxyaDxK8c0k5DWtOv0t/Bi5DWG0jOyV41SgE85I+MAqvCLYcT2lDHkpxx1t3pY++1hPkqsZWJr5ruTZwMnww56qIB/XnxO5voSL8lZeyN+m0ZSyYnRr/On40SjModb7WZaFV6SBPA4ODtY3izn64kk6G3RsyhumDyW8QRBDzgH4qcoeO5sc15zmBQRSabO4E+FP/hfM+CWmvVGRs5i+zLwEgYOLb+OX3jorTSg8j9rRgLvU1RtxYGyOow3W3a4Z2dyI3Jg3BreWX6HqTzG6w4BYmuURRH6xyITIRgPbu5JxNqKDvJmBXqHfRY0u2IWyOr3+nCG2/TXb5becsQe4as8DwgZDecCJYq2B6MwyecPaeiwSnQq60Sg9DE1+oDyl6calOOT0gZaRqdEwsyx/a/NXxR9blbbCrXFNhX9i09JHFAKWSgbzbe/10P0GWtYcJ85Jn34PNd7/XZdeXTeBrb/wfM+M3ggt4m3A++kukvX0+9laRhmGk7seEFMqHPmUsF4ImpRIyoamOnpN6MMRg+N3D0atB550op7ZZe2LDZhjJDWolT7d9XodX8fPifGoKkvWvOvUeeT7KjaI/oB7vsYe97HaMp+RZzxy+aS55mX9UuZARjJQKI792rWA8ivyr6PUwGJGseGE6xV8HX7mshNml96oVghzmWyj+rWfvbD+jf3UfAKx49HPOTznRBcaUZ80jnscZdfagiRRekGkRU6lI4TilhhjgCtmX8WYD6U8HLG5XHqoYWU5hgiI5fYBjj4Cs6O+uCAjF84Kgb3EtxU9La4Ie9yLKURZy9vivHy+XS7UIuSRC0Wzo2hK8/Yz9gcBfJJxwPrz3NVImKLu8iHvkyqiexoBAypbUyRi48y9yXKD9JDBoHOYfPsqBCt07o9pnz8lXJXAKW6P52QmvboK6yE505ilB9Cb1Foxq+FM9g2TE7gmGpUgHnP9OkMJBblD7wRcOo9jZxVgehTYHyaTSInMgeEah+h9NtdStoLK5DpRsaXL2Ww6gU11oE4oN2y2o6/EN/M93tODd++eC+GhBEaPAQCmGK4GY7yti6OGQ3dV6NISr94iv5d0nxy98bozxFx+4PLJCCF+xUk8tTVYdAACQqY/u6knNW/ttMM357/QDd1kFZwABtOH3Mc3FXcKAiWdgX67kcWu5g7040N93hbTy4SEQEwnOxvZAFC76fO4TgEBe5zXpceGENOCaFWxg4TIDGs+SjJg132btLNnvd74M5WwUgsRKjppxiRDpTVAOeu4/1zix7twTm2dVQ3zWgk9EniX8Fbf3jryFN7IHhkxjmvehT5RMzlwuBOILWxevijFb41ZT598Wpsot92aU6Ml0KQECyp6e7wZ2Zzy2w39egdG1Dpi8SVDEqdCZxUEKBJljck1cQGq/sJk+UJi1Kak7pk65nYQvrwC0eOMxLrVY7NvfZW00YbsVLFj0X3qE8GHR2SCAFpcnpOVyzC3VkBi1AzHFZ+4b1reOU7m1OpVSu0/1zamUkzhRsnAWNjU6jRyPrjoKigYDHjQQkoBmFU1e+qnGnOFtKjUwND9fvBn/LTv2UrNYRrzbPFvyzzN9P84jQvuyvNtPA4wHc4V+cZmHheONemPN8Ddaksmn3sSIFKzBhaOWMxeS/KRvmfhJQDx9Hfz0kJqULnrEmR2ctkvH1PufwCiJWNS/dbn+HR+BpgXtHOUaL8d9L4KyHv5SfeOSzGEOPq/aTUCBtZIsL8wvP0MUdXyyp6JWVQv7PidrCSC2RLVt/BRIuPokqySmFY2IaXD82+awUtZW7ztzB0hcQ/TXM2glbs0GHHpeGcxUamNgIvAFfvEp/PuijHwv9OBv86Q0Xj9nagAVqZXodSyv18nWJh9zOAOVilThrNrC4TZrhCP4N6iMrQlpL4fXOeZIU5BUn0ENpPWB62/jp4KgdnIKyPVEcnLoH93DTBjb2zOeJzvoqAAd+GBaElkeGzJWt7Q42LP0YSM3rrQhDkMNs9ELSQsGOaM/zj4uQ2PHUc9ofHJLvlQYeBLYL95i6AVSlCJGNXoFfDxk0N6P9FBlcp/bAPU2qpSEXzmi/PSEVMQ7BnvRJeUjhyJB+AEImvUdkl3NhRvd32teIZIO/tZRgRRm44psvYWxWLHCEdn71cpqwIyGotiR1+AZNvCsPPGWUg9joM1Q1DEd1kJVptZws1tAL41BotDuFZXxHG/l6x7GeXcAsJNC1K9XMyA7C+CFFy5uPm+OKXtw0DEmtjLCq8bciNX315hoKZQxIeib7MpYmjASuzr1/4kHLFu3efWoka7kcGjfbqxWXlWDAhOCP9wgmk9IJ1wtZKTG9z6GMKvdOwNfmFzqhGD9qytRKzKPIMplGrt4UJCzSt8fIgGKwSKqlO3QT2YJk0Semcan8owyQ6unjbnMCuvRw4FkC0MDJIcgRNSTcOa3YDPfJpYJukGtslZUPcR9n+uSpIYS08kzp07OPyxSnh4CabKjZjnOzyP+vzeo1Qcabqco5FvWfJcgbY1WSrCy3xgKdvOHJmw008RO/Zd9QevXw59o6tVQ3WxX4DKlfBGJ7noA/Dihc3BOxFnjINaCTyzd/iweCxanC0x1GXJRdx4myeciKjb+Gd5gyOWsiZpnxzKSRdEHMNrNGx+dSgDaINf+KAegKqhwlNr6X2d+xaZ1F/hwMAe37lVB7M+d4v+8Y8xsHJnowzImWktDeR+xGvDPSIBvrMuVDOKXuo+80Q3db+a8SpezigjqzdXs5d8QkWlrCjtOWqCapgOVlZUXzVdBCpdivftxLJYRucK5aL5QIqge4bGd70kyd1HhtaV6QNvz8P1pUWpsA+TkCxcF+0sA+gRsyfldRudB4s9PsLkvLfqXoYVCZBa4VvvL0/oTUrtyAPpf1fU3Y3EuOkpkduhn6Xkvm6HLCVObMkwslORiWpsUQnseKKrQMUG6rO14dyit245gNVI3NuG//yDRvaBhdmBaoehp0/+jM05kZjeIvuroo7AX54Uh12vVAlJRiFxYzCzoBT5+usKtG0qkfD6+W5Aib2i+sjRtGSX1sp8ijRCo8wmuorfw9QMfw0m8QWkjNwejwHioP/k1lz7vN06Gtc69nhXoWC/pWOEcO/2W4z/R9Dc83b+DJm9ZkMacsoCZoIiYbFbEZkNDfOYNWD21vzrUKOk3P6zIS2DK6t2UvC18e/HaYr0gK5P/B2w0c16AzzWsdQk7C2J5se4cgonBsWKMWP+DF/kpqpM9FDVKXSOg3BGTjH5WrOlpA62fVkOjV+uCoxLyN5cvn79lV0kohj8y0+Posk++hn6WPcnMNFbEghCVuI/S35CLcdEGE91aL8Aqj4Q6RpSL/7hT7aN85LFEnwNXfYaBBA7Ca7KV/L/T3NwhHB+dg3umeSb92cORYJfK9D5/9ygxf9rx+bDFLmp28xU9DYdDW0jhSMGjCvr6w3KKk1i1DF+AIorvt7ODYUCCkD21La1rlHaEsDedHdfadoCBKDTxF8O5qLzW6VIYJjF58Vgufr/6K/Z8ZquEgZc9FWbyFQmUTmY53UjdGva8BkOkNWTL3UvT61Jm+3cEHcADuaACTZBmQyR8u3U0Ne6GgfmVynT2P8gpJl+0YeRXUd+l/dms/ynulIUXmxxVjuRi8ccrlyANv/TUfdp7XJYZq+dpFKdBWFTF0G90GEcWR6MQkiQr1sKV9Sd7dOm1+zeXHhs7Pe8JU7B2jnbIceByfuxGbm/WtDOBMXdEHcIMvlcmTnINpXiNlceVoyKqebdZ1ApH2bc195fS0YadCuGiVRYEJos8RssXMFcKFXc3B1V6PCEhEwZO4WkFrleBoPQNYvAF5H9XUBwuhUU01FZoWo1eWizcTqN3YmdTHtJhdNQvAGuZp5LUhk9bV2mbx0oALiR1t9vvUBhNwDBwhIo9VaevFmvJ0CvXcAkaGAfXqnSlNtSFHOwlf6diJULTD2RzkXOO5m3j9aYKNCagXbrDiuVookTH03HkkrU4ulh6AaNbYDE/oLX0gjn/lq6nEmaJM6m5CY5qo13lDvsKKNnirEaPlwQhv6F6Psg6CkcK4YACMELnoGwiIpUGrP1cfWRYXKcsk2xdAQexGxMYTDZoQc4XQ2ZuQk+Wqh/dU7YBFt0dtCqCE4h7ptBUe5nms2mcjDHPnOU32MVyWy/CWzNk7yi4bJhXW2ixdHYSVoON3O+yBkQVenzbZzjhUmG8Dj1rE3uUSPAPOViWNHRvmxzwT0QWVgsdWdf82siCsIfoekoBXlzDvHiiAlsy/yebQJqH9HPGjnUc5u3npOVa3AWHrU4skazIf8XV0QdOtuMNdQx4KihLIR2qceN3ZSfVsf3djFDQgGzO2tYF1GIs1P3K/IikmuryYIeTe5F1LgRH0DJXr5y9gunqeW9firLnK02ZOwHL/EorcsWluH6PwazN7aQjI7JObLvZTzcviMi5wmEGD9cE2zTqS7US+wMTE5Ds+ILYoBU1NJME+uN3uRMZIAY5fse3ISqEvfk1DMhJmZb0GsUqq5TJeSpPLmBGOjhqGzDZfkiJ3CG+30GQR0nK7b5AlQwgiCiPmxGl4RlwtLVL2un+dBsigeFZ5JJgRdvlmEz7pUgtibAm+GylvWUFVjjH4aE1EWdWrlo7Qd05Q2qCVPB5N/HqZyuSyE7CetnRggywJO1TtmDjta3GiH5wTI3Xi30E2VFXA2iD0JA/d9ajWU1dhFGNCT5rrzwg8jwFw2IXm2l59bKMHa5/9SH/26tY9633VeKhttB5BUNJBAcwVSTBANBSPI96X17UJea5BICgVHhSIZmp6V1F4M95iwjSAL7Ls9YSgSBnqSGX0/d2+4jWrdwXX5imVJX3TseQbgLDtZqSL3BgmIdQdZZQvVT6RMKR2EWo+zhlueu8ijVxwW/K9hw8oIdrIZWl0eLbzQj+uWM1QflzpzJjPn1rCw5wK8pewnLezvoM4mkh7lXtk6tN8u0cBBDaIVpCKicWTNuKBQyJL7X/izRr1rdhL3hlKCTdzc8pcC9N6dj4cUglJPFGagtT/1FxR2Jrlj+W5z3e4ctqSl6KTPerKollalMe+p1ILtk24f9r8vg7KYe9DZLIURmbprIat9adAHDvwpDyZ/zC/NbDocIR0hp4gzlcsmIGQqQQqGoZGM0CeXIdutTb63uQPu5HyIlqu53VtnsY7OYoZ6qL0AMC+94U+yQvoWLzQL9fED42IkIXVjCukMYcAtt0wOlAhmnkAMUKu9vFUnAF0w4tY6o7h2HUBvG3wjWUQSB/qYGThFlbPAAYPDxAkNV6+ZozvprMZDO+Afj6ojcYByQs/N5o8jB6IJs+1BMe9OCNC70ffEJNPYBXZYHtoI08ZkB1vBD/HFxQzXIrmSAvuNvmbuw4cVx2Z/r5O56ZV/lbIhTD2a8zw0Sxlk8mEEeZ/SW1Wvj8l0JJDDK4uiPWmM6Ga45xGH49fCqDQ7M24U8rRZu7mFdkOcBkusyxShqrBoEhQsHT/hwfpXuFJ3rQ3dXBf7gn77cS0bVJ6zH74Mv2jXSErA1iM6s0Sz5ZbRDZTl1ItP1TaC2VH+mxcR1g0Q2dfSJj2aMLP3GHRZ2xKOgkAMhpBSdr/q9+fqlQWDII3dm7zF/ZTzn1SxGuKhuw+GTBcRf5Y7RdCZs4hS+1xTb5F6L+QgX/BMUc22BZxBxtnF51JOocqZ541M9AC2/3es7qTDzuk2EErM1cqyByp3+ZHk9jJ4gRoSdeG7zsqyfe600QysEEimTIOsrKewjY4CClvqWbHQ6wu1/ztxPmM+lCfKwVkumNaNGxi7sg/zZBJ5AERXC+s2RzZAdtbw6Mc8eSngkATE0ih1pjKmavCaHbTrDxhzxzBL1QajsgBZUxR1NHwlBJSMdxLVmnH4G2O55C3BS9rmAxS8XhoQUHtv7BsOt6lc3QOeOIG08YzPTB+qjlGv+KfjyNPEpsGdvccm7OHg9+eIAoxicr0pzcqz3v0OUCUnbkZy1py6MV+DVht22le6VJ/pP4CFDCMOFTUm2McQxWDgyXUp3tiTvgpmbQTm8TAaosyTyfowcUfON5O5DQ1L/ZBxkB5ha3BQyPxdWOB0Ni45AFaNQKINnX6hA/CJG/hNICqSkzBRKjc1pYswRaY7KAV8NzSyE2cgEMUX1KnUWBLvGKMeK9kQDAKgrVXiGijCfCjBYWFYNRfcjhk+Ro2sbwrUILygGc38r/ZIbAcIUef2o2vrwj/zL5RDnOvqTvCrr6ZQb8WlVJMcjohafMMy3NyTMQjNKyq+A0i9+chy+R7PvsD4yDYlFg2t6gAMku0xVxYE0NYLfETntZt2H4tiMhAlq4sBUwaNHj3Tc3MPaobU9dM6e1l9+SPeAwO6VXJWIM2ZIRtyMlSpsnfNnIFbB8RF2SEGyBoe8unighXO5hyokDLtBnmbCoGar4koS3+h+Gz5IJxhL9ylh9csPtcQYWsc0AZJ7luOTNmt+SZFgBx7GMMJS+5rOi0Q5RSCW1GjZi9gWQ3N66j2Eq/TVo86LwVxwRrrfh51Qs/TOPxoPh9wTAmJK/jxzjM6njZFg9MPTXEFAKfNhXebcGu6NrUoDZUm0M3PVVN8a+savTdA0VB4T9t7YhRNa9h6xCwopNjxE0ZEQl5wgdnWFPuVmUlPvV3oq5nWtGRgPUPgA1ZqIvhXPpca3QJdBDNL3Ujs5YC4Rnz7eCDInv9uRR06X8iHo+Ru9tiwb1px+EdCzoVwUxNFP1xdROcURbF2zMZIffn81pCqV/TXmGy2WHYXvA/u/+xpK2eQFpUAeNEDOg7cf/lgnvIMpCz7piPPII9kYy1GgxUqB5dxNHiZmHafaNTbWlBWmCZTFxsrfULMUx4jK2uuT6XAe8lYMkaMHIgX9vzpjtFDm5mgOhEoe7lbE+VSnnUoMUT60Ac0NJdqzgg5igXTzgrDKpyJ8cfMAlU51qAAAA=",
+        desc:     "Lean chicken breast, whole wheat noodles, and fresh vegetables tossed in a light garlic-ginger sauce for a high-protein, healthier take on restaurant-style noodles.",
+        time:     "35 min",
+        servings: "4",
+        calories: "390",
+        ingredients: [
+          "8 oz whole wheat noodles",
+          "1 lb skinless chicken breast, sliced thin",
+          "1 cup broccoli florets",
+          "1 cup carrots, julienned",
+          "½ cup bell peppers, sliced",
+          "2 cloves garlic, minced",
+          "1 tsp grated ginger",
+          "2 tbsp low-sodium soy sauce",
+          "1 tbsp sesame oil",
+          "1 tbsp olive oil",
+          "1 tsp honey",
+          "Green onions and sesame seeds for garnish",
+        ],
+        steps: [
+          "Cook the whole wheat noodles according to package directions, drain, and set aside.",
+          "Heat olive oil in a large pan over medium-high heat.",
+          "Add the sliced chicken breast and cook for 6–8 minutes, turning occasionally, until no longer pink and cooked through.",
+          "Push the chicken to one side, add garlic and ginger, and cook for 30 seconds until fragrant.",
+          "Add the broccoli, carrots, and bell peppers and stir-fry for 4–5 minutes until tender-crisp.",
+          "Whisk together the soy sauce, sesame oil, and honey in a small bowl.",
+          "Add the cooked noodles and sauce to the pan and toss everything together well.",
+          "Cook for 1–2 more minutes until heated through.",
+          "Garnish with sliced green onions and sesame seeds before serving.",
+        ],
+        tip: "Squeeze fresh lime juice over the noodles just before serving for a bright citrus lift without adding many calories. Marinating the chicken in a little soy sauce and ginger for 15 minutes before cooking adds extra depth of flavour.",
+        whyHealthier: [
+          "Lean chicken breast provides 34g of high-quality protein per serving, making this a genuinely filling and muscle-supporting meal.",
+          "Whole wheat noodles replace refined white noodles, delivering more fibre and a lower glycaemic index for sustained energy.",
+          "Broccoli, carrots, and bell peppers contribute vitamins A, C, and K, along with antioxidants and additional fibre.",
+          "Just 1 tbsp of olive oil keeps the dish light, replacing the heavy oil quantities used in traditional takeout versions.",
+          "Low-sodium soy sauce significantly reduces the sodium content without losing the savoury depth you expect.",
+        ],
+        comparison: [
+          ["White refined noodles", "Whole wheat noodles — more fibre and nutrients"],
+          ["Fried or breaded chicken", "Lean skinless chicken breast — low in saturated fat"],
+          ["Heavy oil for cooking", "Just 1 tbsp olive oil"],
+          ["High-sodium sauce", "Low-sodium soy sauce"],
+          ["Few vegetables or none", "Broccoli, carrots, and bell peppers"],
+          ["~500+ calories per serving", "~390 calories per serving"],
+        ],
+      },
+
+      {
+        title:    "Berry Smoothie Bowl",
+        category: "breakfast",
+        emoji:    null,
+        image:    "https://commons.wikimedia.org/wiki/Special:FilePath/Smoothie_bowl.jpg",
+        desc:     "A thick, spoonable smoothie blended with frozen berries and banana, then piled high with fresh fruit, seeds, and granola — breakfast that eats like dessert.",
+        time:     "10 min",
+        servings: "1",
+        calories: "310",
+        ingredients: [
+          "1 cup frozen mixed berries",
+          "1 frozen banana",
+          "½ cup plain Greek yogurt",
+          "¼ cup milk of choice (add more to blend)",
+          "Toppings: fresh berries, sliced banana, granola, chia seeds, and a drizzle of honey",
+        ],
+        steps: [
+          "Add the frozen berries, frozen banana, Greek yogurt, and milk to a blender.",
+          "Blend on high, stopping to scrape down the sides, until thick and smooth. Keep it thicker than a drinkable smoothie so it holds toppings.",
+          "Add a splash more milk only if the blender struggles — you want a spoonable consistency.",
+          "Pour into a bowl and smooth the top with the back of a spoon.",
+          "Arrange fresh berries, sliced banana, granola, and chia seeds on top, then finish with a light drizzle of honey.",
+        ],
+        tip: "Freeze the banana in chunks the night before — it's what makes the base thick enough to eat with a spoon instead of a straw.",
+        whyHealthier: [
+          "Frozen fruit means no added sugar is needed — the natural sweetness does all the work.",
+          "Greek yogurt adds protein and probiotics to keep you full and support gut health.",
+          "Chia seeds contribute plant-based omega-3s and extra fibre.",
+          "Whole fruit toppings keep the fibre intact, unlike fruit juice.",
+          "Portioned into one bowl, it's naturally calorie-aware compared to café versions loaded with syrups.",
+        ],
+        comparison: [
+          ["Sugar-laden café smoothie bowls", "Sweetened only by fruit — no added syrups"],
+          ["Fruit juice bases (fibre stripped)", "Whole frozen fruit — fibre intact"],
+          ["Low-protein, quick to leave you hungry", "Greek yogurt adds staying-power protein"],
+          ["Oversized restaurant portions", "One controlled, balanced bowl"],
+        ],
+      },
+
+      {
+        title:    "Rainbow Quinoa Salad",
+        category: "lunch",
+        emoji:    null,
+        image:    "https://commons.wikimedia.org/wiki/Special:FilePath/Food-salad-healthy-colorful_(24242433051).jpg",
+        desc:     "A bright, protein-packed salad built on fluffy quinoa and a rainbow of crunchy vegetables, tossed in a simple lemon-olive oil dressing. Meal-prep friendly and endlessly customisable.",
+        time:     "25 min",
+        servings: "4",
+        calories: "280",
+        ingredients: [
+          "1 cup quinoa, rinsed",
+          "2 cups water or low-sodium vegetable broth",
+          "1 cup cherry tomatoes, halved",
+          "1 cucumber, diced",
+          "1 bell pepper (any colour), diced",
+          "½ cup red onion, finely chopped",
+          "1 can (15 oz) chickpeas, drained and rinsed",
+          "¼ cup fresh parsley, chopped",
+          "3 tbsp olive oil",
+          "Juice of 1 lemon",
+          "Salt and pepper to taste",
+        ],
+        steps: [
+          "Combine the rinsed quinoa and water (or broth) in a pot. Bring to a boil, then reduce to a simmer, cover, and cook 15 minutes until the liquid is absorbed.",
+          "Fluff the cooked quinoa with a fork and let it cool for a few minutes.",
+          "While the quinoa cools, chop the tomatoes, cucumber, bell pepper, and red onion.",
+          "In a large bowl, combine the quinoa, chopped vegetables, chickpeas, and parsley.",
+          "Whisk together the olive oil, lemon juice, salt, and pepper to make the dressing.",
+          "Pour the dressing over the salad and toss until everything is evenly coated. Serve chilled or at room temperature.",
+        ],
+        tip: "This salad keeps beautifully for 3–4 days in the fridge — the flavours actually deepen overnight, making it perfect for meal prep.",
+        whyHealthier: [
+          "Quinoa is a complete plant protein, providing all nine essential amino acids.",
+          "Chickpeas add extra protein and fibre that keep you full for hours.",
+          "The rainbow of raw vegetables delivers vitamins A, C, K, and a wide range of antioxidants.",
+          "A light lemon-and-olive-oil dressing avoids the heavy mayonnaise and sugar of store-bought dressings.",
+          "It's naturally gluten-free and made entirely from whole ingredients.",
+        ],
+        comparison: [
+          ["Refined pasta or white-rice salads", "Whole-grain quinoa — complete protein and fibre"],
+          ["Creamy mayo-based dressings", "Light lemon and olive oil"],
+          ["Few vegetables", "A rainbow of fresh, raw vegetables"],
+          ["Low protein", "Quinoa plus chickpeas for lasting fullness"],
+          ["Often high in sodium and sugar", "Simple whole-food ingredients you control"],
+        ],
+      },
+
+      {
+        title:    "Creamy Lentil Dal",
+        category: "dinner",
+        emoji:    null,
+        image:    "https://commons.wikimedia.org/wiki/Special:FilePath/Tadka_Daal_(Indian_lentil_curry).jpg",
+        desc:     "A comforting bowl of red lentils simmered with tomatoes and warm spices, finished with a fragrant tempering of garlic and cumin. Rich, creamy, and completely plant-based.",
+        time:     "35 min",
+        servings: "4",
+        calories: "250",
+        ingredients: [
+          "1 cup red lentils (masoor dal), rinsed",
+          "3 cups water",
+          "1 onion, finely chopped",
+          "2 tomatoes, chopped",
+          "3 cloves garlic, minced",
+          "1 tsp fresh ginger, grated",
+          "1 tsp ground turmeric",
+          "1 tsp ground cumin",
+          "½ tsp chilli powder (optional)",
+          "2 tbsp olive oil or ghee",
+          "1 tsp cumin seeds",
+          "Fresh coriander and a squeeze of lemon to finish",
+          "Salt to taste",
+        ],
+        steps: [
+          "Add the rinsed lentils, water, and turmeric to a pot. Bring to a boil, then simmer for 15–20 minutes until the lentils are soft and break down.",
+          "In a separate pan, heat 1 tbsp of the oil and sauté the onion until golden.",
+          "Add the garlic and ginger and cook for 1 minute until fragrant.",
+          "Stir in the chopped tomatoes, ground cumin, and chilli powder. Cook until the tomatoes soften into a paste.",
+          "Pour the tomato-onion mixture into the cooked lentils, add salt, and stir. Simmer 5 more minutes to bring it together, adding water to reach your preferred consistency.",
+          "For the tempering, heat the remaining oil or ghee in a small pan, add the cumin seeds, and let them sizzle for a few seconds. Pour this over the dal.",
+          "Finish with fresh coriander and a squeeze of lemon. Serve with rice or whole wheat roti.",
+        ],
+        tip: "The tempering (tadka) at the end is what makes dal taste restaurant-quality — don't skip it. The sizzling spice-infused oil unlocks a whole layer of aroma.",
+        whyHealthier: [
+          "Red lentils are an excellent source of plant-based protein and fibre, with no cholesterol.",
+          "Lentils have a low glycaemic index, providing steady energy without a blood-sugar spike.",
+          "Turmeric, cumin, and ginger add anti-inflammatory compounds and deep flavour without extra calories.",
+          "Using olive oil (or just a small amount of ghee) keeps the dish light compared to cream-heavy versions.",
+          "It's naturally vegan, gluten-free, and rich in iron and folate.",
+        ],
+        comparison: [
+          ["Cream- and butter-heavy restaurant dals", "Light tempering — creamy from the lentils themselves"],
+          ["Meat-based mains high in saturated fat", "Plant protein with zero cholesterol"],
+          ["Refined side dishes", "Fibre-rich lentils that keep you full"],
+          ["Often very high in sodium", "Salt and spice you control at home"],
+          ["Blood-sugar spikes from refined carbs", "Low-GI lentils for steady energy"],
+        ],
+      },
+
+      {
+        title:    "Avocado Toast with Egg",
+        category: "breakfast",
+        emoji:    null,
+        image:    "https://commons.wikimedia.org/wiki/Special:FilePath/Skinny-Fried-Egg-and-Avocado-Toast-Perfect-breakfast_(35555668870).jpg",
+        desc:     "Creamy smashed avocado on hearty whole-grain toast, topped with a perfectly cooked egg. Five minutes to a breakfast that's balanced, filling, and genuinely satisfying.",
+        time:     "10 min",
+        servings: "1",
+        calories: "330",
+        ingredients: [
+          "1 slice whole-grain bread",
+          "½ ripe avocado",
+          "1 egg",
+          "Squeeze of lemon or lime juice",
+          "Pinch of salt and pepper",
+          "Optional: chilli flakes, everything-bagel seasoning, or fresh herbs",
+        ],
+        steps: [
+          "Toast the slice of whole-grain bread until golden and crisp.",
+          "Scoop the avocado into a bowl, add the lemon juice, salt, and pepper, and mash to your preferred texture.",
+          "Cook the egg to your liking — a fried egg with a runny yolk or a poached egg works beautifully.",
+          "Spread the smashed avocado evenly over the toast.",
+          "Top with the cooked egg and finish with chilli flakes, everything-bagel seasoning, or fresh herbs if using.",
+        ],
+        tip: "A little acid — lemon or lime — keeps the avocado bright green and lifts the whole flavour. Add it as you mash, not after.",
+        whyHealthier: [
+          "Avocado provides heart-healthy monounsaturated fats and potassium.",
+          "The egg adds high-quality complete protein to keep you full through the morning.",
+          "Whole-grain bread delivers more fibre and steadier energy than white toast.",
+          "Together, the fat, protein, and fibre make this a balanced meal that curbs mid-morning cravings.",
+          "It skips the butter, cream cheese, and sugary spreads of typical breakfast toasts.",
+        ],
+        comparison: [
+          ["White toast with butter or jam", "Whole-grain toast with healthy fats and protein"],
+          ["Sugary breakfast pastries", "Balanced fat, protein, and fibre"],
+          ["Low-protein, quick to leave you hungry", "Egg keeps you full for hours"],
+          ["Processed spreads", "Whole avocado — nothing refined"],
+        ],
+      },
+
+    ]; // ← ✏️ Add your recipe objects above this closing bracket.
+
+
+    /* ===========================================================
+       B. RECIPE RENDERER
+       Reads the RECIPES array and builds the HTML for the grid.
+       Also injects placeholder cards to always show at least 6.
+       ─── No edits needed below this line ─────────────────────
+    =========================================================== */
+
+    const PLACEHOLDER_COUNT = 6; // How many placeholder cards to show when there are no recipes
+
+    /** Build one placeholder card element */
+    function buildPlaceholderCard() {
+      const card = document.createElement('div');
+      card.className  = 'recipe-card placeholder';
+      card.dataset.category = 'all'; // Placeholders always pass any filter
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('role', 'button');
+      card.setAttribute('aria-label', 'Recipe coming soon');
+      card.innerHTML = `
+        <div class="placeholder-img">
+          <div class="placeholder-plus" aria-hidden="true">+</div>
+          <span class="placeholder-label">Recipe Coming Soon</span>
+        </div>
+        <div class="placeholder-body">
+          <div class="placeholder-title"></div>
+          <div class="placeholder-line"></div>
+          <div class="placeholder-line short"></div>
+          <div class="placeholder-meta">
+            <div class="placeholder-chip"></div>
+            <div class="placeholder-chip"></div>
+            <div class="placeholder-chip"></div>
+          </div>
+        </div>`;
+      return card;
+    }
+
+    /** Build one real recipe card element from a recipe object */
+    function buildRecipeCard(recipe, index) {
+      const card = document.createElement('div');
+      card.className = 'recipe-card';
+      card.dataset.category = recipe.category || 'all';
+      // Store the recipe index on the card so the modal can retrieve it
+      card.dataset.index = index;
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', `Open recipe: ${recipe.title}`);
+
+      // Image section:
+      // ✏️ If recipe.image is a path/URL, an <img> tag is used.
+      //    If recipe.image is null AND recipe.emoji is set, the emoji placeholder is shown.
+      //    If both are null/empty, the recipe title is shown as a styled banner.
+      const imageHTML = recipe.image
+        ? `<img
+             class="card-img"
+             src="${recipe.image}"
+             alt="${recipe.title}"
+             onerror="this.parentNode.innerHTML='<div class=\\'card-title-banner\\'><span>${recipe.title}</span></div>'"
+           />`
+        : recipe.emoji
+          ? `<div class="card-img-placeholder" aria-hidden="true">${recipe.emoji}</div>`
+          : `<div class="card-title-banner" aria-hidden="true"><span>${recipe.title}</span></div>`;
+
+      card.innerHTML = `
+        ${imageHTML}
+        <div class="card-body">
+          <span class="card-category">${recipe.category || ''}</span>
+          <h3 class="card-title">${recipe.title}</h3>
+          <p  class="card-desc">${recipe.desc || ''}</p>
+          <div class="card-meta">
+            ${recipe.time     ? `<span>⏱ ${recipe.time}</span>` : ''}
+            ${recipe.servings ? `<span>👤 ${recipe.servings}</span>` : ''}
+            ${recipe.calories ? `<span>🔥 ${recipe.calories} cal</span>` : ''}
+          </div>
+        </div>`;
+
+      // Click or Enter/Space key → open modal
+      card.addEventListener('click', () => openModal(index));
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(index); }
+      });
+
+      return card;
+    }
+
+    /** Main render function — called once on page load */
+    function renderRecipes() {
+      const grid = document.getElementById('recipe-grid');
+      grid.innerHTML = ''; // Clear grid before re-rendering
+
+      // 1. Render real recipe cards
+      RECIPES.forEach((recipe, i) => grid.appendChild(buildRecipeCard(recipe, i)));
+
+      // 2. Fill remaining slots with placeholder cards
+      //    (always show at least PLACEHOLDER_COUNT slots total)
+      const placeholdersNeeded = Math.max(0, PLACEHOLDER_COUNT - RECIPES.length);
+      for (let i = 0; i < placeholdersNeeded; i++) {
+        grid.appendChild(buildPlaceholderCard());
+      }
+
+      // 3. Re-apply the current search/filter so new cards behave correctly
+      filterRecipes();
+    }
+
+
+    /* ===========================================================
+       C. RECIPE MODAL
+       Reads from the RECIPES array by index and populates the
+       modal fields. No edits needed here.
+    =========================================================== */
+
+    function openModal(recipeIndex) {
+      const r = RECIPES[recipeIndex];
+      if (!r) return; // Safety check
+
+      // Header: real image or emoji fallback
+      const header = document.getElementById('modal-header');
+      if (r.image) {
+        // ✏️ IMAGE PATH: r.image comes directly from your recipe object.
+        //    Make sure the path or URL is correct.
+        header.innerHTML = `<img class="modal-img" src="${r.image}" alt="${r.title}" onerror="this.outerHTML='<div class=\\'modal-img-emoji\\'>${r.emoji || '🍽️'}</div>'" />`;
+      } else {
+        header.innerHTML = `<div class="modal-img-emoji" aria-hidden="true">${r.emoji || '🍽️'}</div>`;
+      }
+
+      // Text fields
+      document.getElementById('modal-category').textContent = r.category || '';
+      document.getElementById('modal-title').textContent    = r.title    || 'Untitled Recipe';
+      document.getElementById('modal-desc').textContent     = r.desc     || '';
+      document.getElementById('modal-time').textContent     = r.time     || '—';
+      document.getElementById('modal-servings').textContent = r.servings || '—';
+      document.getElementById('modal-calories').textContent = r.calories ? r.calories + ' cal' : '—';
+
+      // Ingredients list
+      const ingEl = document.getElementById('modal-ingredients-list');
+      ingEl.innerHTML = (r.ingredients || [])
+        .map(item => `<div class="modal-ingredient">${item}</div>`)
+        .join('');
+
+      // Steps list
+      const stepsEl = document.getElementById('modal-steps-list');
+      stepsEl.innerHTML = (r.steps || [])
+        .map(step => `<li>${step}</li>`)
+        .join('');
+
+      // Tip (hidden if null or empty)
+      const tipEl = document.getElementById('modal-tip');
+      if (r.tip) {
+        document.getElementById('modal-tip-text').textContent = r.tip;
+        tipEl.style.display = '';
+      } else {
+        tipEl.style.display = 'none';
+      }
+
+      // Why It's Healthier bullets (hidden if not provided)
+      const whyEl  = document.getElementById('modal-why');
+      const whyList = document.getElementById('modal-why-list');
+      if (r.whyHealthier && r.whyHealthier.length) {
+        whyList.innerHTML = r.whyHealthier
+          .map(point => `<div class="modal-why-item">${point}</div>`)
+          .join('');
+        whyEl.style.display = '';
+      } else {
+        whyEl.style.display = 'none';
+      }
+
+      // Comparison table (hidden if not provided)
+      // r.comparison = [ ['Original item', 'Our version item'], ... ]
+      const compEl  = document.getElementById('modal-comparison');
+      const compBody = document.getElementById('modal-table-body');
+      if (r.comparison && r.comparison.length) {
+        compBody.innerHTML = r.comparison
+          .map(([orig, ours]) => `<tr><td>${orig}</td><td>${ours}</td></tr>`)
+          .join('');
+        compEl.style.display = '';
+      } else {
+        compEl.style.display = 'none';
+      }
+
+      // Open overlay
+      document.getElementById('modal-overlay').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Close when clicking outside the modal box
+    document.getElementById('modal-overlay').addEventListener('click', e => {
+      if (e.target === e.currentTarget) closeModal();
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+
+    /* ===========================================================
+       D. SEARCH & FILTER
+       Works automatically with any cards rendered by buildRecipeCard()
+       and buildPlaceholderCard(). No edits needed.
+    =========================================================== */
+
+    let currentFilter = 'all'; // Tracks the active filter pill
+
+    function setFilter(btn, category) {
+      currentFilter = category;
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      filterRecipes();
+    }
+
+    function filterRecipes() {
+      const query = document.getElementById('recipe-search').value.toLowerCase().trim();
+
+      document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
+        // Placeholders always visible when no search/filter would hide them
+        if (card.classList.contains('placeholder')) {
+          // Hide placeholders when a search query is active (they contain no real text)
+          card.style.display = query ? 'none' : '';
+          return;
+        }
+        const cat   = card.dataset.category || '';
+        const text  = card.textContent.toLowerCase();
+        const matchCat = currentFilter === 'all' || cat === currentFilter;
+        const matchQ   = !query || text.includes(query);
+        card.style.display = (matchCat && matchQ) ? '' : 'none';
+      });
+    }
+
+
+    /* ===========================================================
+       E. LOADING SCREEN
+    =========================================================== */
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        document.getElementById('loading-screen').classList.add('hidden');
+      }, 900);
+    });
+
+
+    /* ===========================================================
+       F. DARK MODE TOGGLE
+    =========================================================== */
+    const html     = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+
+    // Restore saved preference from previous visit
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeBtn.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+
+
+    /* ===========================================================
+       G. NAVIGATION
+    =========================================================== */
+
+    // Navbar shadow on scroll
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Highlight the correct nav link as user scrolls through sections
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-links a');
+    const sectionObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          navLinks.forEach(a => {
+            a.classList.toggle('active', a.getAttribute('href') === '#' + entry.target.id);
+          });
+        }
+      });
+    }, { threshold: .4 });
+    sections.forEach(s => sectionObserver.observe(s));
+
+    // Mobile hamburger menu
+    const hamburger  = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobile-menu');
+    let menuOpen = false;
+
+    hamburger.addEventListener('click', () => {
+      menuOpen = !menuOpen;
+      hamburger.classList.toggle('open', menuOpen);
+      mobileMenu.classList.toggle('open', menuOpen);
+      mobileMenu.style.display = menuOpen ? 'flex' : 'none';
+      hamburger.setAttribute('aria-expanded', menuOpen);
+    });
+
+    function closeMobileMenu() {
+      menuOpen = false;
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+      mobileMenu.style.display = 'none';
+      hamburger.setAttribute('aria-expanded', 'false');
+    }
+
+    // Close mobile menu when clicking outside it
+    document.addEventListener('click', e => {
+      if (menuOpen && !navbar.contains(e.target) && !mobileMenu.contains(e.target)) {
+        closeMobileMenu();
+      }
+    });
+
+
+    /* ===========================================================
+       H. SCROLL-TO-TOP BUTTON
+    =========================================================== */
+    const scrollTopBtn = document.getElementById('scroll-top');
+    window.addEventListener('scroll', () => {
+      scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
+    }, { passive: true });
+
+
+    /* ===========================================================
+       I. SCROLL REVEAL ANIMATION
+       Elements with class "reveal" fade in when scrolled into view.
+    =========================================================== */
+    const revealEls  = document.querySelectorAll('.reveal');
+    const revealObserver = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          // Stagger siblings slightly for a cascade effect
+          const siblings = Array.from(entry.target.parentNode.children);
+          const delay = siblings.indexOf(entry.target) * 0.08;
+          entry.target.style.transitionDelay = delay + 's';
+          entry.target.classList.add('visible');
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .12, rootMargin: '0px 0px -40px 0px' });
+    revealEls.forEach(el => revealObserver.observe(el));
+
+
+    /* ===========================================================
+       J. FAQ ACCORDION
+    =========================================================== */
+    function toggleFAQ(btn) {
+      const item   = btn.closest('.faq-item');
+      const isOpen = item.classList.contains('open');
+
+      // Close all open items first
+      document.querySelectorAll('.faq-item').forEach(i => {
+        i.classList.remove('open');
+        i.querySelector('.faq-q').setAttribute('aria-expanded', 'false');
+      });
+
+      // If this item was closed, open it
+      if (!isOpen) {
+        item.classList.add('open');
+        btn.setAttribute('aria-expanded', 'true');
+      }
+    }
+
+
+    /* ===========================================================
+       INITIALISE
+       Call renderRecipes() to build the recipe grid on page load.
+       This must run AFTER the RECIPES array is defined above.
+    =========================================================== */
+    renderRecipes();
+
+  </script>
+</body>
+</html>

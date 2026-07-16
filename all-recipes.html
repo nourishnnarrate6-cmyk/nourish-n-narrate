@@ -56,6 +56,9 @@
       <ul class="nav-links" role="list">
         <li><a href="index.html#home">Home</a></li>
         <li><a href="index.html#recipes">Recipes</a></li>
+        <li><a href="calculator.html">Calculator</a></li>
+        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
         <li><a href="index.html#about">About</a></li>
         <li><a href="index.html#request">Suggest a Food</a></li>
         <li><a href="index.html#contact">Contact</a></li>
@@ -155,6 +158,7 @@
   <script src="supabase-client.js"></script>
   <script src="recipes-data-supabase.js"></script>
   <script src="form-handlers.js"></script>
+  <script src="nn-auth.js"></script>
   <script src="nn-cards.js"></script>
 
   <!-- Page logic: render every recipe, search + filter, theme -->
@@ -261,6 +265,18 @@
       }, { threshold: 0.12 });
       gridObserver.observe(grid);
     })();
+
+    /* Signed-in users get Tracker + Profile in the nav */
+    if (window.NNAuth) NNAuth.onReady(async () => {
+      const session = await NNAuth.getSession();
+      if (!session) return;
+      ['nav-tracker-li', 'nav-profile-li'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+      });
+    });
+
   </script>
+  <script src="nn-premium.js"></script>
 </body>
 </html>

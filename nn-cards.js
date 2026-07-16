@@ -72,9 +72,42 @@
           </div>
         </div>`;
 
+      // "+ Track" — log this recipe to today's tracker (requires login)
+      const meta = card.querySelector('.card-meta');
+      if (meta && window.NNAuth) {
+        const trackBtn = document.createElement('button');
+        trackBtn.type = 'button';
+        trackBtn.className = 'card-track';
+        trackBtn.textContent = '+ Track';
+        trackBtn.title = 'Log this recipe to today\'s calorie tracker';
+        trackBtn.addEventListener('click', async e => {
+          e.stopPropagation();
+          const session = await NNAuth.getSession();
+          if (!session) {
+            const page = location.pathname.split('/').pop() || 'index.html';
+            location.href = 'login.html?redirect=' + encodeURIComponent(page);
+            return;
+          }
+          trackBtn.disabled = true;
+          trackBtn.textContent = 'Adding…';
+          const kcal = parseInt(recipe.calories, 10) || 0;
+          const today = new Date().toLocaleDateString('en-CA');
+          const res = await NNAuth.addLog(today, 'food', recipe.title, kcal);
+          if (res.ok) {
+            trackBtn.textContent = '✓ Tracked';
+            setTimeout(() => { trackBtn.textContent = '+ Track'; trackBtn.disabled = false; }, 2500);
+          } else {
+            trackBtn.textContent = '+ Track';
+            trackBtn.disabled = false;
+          }
+        });
+        meta.appendChild(trackBtn);
+      }
+
       // Click or Enter/Space key → open modal
       card.addEventListener('click', () => openModal(index));
       card.addEventListener('keydown', e => {
+        if (e.target !== card) return; // don't hijack the Track button
         if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(index); }
       });
 

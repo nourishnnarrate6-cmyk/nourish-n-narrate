@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Profile — Nourish N Narrate</title>
+  <meta name="description" content="Your saved nutrition plans and personal targets." />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Shared modern stylesheet (same design system as the home page) -->
+  <link rel="stylesheet" href="nn-modern.css" />
+
+  <style>
+  /* ==================================================================
+     PROFILE PAGE — page-specific styles
+  ================================================================== */
+  #profile-hero {
+    padding: calc(var(--nav-h) + 3rem) 0 1.5rem;
+    overflow: hidden;
+  }
+  #profile-hero .hero-bg { position: absolute; inset: 0; pointer-events: none; }
+
+  @media (max-width: 640px) {
+    .nav-cta { display: inline-flex !important; }
+  }
+
+  /* Signed-out gate */
+  .gate-card {
+    max-width: 440px;
+    margin: 2rem auto;
+    padding: 2.75rem 2rem;
+    text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+  }
+  .gate-card .gate-icon {
+    display: grid; place-items: center;
+    width: 64px; height: 64px;
+    margin: 0 auto 1.2rem;
+    font-size: 1.8rem;
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: 20px;
+  }
+  .gate-card h2 { font-family: var(--font-display); font-size: 1.5rem; margin-bottom: 0.6rem; }
+  .gate-card p { color: var(--text-muted); font-size: 0.93rem; margin-bottom: 1.5rem; }
+
+  /* Profile header row */
+  .profile-head {
+    position: relative;
+    display: flex; align-items: center; gap: 1.25rem;
+    flex-wrap: wrap;
+    max-width: 980px;
+    margin: 0 auto;
+  }
+  .avatar {
+    display: grid; place-items: center;
+    width: 72px; height: 72px;
+    font-family: var(--font-display);
+    font-size: 1.9rem; font-weight: 700;
+    color: #fff;
+    background: var(--grad-green);
+    border-radius: 24px;
+    box-shadow: var(--shadow-green);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+  .profile-id { flex: 1; min-width: 0; }
+  .profile-id h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 4vw, 2rem);
+    margin-bottom: 0.15rem;
+  }
+  .profile-email { color: var(--text-muted); font-size: 0.92rem; word-break: break-all; }
+  .profile-actions { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+
+  /* Cards */
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 1.5rem;
+    max-width: 980px;
+    margin: 2rem auto 0;
+  }
+  .p-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    padding: clamp(1.5rem, 3vw, 2rem);
+  }
+  .p-card h3 {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: 0.5rem;
+  }
+
+  /* Current plan */
+  .plan-goal-chip {
+    display: inline-block;
+    padding: 0.3rem 1rem;
+    font-size: 0.75rem; font-weight: 600;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--green-mid);
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.2);
+    border-radius: var(--radius-full);
+    margin-bottom: 0.9rem;
+  }
+  .plan-cal {
+    font-family: var(--font-display);
+    font-size: clamp(2.6rem, 6vw, 3.4rem);
+    font-weight: 800;
+    line-height: 1;
+    background: var(--grad-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  .plan-cal-label { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-bottom: 1.3rem; }
+  .plan-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6rem;
+    margin-bottom: 1.4rem;
+  }
+  .plan-stat {
+    text-align: center;
+    padding: 0.75rem 0.4rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+  }
+  .plan-stat strong { display: block; font-size: 0.98rem; color: var(--ink); }
+  .plan-stat span {
+    font-size: 0.66rem; font-weight: 500;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .plan-when { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.3rem; }
+  .plan-btns { display: flex; gap: 0.7rem; flex-wrap: wrap; }
+  .btn-track {
+    display: inline-flex; align-items: center; gap: 0.5rem;
+    padding: 0.8rem 1.6rem;
+    font-size: 0.95rem; font-weight: 600;
+    color: #fff;
+    background: var(--grad-green);
+    border: none;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    box-shadow: var(--shadow-green);
+    transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+  }
+  .btn-track:hover { transform: translateY(-2px); box-shadow: 0 16px 38px -10px rgba(5, 150, 105, 0.55); }
+
+  .no-plan { text-align: center; padding: 1.5rem 0; }
+  .no-plan .np-emoji { font-size: 2.4rem; display: block; margin-bottom: 0.8rem; }
+  .no-plan p { color: var(--text-muted); font-size: 0.93rem; margin-bottom: 1.3rem; }
+
+  /* History list */
+  .history-item {
+    display: flex; align-items: center; gap: 0.9rem;
+    padding: 0.85rem 0;
+    border-bottom: 1px dashed var(--border);
+  }
+  .history-item:last-child { border-bottom: none; }
+  .h-icon {
+    display: grid; place-items: center;
+    width: 42px; height: 42px;
+    font-size: 1.15rem;
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.15);
+    border-radius: 13px;
+    flex-shrink: 0;
+  }
+  .h-info { flex: 1; min-width: 0; }
+  .h-goal { font-weight: 600; color: var(--ink); font-size: 0.94rem; }
+  .h-meta { font-size: 0.8rem; color: var(--text-muted); }
+  .h-del {
+    width: 34px; height: 34px;
+    display: grid; place-items: center;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    transition: all 0.25s ease;
+    flex-shrink: 0;
+  }
+  .h-del:hover { color: #dc2626; border-color: rgba(220, 38, 38, 0.4); background: rgba(220, 38, 38, 0.08); }
+  .history-empty { color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 1rem 0; }
+
+  @media (max-width: 860px) {
+    .profile-grid { grid-template-columns: 1fr; }
+  }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish&nbsp;<span class="accent">N</span>&nbsp;Narrate
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html#home">Home</a></li>
+        <li><a href="index.html#recipes">Recipes</a></li>
+        <li><a href="calculator.html">Calculator</a></li>
+        <li><a href="tracker.html">Tracker</a></li>
+        <li><a href="profile.html" class="active">Profile</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ============================================================
+       PROFILE
+  ============================================================ -->
+  <section id="profile-hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-blob hero-blob-1"></div>
+      <div class="hero-blob hero-blob-2"></div>
+    </div>
+
+    <div class="container" style="position:relative;">
+
+      <!-- Signed-out gate -->
+      <div class="gate-card" id="gate" style="display:none;">
+        <div class="gate-icon" aria-hidden="true">🔐</div>
+        <h2>Log in to see your profile</h2>
+        <p>Your saved nutrition plans and daily tracker live here — sign in to access them.</p>
+        <a class="btn-track" href="login.html?redirect=profile.html">Log In / Create Account</a>
+      </div>
+
+      <!-- Signed-in content -->
+      <div id="profile-content" style="display:none;">
+
+        <div class="profile-head">
+          <div class="avatar" id="avatar" aria-hidden="true">?</div>
+          <div class="profile-id">
+            <h1>My Profile</h1>
+            <div class="profile-email" id="profile-email"></div>
+          </div>
+          <div class="profile-actions">
+            <a href="calculator.html" class="see-more-btn">🧮 New Plan</a>
+            <button class="see-more-btn btn-back" id="btn-signout">Sign Out</button>
+          </div>
+        </div>
+
+        <div class="profile-grid">
+
+          <!-- Current plan -->
+          <div class="p-card" id="current-plan-card">
+            <h3>💚 Your Current Plan</h3>
+            <div id="current-plan"><!-- filled by JS --></div>
+          </div>
+
+          <!-- Saved plans history -->
+          <div class="p-card">
+            <h3>📁 Saved Plans</h3>
+            <div id="history"><!-- filled by JS --></div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>© 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <p style="margin-top:.5rem;font-size:.8rem;opacity:.6">Made with 💚 by students, for everyone.</p>
+  </footer>
+
+  <!-- Supabase + shared auth helper -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="nn-auth.js"></script>
+  <script>
+    /* ---------- Load profile ---------- */
+    const GOAL_LABELS = {
+      lose: 'Lose Weight', maintain: 'Maintain Weight', gain: 'Gain Weight',
+      muscle: 'Build Muscle', general: 'General Healthy Eating',
+    };
+
+    function fmtDate(iso) {
+      return new Date(iso).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' });
+    }
+
+    function renderCurrentPlan(latest) {
+      const el = document.getElementById('current-plan');
+      if (!latest) {
+        el.innerHTML = `
+          <div class="no-plan">
+            <span class="np-emoji" aria-hidden="true">🧮</span>
+            <p>You haven't saved a nutrition plan yet. Create one in the calculator — it saves here automatically.</p>
+            <a class="btn-track" href="calculator.html">Create My Plan</a>
+          </div>`;
+        return;
+      }
+      const r = latest.results || {};
+      const goal = r.goalLabel || GOAL_LABELS[(latest.inputs || {}).goal] || 'My Plan';
+      el.innerHTML = `
+        <span class="plan-goal-chip">${goal}</span>
+        <div class="plan-cal">${(r.calories || 0).toLocaleString()}</div>
+        <div class="plan-cal-label">calories / day</div>
+        <div class="plan-stats">
+          <div class="plan-stat"><strong>${r.proteinG || '—'}g</strong><span>Protein</span></div>
+          <div class="plan-stat"><strong>${r.carbsG || '—'}g</strong><span>Carbs</span></div>
+          <div class="plan-stat"><strong>${r.fatG || '—'}g</strong><span>Fat</span></div>
+          <div class="plan-stat"><strong>${r.waterL || '—'} L</strong><span>Water</span></div>
+          <div class="plan-stat"><strong>${r.fiberG || '—'}g</strong><span>Fiber</span></div>
+          <div class="plan-stat"><strong>${(r.tdee || 0).toLocaleString()}</strong><span>TDEE</span></div>
+          ${r.bmi ? '<div class="plan-stat"><strong>' + r.bmi + '</strong><span>BMI · ' + (r.bmiCat || '') + '</span></div>' : ''}
+        </div>
+        <div class="plan-when">Saved ${fmtDate(latest.created_at)}</div>
+        <div class="plan-btns">
+          <a class="btn-track" href="tracker.html">📈 Track Today</a>
+          <a class="see-more-btn" href="calculator.html">🔄 Recalculate</a>
+        </div>`;
+    }
+
+    function renderHistory(items) {
+      const el = document.getElementById('history');
+      if (!items.length) {
+        el.innerHTML = '<div class="history-empty">No saved plans yet.</div>';
+        return;
+      }
+      el.innerHTML = items.map(item => {
+        const r = item.results || {};
+        const goal = r.goalLabel || GOAL_LABELS[(item.inputs || {}).goal] || 'Plan';
+        return `
+          <div class="history-item" data-id="${item.id}">
+            <div class="h-icon" aria-hidden="true">📄</div>
+            <div class="h-info">
+              <div class="h-goal">${goal}</div>
+              <div class="h-meta">${(r.calories || 0).toLocaleString()} kcal · ${r.proteinG || '—'}g protein · ${fmtDate(item.created_at)}</div>
+            </div>
+            <button class="h-del" title="Delete this plan" aria-label="Delete this plan" onclick="removePlan('${item.id}')">🗑</button>
+          </div>`;
+      }).join('');
+    }
+
+    async function loadProfile() {
+      const [latest, all] = [await NNAuth.getLatestResult(), await NNAuth.getAllResults()];
+      renderCurrentPlan(latest);
+      renderHistory(all);
+    }
+
+    async function removePlan(id) {
+      if (!confirm('Delete this saved plan?')) return;
+      const res = await NNAuth.deleteResult(id);
+      if (res.ok) loadProfile();
+      else alert('Could not delete: ' + (res.message || 'unknown error'));
+    }
+
+    NNAuth.onReady(async () => {
+      const session = await NNAuth.getSession();
+      if (!session) {
+        document.getElementById('gate').style.display = 'block';
+        return;
+      }
+      document.getElementById('profile-content').style.display = 'block';
+      document.getElementById('profile-email').textContent = session.user.email;
+      document.getElementById('avatar').textContent = (session.user.email || '?')[0];
+      loadProfile();
+    });
+
+    document.getElementById('btn-signout').addEventListener('click', async () => {
+      await NNAuth.signOut();
+      location.href = 'index.html';
+    });
+
+    /* ---------- Page chrome (theme + navbar) ---------- */
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeBtn.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+  </script>
+  <script src="nn-premium.js"></script>
+</body>
+</html>
