@@ -97,7 +97,7 @@
     --font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Layout */
-    --nav-h: 76px;
+    --nav-h: 60px;
   }
 
   /* ---------- 2. RESET & BASE ---------- */
@@ -273,7 +273,7 @@
     border-bottom: 1px solid transparent;
   }
   #navbar.scrolled {
-    height: 64px;
+    height: 54px;
     background: rgba(255, 255, 255, 0.82);
     -webkit-backdrop-filter: blur(16px) saturate(1.5);
     backdrop-filter: blur(16px) saturate(1.5);
@@ -289,9 +289,9 @@
   }
 
   .nav-logo {
-    display: flex; align-items: center; gap: 0.6rem;
+    display: flex; align-items: center; gap: 0.55rem;
     font-family: var(--font-display);
-    font-size: 1.25rem; font-weight: 700;
+    font-size: 1.1rem; font-weight: 700;
     color: var(--ink);
     text-decoration: none;
     white-space: nowrap;
@@ -299,8 +299,8 @@
   .nav-logo .accent { color: var(--green); }
   .nav-logo .leaf {
     display: grid; place-items: center;
-    width: 38px; height: 38px;
-    font-size: 1.15rem;
+    width: 32px; height: 32px;
+    font-size: 1rem;
     border-radius: var(--radius-sm);
     background: var(--grad-green);
     box-shadow: var(--shadow-green);
@@ -336,15 +336,15 @@
   .nav-actions { display: flex; align-items: center; gap: 0.7rem; }
 
   .nav-social {
-    display: inline-flex; align-items: center; gap: 5px;
+    display: inline-flex; align-items: center;
     color: var(--text-muted);
-    font-size: 0.88rem; font-weight: 600;
     text-decoration: none;
-    padding: 0.4rem 0.65rem;
+    padding: 0.4rem;
     border-radius: var(--radius-full);
     transition: color 0.25s ease, background 0.25s ease, transform 0.25s ease;
   }
-  .nav-social:hover { color: #e1306c; background: rgba(225, 48, 108, 0.08); transform: translateY(-1px); }
+  .nav-social span { display: none; } /* icon-only in the top bar */
+  .nav-social:hover { color: var(--green); background: var(--surface-2); transform: translateY(-1px); }
   .nav-social svg { width: 20px; height: 20px; }
 
   .theme-toggle {
