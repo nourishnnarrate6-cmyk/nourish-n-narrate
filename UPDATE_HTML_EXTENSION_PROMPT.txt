@@ -1,0 +1,51 @@
+════════════════════════════════════════════════════════════════════
+CLAUDE EXTENSION PROMPT — Update HTML Files Automatically
+════════════════════════════════════════════════════════════════════
+
+📋 INSTRUCTIONS:
+1. Copy everything below (between the lines)
+2. Paste into Claude extension chat
+3. It will update your HTML files automatically
+4. Come back and tell me when it's done
+
+════════════════════════════════════════════════════════════════════
+COPY EVERYTHING BELOW AND PASTE INTO CLAUDE EXTENSION
+════════════════════════════════════════════════════════════════════
+
+I need you to update my HTML files for my Nourish N Narrate website. Here's what to do:
+
+I have two HTML files in my Downloads/OIP folder:
+1. index.html
+2. all-recipes.html
+
+For BOTH files, I need you to:
+
+1. Open the file
+2. Find the <head> section
+3. Find this line: <script src="recipes-data.js"></script>
+4. Replace that ENTIRE line with these 5 new lines:
+
+```
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-client.js"></script>
+<script src="recipes-data-supabase.js"></script>
+<script src="form-handlers.js"></script>
+<script src="nn-cards.js"></script>
+```
+
+IMPORTANT: Keep everything else in the file EXACTLY the same. Only replace that one script tag line with the 5 new lines above.
+
+Steps:
+1. First, open ~/Downloads/OIP/index.html
+2. Find and replace as described above
+3. Save the file
+4. Then open ~/Downloads/OIP/all-recipes.html
+5. Do the exact same replacement
+6. Save the file
+7. Tell me when both files are updated successfully
+
+After you're done, verify by opening both files and showing me that the script section is correct.
+
+════════════════════════════════════════════════════════════════════
+END OF PROMPT
+════════════════════════════════════════════════════════════════════

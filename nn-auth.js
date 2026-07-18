@@ -215,6 +215,40 @@ const NNAuth = (() => {
     return data;
   }
 
+  /* ---------------- Photo AI (Gemini via Edge Function) ---------------- */
+
+  /** Analyze a food photo server-side. imageBase64 = raw base64, no data: prefix.
+      phash = optional 64-char perceptual hash so the server can reuse a saved
+      scan of a visually-similar photo instead of re-analyzing. */
+  async function analyzeFoodPhoto(imageBase64, mime, phash) {
+    if (!client) return { ok: false, reason: 'no_client' };
+    try {
+      const body = { image: imageBase64, mime: mime || 'image/jpeg' };
+      if (phash) body.phash = phash;
+      const { data, error } = await client.functions.invoke('analyze-food', { body: body });
+      if (error) return { ok: false, reason: error.message || 'invoke_failed' };
+      if (!data || data.error) return { ok: false, reason: (data && data.error) || 'empty' };
+      return { ok: true, foods: data.foods || [], cached: !!data.cached, model: data.model, scanId: data.scan_id || null };
+    } catch (e) {
+      return { ok: false, reason: 'network' };
+    }
+  }
+
+  /** Push a user's calorie correction back into the shared scan cache so future
+      similar photos benefit. Best-effort — callers should not block on it. */
+  async function correctFoodScan(scanId, foodName, calories) {
+    if (!client || !scanId) return { ok: false };
+    try {
+      const { data, error } = await client.functions.invoke('correct-scan', {
+        body: { scan_id: scanId, food_name: foodName, calories: calories },
+      });
+      if (error || !data || data.error) return { ok: false };
+      return { ok: true };
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
   /* ---------------- Reference libraries & meal plans ---------------- */
 
   /** Food library (name + typical-serving kcal), public read. */
@@ -251,6 +285,7 @@ const NNAuth = (() => {
     getLogs, addLog, deleteLog,
     saveWeight, getWeights, getRecipes,
     getFoodLibrary, getExerciseLibrary, getMealPlans,
+    analyzeFoodPhoto, correctFoodScan,
     getLogsSince, /* #2 EXTRA FEATURE */
   };
 })();

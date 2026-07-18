@@ -714,6 +714,65 @@
   }
   .wk-total span { color: var(--text-muted); font-weight: 500; }
 
+  /* ---------- Photo food recognition ---------- */
+  .photo-btn {
+    width: 100%;
+    display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+    margin: -0.5rem 0 1.25rem;
+    padding: 0.85rem 1.5rem;
+    font-family: inherit; font-size: 0.95rem; font-weight: 600;
+    color: var(--orange);
+    background: var(--orange-pale);
+    border: 1.5px dashed rgba(234, 88, 12, 0.4);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.25s var(--ease-out);
+  }
+  .photo-btn:hover { background: var(--surface); border-style: solid; transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+  .photo-preview {
+    width: 100%;
+    max-height: 260px;
+    object-fit: cover;
+    border-radius: 14px;
+    margin-bottom: 0.9rem;
+    display: none;
+  }
+  .photo-result {
+    display: flex; align-items: center; gap: 0.7rem;
+    padding: 0.7rem 0.9rem;
+    margin-bottom: 0.55rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    animation: fadeInUp 0.35s var(--ease-out);
+  }
+  .pr-info { flex: 1; min-width: 0; }
+  .pr-name { font-weight: 600; color: var(--ink); font-size: 0.92rem; }
+  .pr-kcal { font-size: 0.78rem; color: var(--text-muted); }
+  .pr-log {
+    padding: 0.45rem 1rem;
+    font-family: inherit; font-size: 0.82rem; font-weight: 600;
+    color: #fff;
+    background: var(--grad-green);
+    border: none; border-radius: var(--radius-full);
+    box-shadow: var(--shadow-green);
+    transition: transform 0.25s var(--ease-spring);
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .pr-log:hover:not(:disabled) { transform: translateY(-2px); }
+  .pr-log:disabled { opacity: 0.6; }
+  .pr-edit {
+    padding: 0.45rem 0.8rem;
+    font-family: inherit; font-size: 0.82rem; font-weight: 600;
+    color: var(--green-mid);
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.3);
+    border-radius: var(--radius-full);
+    flex-shrink: 0;
+  }
+  .photo-note { font-size: 0.76rem; color: var(--text-muted); text-align: center; margin-top: 0.6rem; }
+
   /* ---------- Barcode scanner ---------- */
   .scan-btn {
     width: 100%;
@@ -977,6 +1036,10 @@
 
             <button class="scan-btn" id="btn-scan" type="button">📷 Scan a Barcode — calories auto-fill</button>
 
+            <!-- Photo recognition: snap the food, AI guesses it -->
+            <button class="photo-btn" id="btn-photo" type="button">📸 Snap a Photo — AI guesses the food</button>
+            <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;" aria-hidden="true" />
+
             <!-- #2 EXTRA FEATURE: recent foods quick-add -->
             <div class="recent-chips" id="recent-chips"></div>
             <!-- end #2 EXTRA -->
@@ -1068,6 +1131,11 @@
 
             <div class="track-msg" id="track-msg" aria-live="polite"></div>
 
+            <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;line-height:1.4;">
+              Calorie values — including AI photo estimates — are approximate and meant to help you build awareness,
+              not to provide medical or dietary advice. Talk to a doctor or dietitian for personalized guidance.
+            </p>
+
             <!-- Entries -->
             <div id="entries"><div class="entries-empty">Nothing logged yet — add your first meal or workout above!</div></div>
           </div>
@@ -1121,6 +1189,13 @@
   <footer>
     <div class="foot-logo">Nourish <span>N</span> Narrate</div>
     <p>© 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <div style="margin:1.1rem 0 0.2rem;">
+      <a href="https://www.youtube.com/channel/UCIHTdS000vhikhav7c141bA" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on YouTube"
+         style="display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.05rem;border-radius:999px;font-size:.9rem;font-weight:600;color:#fff;text-decoration:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);">
+        <svg viewBox="0 0 24 24" fill="#FF0000" aria-hidden="true" style="width:22px;height:22px;flex-shrink:0;"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
+        <span>Watch us on YouTube</span>
+      </a>
+    </div>
     <p style="margin-top:.5rem;font-size:.8rem;opacity:.6">Made with 💚 by students, for everyone.</p>
   </footer>
 
@@ -1131,6 +1206,20 @@
       <h3 id="week-title">📅 Your 7-Day Meal Plan</h3>
       <p class="wk-sub" id="wk-sub">Each day rotates automatically — the plan shown in your daily card always matches this week view.</p>
       <div class="wk-grid" id="wk-grid"></div>
+    </div>
+  </div>
+
+
+  <!-- Photo recognition modal -->
+  <div class="scan-overlay" id="photo-modal" role="dialog" aria-modal="true" aria-labelledby="photo-title">
+    <div class="scan-modal">
+      <button class="scan-close" id="photo-close-btn" type="button" aria-label="Close">✕</button>
+      <h3 id="photo-title">📸 What did you eat?</h3>
+      <img class="photo-preview" id="photo-preview" alt="Your food photo" />
+      <div class="scan-status" id="photo-status" aria-live="polite"></div>
+      <div id="photo-results"></div>
+      <p class="photo-note">AI runs on your device — the photo never leaves your phone.
+        Estimates are per typical serving; tap ✎ to adjust before logging.</p>
     </div>
   </div>
 
@@ -1253,6 +1342,14 @@
       msg.textContent = 'Adding…';
       const res = await NNAuth.addLog(dateStr(currentDate), kind, name, cal);
       if (!res.ok) { msg.textContent = '⚠️ ' + (res.message || 'Could not add entry.'); return; }
+
+      // If this entry came from a photo scan and the user changed the calories,
+      // push the correction back so the shared scan cache self-improves.
+      if (kind === 'food' && calEl.dataset.scanId && Number(calEl.dataset.scanKcal) !== cal) {
+        NNAuth.correctFoodScan(calEl.dataset.scanId, calEl.dataset.scanLabel || name, cal);
+      }
+      delete calEl.dataset.scanId; delete calEl.dataset.scanLabel; delete calEl.dataset.scanKcal;
+
       nameEl.value = ''; calEl.value = '';
       msg.textContent = '';
       loadDay();
@@ -1852,6 +1949,240 @@
         have + ' / ' + total + ' glasses' + (have >= total ? ' — hydrated! ✨' : '');
     }
     /* ================= end #2 EXTRA FEATURES ================= */
+
+
+    /* ===========================================================
+       PHOTO FOOD RECOGNITION
+       On-device AI (TensorFlow.js MobileNet, lazy-loaded from CDN).
+       The photo is analyzed locally — it never leaves the device.
+       Guesses are matched to the food library / Open Food Facts
+       for calories, then confirmed by the user before logging.
+    =========================================================== */
+    let photoModel = null, photoModelLoading = null, photoObjectUrl = null;
+
+    function loadScriptOnce(src) {
+      return new Promise(function (resolve, reject) {
+        const sc = document.createElement('script');
+        sc.src = src;
+        sc.onload = resolve;
+        sc.onerror = function () { reject(new Error('load failed')); };
+        document.head.appendChild(sc);
+      });
+    }
+
+    async function ensurePhotoModel() {
+      if (photoModel) return photoModel;
+      if (!photoModelLoading) {
+        photoModelLoading = (async function () {
+          if (!window.tf) await loadScriptOnce('https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js');
+          if (!window.mobilenet) await loadScriptOnce('https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@2.1.1/dist/mobilenet.min.js');
+          photoModel = await window.mobilenet.load({ version: 2, alpha: 0.5 });
+          return photoModel;
+        })();
+      }
+      return photoModelLoading;
+    }
+
+    /** Turn an AI class name into a food + calories, or null. */
+    async function resolvePhotoFood(rawName) {
+      const name = rawName.split(',')[0].trim();
+      const local = bestMatch(FOODS, name, null);
+      if (local) return { label: local[0], kcal: local[1] };
+      try {
+        const hits = await searchWorldFoods(name);
+        if (hits.length) return { label: hits[0][0], kcal: hits[0][1] };
+      } catch (e) { /* offline */ }
+      return null;
+    }
+
+    function closePhotoModal() {
+      document.getElementById('photo-modal').classList.remove('open');
+      if (photoObjectUrl) { URL.revokeObjectURL(photoObjectUrl); photoObjectUrl = null; }
+      document.getElementById('photo-input').value = '';
+    }
+
+    /** Downscale the photo (max 800px) → raw base64 JPEG for upload. */
+    function photoToBase64(imgEl) {
+      const max = 800;
+      const scale = Math.min(1, max / Math.max(imgEl.naturalWidth || max, imgEl.naturalHeight || max));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round((imgEl.naturalWidth || max) * scale);
+      canvas.height = Math.round((imgEl.naturalHeight || max) * scale);
+      canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+      return canvas.toDataURL('image/jpeg', 0.85).split(',')[1];
+    }
+
+    /** Perceptual hash (dHash): a 64-char "01" fingerprint of the photo.
+        Similar-looking plates produce similar fingerprints, so the server can
+        reuse a saved scan of a lookalike instead of re-analyzing. */
+    function photoToPHash(imgEl) {
+      try {
+        const w = 9, h = 8; // 9x8 grayscale → 8x8 = 64 comparison bits
+        const c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        const ctx = c.getContext('2d');
+        ctx.drawImage(imgEl, 0, 0, w, h);
+        const d = ctx.getImageData(0, 0, w, h).data;
+        let bits = '';
+        for (let y = 0; y < h; y++) {
+          for (let x = 0; x < w - 1; x++) {
+            const i = (y * w + x) * 4, j = (y * w + x + 1) * 4;
+            const gL = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+            const gR = 0.299 * d[j] + 0.587 * d[j + 1] + 0.114 * d[j + 2];
+            bits += gL > gR ? '1' : '0';
+          }
+        }
+        return bits.length === 64 ? bits : '';
+      } catch (e) { return ''; }
+    }
+
+    async function analyzePhoto(file) {
+      const modal = document.getElementById('photo-modal');
+      const preview = document.getElementById('photo-preview');
+      const status = document.getElementById('photo-status');
+      const results = document.getElementById('photo-results');
+      results.innerHTML = '';
+      modal.classList.add('open');
+
+      photoObjectUrl = URL.createObjectURL(file);
+      preview.src = photoObjectUrl;
+      preview.style.display = 'block';
+      await new Promise(function (r) { preview.onload = r; preview.onerror = r; });
+
+      /* 1) Cloud AI (Gemini via Edge Function) — understands whole
+            dishes and estimates the portion actually on the plate. */
+      try {
+        status.textContent = '🛰 AI is looking at your plate…';
+        const base64 = photoToBase64(preview);
+        const phash = photoToPHash(preview);
+        // Cap the cloud wait at 15s: if Google's vision service is congested,
+        // don't leave the user hanging — fall through to the on-device model.
+        const CLOUD_TIMEOUT_MS = 15000;
+        const cloud = await Promise.race([
+          NNAuth.analyzeFoodPhoto(base64, 'image/jpeg', phash),
+          new Promise(function (resolve) {
+            setTimeout(function () { resolve({ ok: false, reason: 'timeout' }); }, CLOUD_TIMEOUT_MS);
+          })
+        ]);
+        if (cloud.ok) {
+          if (!cloud.foods.length) {
+            status.textContent = '🤔 The AI could not find food in this photo — try the search box or barcode instead.';
+            return;
+          }
+          status.textContent = cloud.cached
+            ? '♻️ Matched a saved scan — tap one to log it:'
+            : 'AI results — tap one to log it:';
+          renderPhotoResults(cloud.foods.map(function (f) {
+            return { label: f.name, kcal: f.calories, confidence: f.confidence, scanId: cloud.scanId };
+          }));
+          return;
+        }
+        // Cloud unavailable (e.g. key not configured yet) → on-device fallback
+      } catch (e) { /* fall through */ }
+
+      /* 2) On-device fallback (TensorFlow.js MobileNet) */
+      try {
+        status.textContent = '🧠 Loading the on-device AI (first time takes a moment)…';
+        const model = await ensurePhotoModel();
+        status.textContent = '🔎 Analyzing your photo…';
+        const preds = await model.classify(preview, 5);
+
+        const seen = {};
+        const found = [];
+        for (let i = 0; i < preds.length && found.length < 3; i++) {
+          if (preds[i].probability < 0.05) continue;
+          const food = await resolvePhotoFood(preds[i].className);
+          if (food && !seen[food.label.toLowerCase()]) {
+            seen[food.label.toLowerCase()] = true;
+            food.confidence = Math.round(preds[i].probability * 100);
+            found.push(food);
+          }
+        }
+
+        if (!found.length) {
+          status.textContent = '🤔 Could not recognize a food in this photo — try the search box or barcode scanner instead.';
+          return;
+        }
+        status.textContent = 'Best guesses — tap one to log it:';
+        renderPhotoResults(found);
+      } catch (e) {
+        status.textContent = '⚠️ The AI model could not load — check your connection, or use search / barcode instead.';
+      }
+    }
+
+    /** Render guess rows with + Log and ✎ Edit actions. */
+    function renderPhotoResults(found) {
+      const results = document.getElementById('photo-results');
+      results.innerHTML = '';
+      found.forEach(function (f) {
+          const row = document.createElement('div');
+          row.className = 'photo-result';
+          const info = document.createElement('div');
+          info.className = 'pr-info';
+          const nm = document.createElement('div');
+          nm.className = 'pr-name';
+          nm.textContent = f.label;
+          const kc = document.createElement('div');
+          kc.className = 'pr-kcal';
+          kc.textContent = '~' + f.kcal + ' kcal' + (f.confidence ? ' · ' + f.confidence + '% match' : '');
+          info.appendChild(nm); info.appendChild(kc);
+          const edit = document.createElement('button');
+          edit.type = 'button';
+          edit.className = 'pr-edit';
+          edit.textContent = '✎';
+          edit.title = 'Edit before logging';
+          edit.addEventListener('click', function () {
+            const calInput = document.getElementById('food-cal');
+            document.getElementById('food-name').value = f.label;
+            calInput.value = f.kcal;
+            // Remember which cached scan this came from, so if the user changes the
+            // calories the correction can be pushed back to the shared cache.
+            if (f.scanId) {
+              calInput.dataset.scanId = f.scanId;
+              calInput.dataset.scanLabel = f.label;
+              calInput.dataset.scanKcal = f.kcal;
+            } else {
+              delete calInput.dataset.scanId;
+            }
+            closePhotoModal();
+            document.getElementById('food-name').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            document.getElementById('track-msg').textContent = '✓ Filled in from your photo — adjust and press "+ Add".';
+          });
+          const log = document.createElement('button');
+          log.type = 'button';
+          log.className = 'pr-log';
+          log.textContent = '+ Log';
+          log.addEventListener('click', async function () {
+            log.disabled = true;
+            log.textContent = 'Adding…';
+            const res = await NNAuth.addLog(dateStr(currentDate), 'food', f.label, f.kcal);
+            if (res.ok) {
+              closePhotoModal();
+              loadDay();
+              loadExtras();
+            } else {
+              log.textContent = '+ Log';
+              log.disabled = false;
+            }
+          });
+          row.appendChild(info); row.appendChild(edit); row.appendChild(log);
+          results.appendChild(row);
+      });
+    }
+
+    document.getElementById('btn-photo').addEventListener('click', function () {
+      document.getElementById('photo-input').click();
+    });
+    document.getElementById('photo-input').addEventListener('change', function (e) {
+      if (e.target.files && e.target.files[0]) analyzePhoto(e.target.files[0]);
+    });
+    document.getElementById('photo-close-btn').addEventListener('click', closePhotoModal);
+    document.getElementById('photo-modal').addEventListener('click', function (e) {
+      if (e.target === e.currentTarget) closePhotoModal();
+    });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closePhotoModal();
+    });
 
 
     /* ===========================================================
