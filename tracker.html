@@ -242,8 +242,15 @@
     border: 1px solid rgba(5, 150, 105, 0.15);
   }
   .e-icon.burn { background: var(--orange-pale); border-color: rgba(234, 88, 12, 0.2); }
-  .e-name { flex: 1; min-width: 0; font-weight: 500; color: var(--ink); font-size: 0.93rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .e-cal { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+  /* Name + calories stacked so long foods sit on their own line(s) instead of
+     stretching the row horizontally. */
+  .e-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 0.12rem; }
+  .e-name {
+    font-weight: 500; color: var(--ink); font-size: 0.93rem; line-height: 1.25;
+    overflow: hidden; word-break: break-word;
+    display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  }
+  .e-cal { font-weight: 700; font-size: 0.85rem; white-space: nowrap; }
   .e-cal.eat  { color: var(--green-mid); }
   .e-cal.burn { color: var(--orange); }
   .e-del {
@@ -1326,8 +1333,10 @@
       el.innerHTML = entries.map(e => `
         <div class="entry-item">
           <div class="e-icon ${e.kind === 'exercise' ? 'burn' : ''}" aria-hidden="true">${e.kind === 'exercise' ? '🔥' : '🍽️'}</div>
-          <div class="e-name">${escapeHtml(e.name)}</div>
-          <div class="e-cal ${e.kind === 'exercise' ? 'burn' : 'eat'}">${e.kind === 'exercise' ? '−' : '+'}${e.calories.toLocaleString()} kcal</div>
+          <div class="e-main">
+            <div class="e-name">${escapeHtml(e.name)}</div>
+            <div class="e-cal ${e.kind === 'exercise' ? 'burn' : 'eat'}">${e.kind === 'exercise' ? '−' : '+'}${e.calories.toLocaleString()} kcal</div>
+          </div>
           <button class="e-del" title="Remove entry" aria-label="Remove entry" onclick="removeEntry('${e.id}')">✕</button>
         </div>`).join('');
     }
