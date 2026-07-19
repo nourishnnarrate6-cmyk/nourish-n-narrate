@@ -353,6 +353,23 @@
     .weight-flex { grid-template-columns: 1fr; gap: 1.25rem; }
   }
 
+  /* ---------- Phones: scale the tracker down so it isn't oversized ---------- */
+  @media (max-width: 560px) {
+    #tracker-content .section-title { font-size: 1.6rem !important; }
+    .t-card { padding: 1.15rem; }
+    .t-card h3 { font-size: 1.05rem; margin-bottom: 0.85rem; }
+    .ring-wrap svg { width: 148px; height: 148px; }
+    .ring-center strong { font-size: 1.55rem; }
+    .sum-chip { padding: 0.55rem 0.4rem; }
+    .sum-chip strong { font-size: 0.95rem; }
+    /* Stack the add-entry fields vertically instead of side-by-side */
+    .entry-form { grid-template-columns: 1fr; }
+    .entry-form .ef-btn { grid-column: auto; }
+    .date-label { min-width: 0; }
+    .weight-banner { padding: 0.8rem 1rem; font-size: 0.85rem; }
+    .tracker-grid, .weight-card, .weight-banner, .plan-note { margin-top: 1.1rem; }
+  }
+
   /* ---------- Calorie-burn estimator ---------- */
   .estimate-toggle {
     display: block;
