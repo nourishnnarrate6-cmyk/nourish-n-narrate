@@ -373,6 +373,20 @@
   .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 34px -8px rgba(5, 150, 105, 0.55); filter: brightness(1.05); }
   .nav-cta:active { transform: translateY(0) scale(0.98); }
 
+  /* Log In / Sign Up — secondary outlined button */
+  .nav-auth {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--green-mid);
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, transform 0.3s var(--ease-spring);
+  }
+  .nav-auth:hover { color: var(--green); border-color: var(--green); background: var(--green-pale); transform: translateY(-1px); }
+
   /* Hamburger — mobile only */
   .hamburger {
     display: none;
@@ -1754,6 +1768,7 @@
     :root { --nav-h: 66px; }
     #home { min-height: auto; padding-top: calc(var(--nav-h) + 3rem); }
     .nav-cta { display: none; } /* CTA lives in the mobile menu */
+    .nav-auth { display: none; } /* Log In lives in the mobile menu */
     .diet-selector { grid-template-columns: 1fr; max-width: 340px; margin-inline: auto; }
     .about-pillars { grid-template-columns: 1fr; }
     .hero-stat + .hero-stat { padding-left: 1.1rem; }
@@ -2001,7 +2016,6 @@
         <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
         <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
         <li><a href="#about">About</a></li>
-        <li><a href="#faq">FAQ</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
 
@@ -2016,6 +2030,8 @@
         </a>
         <!-- Dark mode toggle -->
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <!-- Log In / Sign Up (hidden once the user is signed in) -->
+        <a href="login.html" class="nav-auth" id="nav-login">Log In / Sign Up</a>
         <!-- ✏️ CTA button text -->
         <button class="nav-cta" onclick="document.getElementById('request').scrollIntoView({behavior:'smooth'})">
           Suggest a Food
@@ -2036,8 +2052,8 @@
     <a href="tracker.html" id="m-nav-tracker" style="display:none;">📈 My Tracker</a>
     <a href="profile.html" id="m-nav-profile" style="display:none;">👤 My Profile</a>
     <a href="#about"   onclick="closeMobileMenu()">About</a>
-    <a href="#faq"     onclick="closeMobileMenu()">FAQ</a>
     <a href="#contact" onclick="closeMobileMenu()">Contact</a>
+    <a href="login.html" id="m-nav-login">🔑 Log In / Sign Up</a>
     <a href="#request" class="mobile-cta" onclick="closeMobileMenu()">Suggest a Food 🍽️</a>
   </div>
 
@@ -2890,6 +2906,11 @@
       ['nav-tracker-li', 'nav-profile-li', 'm-nav-tracker', 'm-nav-profile'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.style.display = '';
+      });
+      // Signed in — hide the Log In / Sign Up buttons
+      ['nav-login', 'm-nav-login'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
       });
 
       // Hero button with a live "kcal left today" readout
