@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nourish N Narrate — Start a Chapter</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Arial', 'Helvetica', sans-serif;
+    display:flex; justify-content:center; align-items:center;
+    min-height:100vh; background:#f0f0ee; padding:20px;
+  }
+
+  /* Frame scales the fixed 1080x1080 canvas to fit the screen */
+  .frame {
+    width: min(88vw, 88vh, 620px);
+    aspect-ratio: 1 / 1;
+    position: relative;
+    overflow: hidden;
+    border-radius: 14px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.18);
+  }
+
+  /* TRUE 1:1 INSTAGRAM CANVAS — 1080 x 1080 */
+  .stage {
+    position:absolute; top:0; left:0;
+    width:1080px; height:1080px;
+    transform-origin: top left;
+    background: linear-gradient(135deg, #d8f3dc 0%, #b7e4c7 55%, #a8dadc 100%);
+    padding: 36px;
+    overflow: hidden;
+  }
+
+  .deco { position:absolute; opacity:.22; pointer-events:none; }
+  .deco-1 { top:18px;  right:26px; font-size:96px; }
+  .deco-2 { bottom:18px; left:26px; font-size:76px; }
+
+  /* Explicit row heights: 240+220+250+130+80 = 920, + 4 gaps x14 = 976 <= 1008 available */
+  .content {
+    position:relative; z-index:2;
+    height:100%;
+    display:grid;
+    grid-template-rows: 240px 220px 250px 130px 80px;
+    gap:14px;
+  }
+  .content > * { overflow:hidden; min-height:0; }
+
+  /* ---------- HEADER ---------- */
+  .header { text-align:center; display:flex; flex-direction:column; justify-content:center; }
+  .logo { font-size:46px; line-height:1.1; }
+  .main-title {
+    font-size:62px; font-weight:900; color:#2d6a4f;
+    line-height:.95; letter-spacing:-1px;
+    text-shadow:2px 2px 0 rgba(255,255,255,.55);
+    margin:4px 0 8px;
+  }
+  .tagline {
+    font-size:20px; font-weight:700; color:#40916c;
+    background:rgba(255,255,255,.92);
+    padding:6px 20px; border-radius:20px;
+    align-self:center;
+  }
+
+  /* ---------- TWO INFO BOXES ---------- */
+  .row-two { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .box {
+    background:rgba(255,255,255,.95);
+    border-left:5px solid #40916c;
+    border-radius:10px;
+    padding:14px 16px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    overflow:hidden;
+  }
+  .box-title {
+    font-size:17px; font-weight:900; color:#2d6a4f;
+    text-transform:uppercase; letter-spacing:.6px;
+    background:#eafbf0; padding:4px 9px; border-radius:5px;
+    display:inline-block; margin-bottom:8px;
+  }
+  .box ul { list-style:none; }
+  .box li {
+    font-size:14px; color:#2d6a4f; font-weight:500;
+    line-height:1.35; margin-bottom:5px;
+    padding-left:20px; position:relative;
+  }
+  .box li:before { content:"💚"; position:absolute; left:0; font-size:12px; top:1px; }
+
+  /* ---------- WHAT WE DO ---------- */
+  .what {
+    background:linear-gradient(135deg,#eafbf0,#d8f3dc);
+    border-left:5px solid #52b788;
+    border-radius:10px;
+    padding:14px 16px;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+    display:flex; flex-direction:column;
+  }
+  .grid3 {
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(2,1fr);
+    gap:10px;
+    flex:1; min-height:0;
+  }
+  .cell {
+    background:rgba(255,255,255,.85);
+    border-radius:8px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    text-align:center;
+    font-size:13px; font-weight:700; color:#2d6a4f;
+    line-height:1.2; padding:6px 4px;
+  }
+  .cell span { font-size:22px; display:block; margin-bottom:3px; }
+
+  /* ---------- CTA ---------- */
+  .cta {
+    background:linear-gradient(135deg,#2d6a4f,#40916c);
+    color:#fff; border-radius:10px;
+    display:flex; flex-direction:column;
+    align-items:center; justify-content:center;
+    box-shadow:0 6px 18px rgba(45,106,79,.32);
+    padding:10px;
+  }
+  .cta h3 {
+    font-size:26px; font-weight:900;
+    text-transform:uppercase; letter-spacing:1px;
+    margin-bottom:6px;
+  }
+  .cta p { font-size:16px; font-weight:500; margin-bottom:4px; }
+  .cta .handle { font-size:18px; font-weight:800; text-decoration:underline; }
+
+  /* ---------- FOOTER ---------- */
+  .footer {
+    background:rgba(255,255,255,.95);
+    border:3px solid #40916c; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+    text-align:center;
+    font-size:15px; font-weight:800; color:#2d6a4f;
+    text-transform:uppercase; letter-spacing:.5px;
+    line-height:1.25;
+  }
+</style>
+</head>
+<body>
+
+<div class="frame" id="frame">
+  <div class="stage" id="stage">
+
+    <div class="deco deco-1">🌿</div>
+    <div class="deco deco-2">🌱</div>
+
+    <div class="content">
+
+      <!-- HEADER -->
+      <div class="header">
+        <div class="logo">🌿</div>
+        <h1 class="main-title">START A<br>CHAPTER</h1>
+        <div class="tagline">We're Growing — Join Us</div>
+      </div>
+
+      <!-- WHY / WHO -->
+      <div class="row-two">
+        <div class="box">
+          <div class="box-title">Why Join</div>
+          <ul>
+            <li>Transform comfort foods</li>
+            <li>Lead in your community</li>
+            <li>Fight food insecurity</li>
+            <li>Earn volunteer hours</li>
+          </ul>
+        </div>
+        <div class="box">
+          <div class="box-title">Who Can Apply</div>
+          <ul>
+            <li>High school students</li>
+            <li>Health &amp; wellness fans</li>
+            <li>Community leaders</li>
+            <li>All backgrounds welcome</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- WHAT WE DO -->
+      <div class="what">
+        <div class="box-title">What We Do</div>
+        <div class="grid3">
+          <div class="cell"><span>🥗</span>Recipe<br>Development</div>
+          <div class="cell"><span>👩‍🍳</span>Cooking<br>Workshops</div>
+          <div class="cell"><span>🎉</span>Community<br>Events</div>
+          <div class="cell"><span>💰</span>Fundraising</div>
+          <div class="cell"><span>📚</span>Nutrition<br>Education</div>
+          <div class="cell"><span>💚</span>Food Bank<br>Donations</div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="cta">
+        <h3>Ready to Lead?</h3>
+        <p>Apply through the link in our Instagram bio</p>
+        <div class="handle">@nourishnnarrate</div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="footer">
+        🌿&nbsp; Nourish Your Body, Narrate Your Progress &nbsp;💚
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  // Scale the fixed 1080x1080 canvas to whatever size the frame is
+  function fit() {
+    var frame = document.getElementById('frame');
+    var stage = document.getElementById('stage');
+    stage.style.transform = 'scale(' + (frame.clientWidth / 1080) + ')';
+  }
+  fit();
+  window.addEventListener('resize', fit);
+</script>
+
+</body>
+</html>

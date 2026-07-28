@@ -2102,6 +2102,7 @@
 
         <!-- ✏️ Quick trust stats -->
         <div class="hero-stats anim-d5">
+          <div class="hero-stat"><strong id="member-count">27</strong><span>Members &amp; growing</span></div>
           <div class="hero-stat"><strong>25+</strong><span>Recipes recreated</span></div>
           <div class="hero-stat"><strong>100%</strong><span>Taste-tested</span></div>
           <div class="hero-stat"><strong>4</strong><span>Student founders</span></div>
@@ -2935,5 +2936,24 @@
   </script>
   <script src="nn-premium.js"></script>
   <script src="nn-tour.js"></script>
+  <!-- Live member count from Supabase Auth -->
+  <script>
+    (function () {
+      var URL = 'https://qonuiowgfwhgqnojzjxy.supabase.co';
+      var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvbnVpb3dnZndoZ3Fub2p6anh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDYzNDQsImV4cCI6MjA5OTUyMjM0NH0.u2SxUdFzufbJk9L0WHASepfvHcxw-RiwqufemQ3ywFs';
+      var el = document.getElementById('member-count');
+      if (!el) return;
+      fetch(URL + '/rest/v1/rpc/get_user_count', {
+        method: 'POST',
+        headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: '{}'
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (n) {
+          if (typeof n === 'number' && n > 0) el.textContent = n;
+        })
+        .catch(function () { /* keep fallback number */ });
+    })();
+  </script>
 </body>
 </html>
