@@ -234,7 +234,15 @@ const NNAuth = (() => {
       const { data, error } = await client.functions.invoke('analyze-food', { body: body });
       if (error) return { ok: false, reason: error.message || 'invoke_failed' };
       if (!data || data.error) return { ok: false, reason: (data && data.error) || 'empty' };
-      return { ok: true, foods: data.foods || [], cached: !!data.cached, model: data.model, scanId: data.scan_id || null };
+      return {
+        ok: true,
+        foods: data.foods || [],
+        cached: !!data.cached,
+        model: data.model,
+        scanId: data.scan_id || null,
+        mealTotal: typeof data.mealTotal === 'number' ? data.mealTotal : null,
+        refined: !!data.refined,
+      };
     } catch (e) {
       return { ok: false, reason: 'network' };
     }
