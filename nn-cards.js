@@ -1,7 +1,8 @@
 /* ===================================================================
    NOURISH N NARRATE — SHARED CARD + MODAL LOGIC
    Used by both index.html and all-recipes.html.
-   Requires: RECIPES (recipes-data.js) and the modal markup in the page.
+   Requires: RECIPES (recipes-data-supabase.js) and the modal markup
+   in the page.
 =================================================================== */
 
     const PLACEHOLDER_COUNT = 6; // How many placeholder cards to show when there are no recipes

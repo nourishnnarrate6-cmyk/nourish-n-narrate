@@ -1,8 +1,11 @@
 /* ==================================================================
-   NOURISH N NARRATE — MODERN DESIGN SYSTEM (shared)
-   Extracted from index.html so secondary pages (all-recipes.html)
-   share the exact same look. Keep in sync with the inline styles
-   in index.html if you change the design.
+   NOURISH N NARRATE — SHARED DESIGN SYSTEM
+   The single stylesheet for every page: index, all-recipes,
+   calculator, tracker, profile and login.
+
+   Pages may add a small <style> block of their own for page-specific
+   bits, but everything shared lives here. Edit once, applies
+   everywhere.
 ================================================================== */
 
   /* ==================================================================
@@ -81,7 +84,7 @@
     --font-body:    'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
     /* Layout */
-    --nav-h: 76px;
+    --nav-h: 60px;
   }
 
   /* ---------- 2. RESET & BASE ---------- */
@@ -208,6 +211,42 @@
     100% { transform: translateX(280%); }
   }
 
+  /* Luxury loader: brass leaf drawn line-by-line, logo tracks in */
+  #loading-screen {
+    transition: opacity 0.65s ease, visibility 0.65s ease, transform 0.65s var(--ease-out);
+  }
+  #loading-screen.hidden { transform: scale(1.04); }
+  .loader-draw { width: 82px; height: 82px; margin-bottom: 0.35rem; }
+  .loader-draw path {
+    stroke: #b28a3a;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 280;
+    stroke-dashoffset: 280;
+    animation: ldDraw 1.15s var(--ease-out) forwards;
+  }
+  .loader-draw .ld-vein {
+    stroke: #d4b06a;
+    stroke-width: 2;
+    stroke-dasharray: 90;
+    stroke-dashoffset: 90;
+    animation-delay: 0.45s;
+    animation-duration: 0.7s;
+  }
+  @keyframes ldDraw { to { stroke-dashoffset: 0; } }
+  .loader-logo { animation: ldTrack 0.9s var(--ease-out) 0.15s both; }
+  .loader-logo span {
+    background: linear-gradient(120deg, #b28a3a, #e2c078 45%, #b28a3a);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+  }
+  @keyframes ldTrack {
+    from { opacity: 0; letter-spacing: 0.3em; filter: blur(3px); }
+    to   { opacity: 1; letter-spacing: 0.01em; filter: blur(0); }
+  }
+
   /* ---------- 5. NAVIGATION ---------- */
   #navbar {
     position: fixed; top: 0; left: 0; right: 0;
@@ -221,7 +260,7 @@
     border-bottom: 1px solid transparent;
   }
   #navbar.scrolled {
-    height: 64px;
+    height: 54px;
     background: rgba(255, 255, 255, 0.82);
     -webkit-backdrop-filter: blur(16px) saturate(1.5);
     backdrop-filter: blur(16px) saturate(1.5);
@@ -237,9 +276,9 @@
   }
 
   .nav-logo {
-    display: flex; align-items: center; gap: 0.6rem;
+    display: flex; align-items: center; gap: 0.55rem;
     font-family: var(--font-display);
-    font-size: 1.25rem; font-weight: 700;
+    font-size: 1.1rem; font-weight: 700;
     color: var(--ink);
     text-decoration: none;
     white-space: nowrap;
@@ -247,8 +286,8 @@
   .nav-logo .accent { color: var(--green); }
   .nav-logo .leaf {
     display: grid; place-items: center;
-    width: 38px; height: 38px;
-    font-size: 1.15rem;
+    width: 32px; height: 32px;
+    font-size: 1rem;
     border-radius: var(--radius-sm);
     background: var(--grad-green);
     box-shadow: var(--shadow-green);
@@ -284,15 +323,15 @@
   .nav-actions { display: flex; align-items: center; gap: 0.7rem; }
 
   .nav-social {
-    display: inline-flex; align-items: center; gap: 5px;
+    display: inline-flex; align-items: center;
     color: var(--text-muted);
-    font-size: 0.88rem; font-weight: 600;
     text-decoration: none;
-    padding: 0.4rem 0.65rem;
+    padding: 0.4rem;
     border-radius: var(--radius-full);
     transition: color 0.25s ease, background 0.25s ease, transform 0.25s ease;
   }
-  .nav-social:hover { color: #e1306c; background: rgba(225, 48, 108, 0.08); transform: translateY(-1px); }
+  .nav-social span { display: none; } /* icon-only in the top bar */
+  .nav-social:hover { color: var(--green); background: var(--surface-2); transform: translateY(-1px); }
   .nav-social svg { width: 20px; height: 20px; }
 
   .theme-toggle {
@@ -320,6 +359,20 @@
   }
   .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 14px 34px -8px rgba(5, 150, 105, 0.55); filter: brightness(1.05); }
   .nav-cta:active { transform: translateY(0) scale(0.98); }
+
+  /* Log In / Sign Up — secondary outlined button */
+  .nav-auth {
+    padding: 0.55rem 1.1rem;
+    font-size: 0.88rem; font-weight: 600;
+    color: var(--green-mid);
+    background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.25s ease, background 0.25s ease, border-color 0.25s ease, transform 0.3s var(--ease-spring);
+  }
+  .nav-auth:hover { color: var(--green); border-color: var(--green); background: var(--green-pale); transform: translateY(-1px); }
 
   /* Hamburger — mobile only */
   .hamburger {
@@ -699,6 +752,24 @@
   .about-tag-1 { top: -18px; right: 8%; }
   .about-tag-2 { bottom: -16px; left: 6%; animation-delay: -3s; }
 
+  /* Keep the fruit grid perfectly aligned everywhere */
+  .emoji-grid span { line-height: 1; }
+
+  @media (max-width: 640px) {
+    .about-visual { text-align: center; }
+    .about-img-box { padding: 1rem; }
+    .emoji-grid { gap: 0.6rem; }
+    .emoji-grid span { font-size: 2rem; border-radius: 12px; }
+    /* On phones the floating tags become neat pills under the grid
+       instead of absolutely-positioned overlays */
+    .about-tag {
+      position: static;
+      display: inline-flex;
+      margin: 0.9rem 0.3rem 0;
+      animation: none;
+    }
+  }
+
   .about-pillars {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -1006,6 +1077,95 @@
   }
 
   .rate-note { color: var(--text-muted); margin-bottom: 1rem; font-size: 1rem; }
+
+  /* ---------- 9b. NUTRITION CALCULATOR PROMO ---------- */
+  #calc-promo { padding-top: 0; }
+  .calc-banner {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    align-items: center;
+    gap: 2rem;
+    padding: clamp(2.25rem, 5vw, 3.5rem);
+    background: var(--grad-green);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 60px -18px rgba(5, 150, 105, 0.55);
+    overflow: hidden;
+  }
+  .calc-banner-glow {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(400px 260px at 85% 0%, rgba(255, 255, 255, 0.18), transparent 65%),
+      radial-gradient(360px 240px at 5% 100%, rgba(255, 255, 255, 0.1), transparent 65%);
+    pointer-events: none;
+  }
+  .calc-banner-emoji {
+    position: absolute;
+    font-size: 3.2rem;
+    opacity: 0.18;
+    pointer-events: none;
+    animation: floatSlow 6s ease-in-out infinite;
+  }
+  .calc-banner-emoji:nth-of-type(1) { top: 10%; right: 4%; }
+  .calc-banner-emoji:nth-of-type(2) { bottom: 8%; left: 3%; animation-delay: -3s; }
+  .calc-banner-text { position: relative; }
+  .calc-banner-label {
+    display: inline-block;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.74rem; font-weight: 600;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    border-radius: var(--radius-full);
+    margin-bottom: 1rem;
+  }
+  .calc-banner h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 4vw, 2.4rem);
+    color: #fff;
+    margin-bottom: 0.7rem;
+  }
+  .calc-banner p {
+    color: rgba(255, 255, 255, 0.85);
+    max-width: 46ch;
+    margin-bottom: 1.3rem;
+  }
+  .calc-banner-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .calc-banner-chips span {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem; font-weight: 500;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.13);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: var(--radius-full);
+  }
+  .calc-banner-action {
+    position: relative;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0.8rem;
+    justify-self: center;
+  }
+  .btn-calc-promo {
+    display: inline-flex; align-items: center; gap: 0.6rem;
+    padding: 1rem 2.1rem;
+    font-size: 1.02rem; font-weight: 600;
+    color: var(--green-deep);
+    background: #fff;
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    box-shadow: 0 14px 34px -8px rgba(6, 78, 59, 0.5);
+    transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease;
+  }
+  .btn-calc-promo:hover { transform: translateY(-3px); box-shadow: 0 20px 44px -8px rgba(6, 78, 59, 0.6); }
+  .btn-calc-promo .btn-arrow { transition: transform 0.3s var(--ease-spring); }
+  .btn-calc-promo:hover .btn-arrow { transform: translateX(4px); }
+  .calc-banner-note { font-size: 0.82rem; color: rgba(255, 255, 255, 0.75); }
+
+  @media (max-width: 860px) {
+    .calc-banner { grid-template-columns: 1fr; text-align: center; }
+    .calc-banner p, .calc-banner-chips { margin-inline: auto; justify-content: center; }
+  }
 
   /* ---------- 10. RECIPE MODAL ---------- */
   .modal-overlay {
@@ -1493,6 +1653,7 @@
   .reveal-left  { transform: translateX(-40px); }
   .reveal-right { transform: translateX(40px); }
   .reveal-scale { transform: scale(0.94); }
+  .reveal-rotate { transform: rotate(-3deg) translateY(24px) scale(0.97); }
   .reveal.visible { opacity: 1; transform: none; }
   .no-io .reveal { opacity: 1; transform: none; } /* Fallback: no IntersectionObserver */
 
@@ -1594,6 +1755,7 @@
     :root { --nav-h: 66px; }
     #home { min-height: auto; padding-top: calc(var(--nav-h) + 3rem); }
     .nav-cta { display: none; } /* CTA lives in the mobile menu */
+    .nav-auth { display: none; } /* Log In lives in the mobile menu */
     .diet-selector { grid-template-columns: 1fr; max-width: 340px; margin-inline: auto; }
     .about-pillars { grid-template-columns: 1fr; }
     .hero-stat + .hero-stat { padding-left: 1.1rem; }
@@ -1617,6 +1779,62 @@
       transition-duration: 0.01ms !important;
     }
     .reveal { opacity: 1; transform: none; }
+  }
+
+  /* ==================================================================
+     SECTION IDENTITY — each section gets its own quiet signature
+     (hero: drifting dots · about: stitched frame + grain ·
+      recipes: stitch divider · faq: double-rule · contact: warm blend ·
+      footer: seam)
+  ================================================================== */
+
+  /* About: faint dot grain + stitched (dashed) frame around the visual */
+  #about::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: radial-gradient(rgba(5, 150, 105, 0.05) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask-image: linear-gradient(115deg, rgba(0,0,0,0.8), transparent 55%);
+    mask-image: linear-gradient(115deg, rgba(0,0,0,0.8), transparent 55%);
+    pointer-events: none;
+  }
+  .about-img-box { position: relative; }
+  .about-img-box::after {
+    content: '';
+    position: absolute; inset: 10px;
+    border: 2px dashed rgba(5, 150, 105, 0.28);
+    border-radius: calc(var(--radius-lg) - 8px);
+    pointer-events: none;
+  }
+
+  /* Recipes: stitch-styled divider */
+  #recipes .divider {
+    background: repeating-linear-gradient(90deg, var(--green) 0 9px, transparent 9px 15px);
+    width: 72px;
+  }
+
+  /* Request: warm amber-to-green divider echoing the floating fruit */
+  #request .divider { background: linear-gradient(90deg, var(--amber), var(--green)); width: 72px; }
+
+  /* FAQ: editorial double rule */
+  #faq .divider {
+    height: 2px;
+    box-shadow: 0 5px 0 0 rgba(5, 150, 105, 0.3);
+  }
+
+  /* Contact: short warm rule */
+  #contact .divider { width: 36px; background: linear-gradient(90deg, var(--green), var(--amber)); }
+
+  /* Footer: stitched seam above the gradient edge */
+  footer::after {
+    content: '';
+    position: absolute; top: 9px; left: 8%; right: 8%;
+    border-top: 1px dashed rgba(255, 255, 255, 0.14);
+  }
+
+  /* Hero on phones: full-width comfy buttons */
+  @media (max-width: 640px) {
+    .hero-actions > * { flex: 1 1 100%; justify-content: center; }
   }
 
   /* ==================================================================
@@ -1681,6 +1899,7 @@
     .section-sub { font-size: 0.98rem; }
   }
 
+
   /* ==================================================================
      COMPACT MOBILE NAVBAR — slimmer bar, nothing clipped on the right
   ================================================================== */
@@ -1705,6 +1924,7 @@
     .nav-cta { padding: 0.42rem 0.7rem; font-size: 0.72rem; }
     .nav-auth { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
   }
+
 
   /* ==================================================================
      DEVICE-AWARE REFINEMENTS
@@ -1742,3 +1962,283 @@
   html[data-device="tablet"] .container { width: min(100% - 2.4rem, 1140px); }
   html[data-device="tablet"] input,
   html[data-device="tablet"] select { font-size: 16px !important; }
+
+
+/* ==================================================================
+   19. RESPONSIVE HARDENING
+   Makes every page behave on real phones and real desktops:
+   notch/home-bar safe areas, thumb-sized tap targets, nothing that
+   can scroll sideways, and dynamic viewport units so mobile browser
+   chrome doesn't cut content off.
+
+   These rules use media queries (not the data-device attribute) so
+   they apply immediately, before any JavaScript runs.
+================================================================== */
+
+/* ---------- 19a. Never scroll sideways ---------- */
+html, body { max-width: 100%; overflow-x: clip; }
+
+/* Long words, URLs and emails wrap instead of pushing the page wide */
+body { overflow-wrap: break-word; }
+
+/* Media and embeds always shrink to fit their column */
+img, svg, video, canvas, iframe, table { max-width: 100%; }
+img, video { height: auto; }
+
+/* Stop iOS from re-scaling text after a rotate */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+/* Decorative hero blobs must never widen the page */
+.hero-bg, .hero-blob { max-width: 100vw; }
+
+/* ---------- 19b. Safe areas (notches + home bar) ---------- */
+:root {
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+}
+
+.nav-inner   { padding-left: var(--safe-l); padding-right: var(--safe-r); }
+.mobile-menu { margin-left: var(--safe-l); margin-right: var(--safe-r); }
+footer       { padding-bottom: calc(3.5rem + var(--safe-b)); }
+#scroll-top  { bottom: calc(1.5rem + var(--safe-b)); }
+
+@media (max-width: 640px) {
+  #scroll-top { bottom: calc(1rem + var(--safe-b)); }
+}
+
+/* ---------- 19c. Full-height sections that respect browser chrome ---------- */
+/* svh/dvh keep hero sections from being clipped by mobile toolbars. */
+@supports (height: 100svh) {
+  #home, #login-hero { min-height: 100svh; }
+  .modal { max-height: 88dvh; }
+  .mobile-menu { max-height: calc(100dvh - var(--nav-h) - 1.5rem); }
+}
+
+/* A long mobile menu scrolls rather than running off the screen */
+.mobile-menu {
+  max-height: calc(100vh - var(--nav-h) - 1.5rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ---------- 19d. Touch targets ---------- */
+/* Apple and Google both ask for ~44px. Applied on touch devices only,
+   so the desktop layout keeps its tighter, tidier proportions. */
+@media (pointer: coarse) {
+  .nav-links a,
+  .mobile-menu a,
+  .theme-toggle,
+  .hamburger,
+  .nav-social,
+  .nav-cta,
+  .nav-auth,
+  .pill,
+  .faq-q,
+  .modal-close,
+  .card-track,
+  .see-more-btn,
+  .btn-primary,
+  .btn-secondary,
+  .btn-auth,
+  .btn-suggest,
+  .btn-rate,
+  .btn-calc-promo,
+  .auth-tab,
+  #scroll-top {
+    min-height: 44px;
+  }
+
+  .theme-toggle, .hamburger, .modal-close, #scroll-top { min-width: 44px; }
+
+  .nav-social { padding: 0.6rem; }
+  .pill { display: inline-flex; align-items: center; }
+}
+
+/* 16px inputs stop iOS Safari zooming in when a field is focused */
+@media (pointer: coarse) {
+  input, select, textarea { font-size: 16px; }
+}
+
+/* ---------- 19e. No hover states on touch ---------- */
+/* Sticky :hover transforms look broken after a tap on mobile. */
+@media (hover: none) {
+  .recipe-card:hover,
+  .pillar:hover,
+  .diet-btn:hover,
+  .stat-card:hover,
+  .t-card:hover,
+  .p-card:hover,
+  .res-card:hover,
+  .contact-founders:hover,
+  .contact-email-wrap:hover,
+  .btn-primary:hover,
+  .btn-secondary:hover,
+  .btn-auth:hover,
+  .btn-suggest:hover,
+  .btn-rate:hover,
+  .see-more-btn:hover,
+  .nav-cta:hover,
+  .nav-auth:hover,
+  .btn-calc-promo:hover,
+  .modal-stat:hover {
+    transform: none;
+  }
+  .recipe-card:hover .card-img { transform: none; filter: none; }
+  .theme-toggle:hover { transform: none; }
+  .modal-close:hover { transform: none; }
+  .diet-btn:hover .diet-icon { transform: none; }
+  .nav-logo:hover .leaf { transform: none; }
+  .emoji-grid span:hover { transform: none; }
+
+  /* Tapping a card should still give feedback */
+  .recipe-card:active { transform: scale(0.985); }
+}
+
+/* ---------- 19f. Recipe modal on small screens ---------- */
+/* The comparison table is the one element that can't shrink far, so it
+   gets its own horizontal scroller instead of stretching the modal. */
+.modal-comparison {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.modal-table { min-width: 380px; }
+
+@media (max-width: 640px) {
+  .modal-overlay { padding: 0.75rem; align-items: flex-end; }
+  .modal {
+    max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  }
+  .modal-img { height: 200px; }
+  .modal-img-emoji { height: 160px; font-size: 4rem; }
+  .modal-stats { grid-template-columns: repeat(3, 1fr); }
+  .modal-steps li { padding-left: 2.6rem; }
+  .modal-steps li::before { width: 28px; height: 28px; font-size: 0.78rem; }
+  .modal-steps li:not(:last-child)::after { left: 13px; top: 32px; }
+}
+
+@supports (height: 100dvh) {
+  @media (max-width: 640px) { .modal { max-height: 92dvh; } }
+}
+
+@media (max-width: 400px) {
+  .modal-stats { grid-template-columns: repeat(2, 1fr); }
+  .modal-table { min-width: 300px; }
+}
+
+/* ---------- 19g. Small-screen typography and spacing ---------- */
+@media (max-width: 480px) {
+  .hero-title { font-size: clamp(2.4rem, 12vw, 3.2rem); }
+  .hero-stats { gap: 1rem 1.25rem; }
+  .hero-stat strong { font-size: 1.3rem; }
+  .hero-stat + .hero-stat { padding-left: 1rem; }
+  .section-title { font-size: clamp(1.6rem, 7vw, 2.1rem); }
+  .contact-founders, .contact-email-wrap { padding: 1.5rem 1.35rem; }
+  .contact-email-link { font-size: 0.95rem; }
+  .faq-q { padding: 1rem 1.15rem; font-size: 0.95rem; }
+  .faq-a-inner { padding: 0 1.15rem; }
+  .faq-item.open .faq-a-inner { padding: 0 1.15rem 1.1rem; }
+  .card-body { padding: 1.15rem 1.25rem 1.3rem; }
+  .suggest-accent { display: none; } /* decorative — they crowd a small card */
+}
+
+/* ---------- 19h. Tablet / mid-size ---------- */
+@media (min-width: 641px) and (max-width: 1024px) {
+  .recipe-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+  .modal-stats { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ---------- 19i. Very wide screens ---------- */
+/* Keep line lengths readable instead of stretching edge to edge. */
+@media (min-width: 1600px) {
+  .container { width: min(100% - 4rem, 1280px); }
+  .nav-inner { width: min(100% - 4rem, 1380px); }
+}
+
+/* ---------- 19j. Print ---------- */
+@media print {
+  #navbar, .mobile-menu, #scroll-top, #loading-screen,
+  .hero-bg, .theme-toggle, .hamburger, .nn-tour, .card-track { display: none !important; }
+  body { background: #fff; color: #000; }
+  .modal-overlay { position: static; opacity: 1; visibility: visible; background: none; }
+  .modal { box-shadow: none; max-height: none; overflow: visible; }
+  a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.75em; }
+}
+
+/* ---------- 19k. Filter pills on phones ---------- */
+/* Six category pills stack into a tall block on a narrow screen. A
+   single swipeable row keeps the recipe grid above the fold. */
+@media (max-width: 560px) {
+  .filter-pills {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding-bottom: 0.35rem;
+    /* Bleed to the screen edges so the row reads as scrollable */
+    margin-inline: -0.9rem;
+    padding-inline: 0.9rem;
+  }
+  .filter-pills::-webkit-scrollbar { display: none; }
+  .filter-pills .pill { flex: 0 0 auto; }
+}
+
+/* ---------- 19l. Shared footer ---------- */
+.foot-social {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.7rem;
+  margin: 1.2rem 0 0.3rem;
+}
+.foot-social a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-full);
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s var(--ease-spring);
+}
+.foot-social a:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.28);
+  transform: translateY(-2px);
+}
+.foot-social svg { width: 22px; height: 22px; flex-shrink: 0; }
+.foot-note { margin-top: 0.7rem; font-size: 0.8rem; opacity: 0.6; }
+
+@media (max-width: 420px) {
+  .foot-social { flex-direction: column; align-items: stretch; }
+  .foot-social a { justify-content: center; }
+}
+@media (hover: none) {
+  .foot-social a:hover { transform: none; }
+}
+
+/* ---------- 19m. Decorative blobs on phones ---------- */
+/* The hero blobs are clipped by their overflow:hidden container, so they
+   never widen the page — but a 520px blurred circle is expensive to
+   composite on a small screen. Scale them to the viewport instead. */
+@media (max-width: 640px) {
+  .hero-blob { filter: blur(60px); }
+  .hero-blob-1 { width: min(340px, 90vw); height: min(340px, 90vw); top: -110px; right: -80px; }
+  .hero-blob-2 { width: min(300px, 85vw); height: min(300px, 85vw); bottom: -120px; left: -90px; }
+  .hero-blob-3 { display: none; }
+}
+
+/* Devices that ask for reduced motion get static blobs */
+@media (prefers-reduced-motion: reduce) {
+  .hero-blob, .hero-img-wrap, .stat-card, .about-tag,
+  .suggest-accent, .calc-banner-emoji { animation: none !important; }
+}

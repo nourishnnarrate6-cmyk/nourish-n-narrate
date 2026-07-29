@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Nourish N Narrate — Site Checklist</title>
+<style>
+  :root{
+    --green:#059669; --green-mid:#047857; --green-deep:#065f46; --green-pale:#ecfdf5;
+    --amber:#f59e0b; --amber-pale:#fffbeb; --red:#dc2626; --red-pale:#fef2f2;
+    --ink:#0f172a; --text:#334155; --muted:#64748b;
+    --bg:#f6f8f7; --surface:#fff; --surface-2:#f1f5f4;
+    --border:rgba(15,23,42,.09); --border-strong:rgba(15,23,42,.16);
+    --grad:linear-gradient(135deg,#059669,#047857 60%,#065f46);
+    --radius:16px; --shadow:0 1px 2px rgba(15,23,42,.04),0 8px 24px -8px rgba(15,23,42,.10);
+    --font:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --ink:#f1f5f9; --text:#cbd5e1; --muted:#94a3b8;
+      --bg:#0b1220; --surface:#111a2e; --surface-2:#16203a;
+      --border:rgba(148,163,184,.15); --border-strong:rgba(148,163,184,.26);
+      --green-pale:rgba(16,185,129,.13); --amber-pale:rgba(245,158,11,.11); --red-pale:rgba(220,38,38,.12);
+    }
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);line-height:1.6;font-size:15px;
+       padding:0 0 4rem;-webkit-font-smoothing:antialiased}
+  .wrap{width:min(100% - 2rem,880px);margin-inline:auto}
+
+  /* ---------- header ---------- */
+  header{background:var(--grad);color:#fff;padding:2.5rem 0 1.75rem;margin-bottom:1.5rem}
+  header .wrap{display:flex;flex-direction:column;gap:.35rem}
+  h1{font-size:clamp(1.5rem,4vw,2rem);font-weight:700;letter-spacing:-.02em;line-height:1.2}
+  .sub{opacity:.85;font-size:.92rem}
+  .meta{margin-top:.9rem;font-size:.78rem;opacity:.75}
+
+  /* ---------- sticky progress ---------- */
+  .bar-wrap{position:sticky;top:0;z-index:20;background:var(--bg);
+            border-bottom:1px solid var(--border);padding:.7rem 0;margin-bottom:1.5rem;
+            backdrop-filter:blur(8px)}
+  .bar-inner{display:flex;align-items:center;gap:.9rem;flex-wrap:wrap}
+  .track{flex:1;min-width:140px;height:9px;background:var(--surface-2);border-radius:999px;overflow:hidden;
+         border:1px solid var(--border)}
+  .fill{height:100%;width:0;background:var(--grad);border-radius:999px;transition:width .4s cubic-bezier(.22,1,.36,1)}
+  .count{font-size:.85rem;font-weight:600;color:var(--ink);white-space:nowrap}
+  .btn{font-family:inherit;font-size:.8rem;font-weight:600;padding:.45rem .9rem;border-radius:999px;
+       border:1px solid var(--border-strong);background:var(--surface);color:var(--muted);cursor:pointer;
+       transition:.2s}
+  .btn:hover{color:var(--ink);border-color:var(--green);background:var(--green-pale)}
+
+  /* ---------- sections ---------- */
+  section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+          box-shadow:var(--shadow);margin-bottom:1rem;overflow:hidden}
+  .head{display:flex;align-items:center;gap:.8rem;width:100%;padding:1.05rem 1.25rem;
+        background:none;border:none;font-family:inherit;text-align:left;cursor:pointer}
+  .head:hover{background:var(--surface-2)}
+  .icon{display:grid;place-items:center;width:36px;height:36px;font-size:1.05rem;
+        background:var(--green-pale);border-radius:11px;flex-shrink:0}
+  .htext{flex:1;min-width:0}
+  .htitle{font-size:1rem;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+  .hnote{font-size:.79rem;color:var(--muted)}
+  .hcount{font-size:.76rem;font-weight:600;color:var(--muted);background:var(--surface-2);
+          border:1px solid var(--border);padding:.2rem .6rem;border-radius:999px;white-space:nowrap}
+  .chev{color:var(--muted);transition:transform .3s;flex-shrink:0}
+  section.open .chev{transform:rotate(180deg)}
+  .body{display:none;padding:0 1.25rem 1rem}
+  section.open .body{display:block}
+
+  /* ---------- items ---------- */
+  .item{display:flex;gap:.75rem;padding:.7rem 0;border-top:1px dashed var(--border)}
+  .item:first-child{border-top:none}
+  .item input{appearance:none;-webkit-appearance:none;flex-shrink:0;width:21px;height:21px;margin-top:.15rem;
+              border:2px solid var(--border-strong);border-radius:6px;background:var(--surface);cursor:pointer;
+              transition:.18s;position:relative}
+  .item input:hover{border-color:var(--green)}
+  .item input:checked{background:var(--green);border-color:var(--green)}
+  .item input:checked::after{content:'';position:absolute;left:6px;top:2px;width:5px;height:10px;
+              border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(42deg)}
+  .item input:focus-visible{outline:3px solid rgba(5,150,105,.45);outline-offset:2px}
+  .lbl{flex:1;min-width:0;cursor:pointer}
+  .txt{color:var(--ink);font-size:.93rem;font-weight:500}
+  .why{font-size:.82rem;color:var(--muted);margin-top:.15rem}
+  .item input:checked ~ .lbl .txt{text-decoration:line-through;opacity:.5}
+  .item input:checked ~ .lbl .why{opacity:.5}
+  code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85em;
+       background:var(--surface-2);border:1px solid var(--border);padding:.05em .4em;border-radius:5px;
+       word-break:break-word}
+
+  .tag{display:inline-block;font-size:.63rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+       padding:.16rem .5rem;border-radius:999px;margin-left:.4rem;vertical-align:.09em;white-space:nowrap}
+  .t-block{color:var(--red);background:var(--red-pale);border:1px solid rgba(220,38,38,.28)}
+  .t-imp{color:#b45309;background:var(--amber-pale);border:1px solid rgba(245,158,11,.3)}
+  .t-nice{color:var(--green-mid);background:var(--green-pale);border:1px solid rgba(5,150,105,.25)}
+
+  /* ---------- notes ---------- */
+  .note{margin:1.25rem 0;padding:.95rem 1.15rem;border-radius:12px;font-size:.87rem;
+        background:var(--amber-pale);border:1px solid rgba(245,158,11,.3);border-left:4px solid var(--amber)}
+  .note strong{color:var(--ink)}
+  .legend{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.25rem;font-size:.78rem;color:var(--muted);
+          align-items:center}
+
+  footer{margin-top:2rem;text-align:center;font-size:.78rem;color:var(--muted)}
+
+  @media print{
+    .bar-wrap,.btn,.chev{display:none}
+    body{background:#fff;font-size:11pt}
+    header{background:none;color:#000;border-bottom:2px solid #000;padding-bottom:1rem}
+    section{break-inside:avoid;box-shadow:none;border:1px solid #999}
+    .body{display:block !important}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Nourish N Narrate — Site Checklist</h1>
+    <div class="sub">Verify the cleanup, then everything else before you go live.</div>
+    <div class="meta">Your ticks are saved in this browser automatically. Personal working file — keep it out of the <code style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.25);color:#fff">nourish-n-narrate</code> folder so it never deploys.</div>
+  </div>
+</header>
+
+<div class="bar-wrap">
+  <div class="wrap bar-inner">
+    <div class="track"><div class="fill" id="fill"></div></div>
+    <div class="count" id="count">0 / 0</div>
+    <button class="btn" id="expand">Expand all</button>
+    <button class="btn" id="reset">Reset</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <div class="legend">
+    <span class="tag t-block">Blocker</span> breaks the site
+    <span class="tag t-imp">Important</span> fix before launch
+    <span class="tag t-nice">Nice</span> polish
+  </div>
+
+  <div class="note">
+    <strong>Start here.</strong> Open <code>nourish-n-narrate/index.html</code> in Chrome, press <code>F12</code>,
+    and keep the <em>Console</em> tab open while you work through section 1. Red errors there are the fastest
+    signal that something in the cleanup broke.
+  </div>
+
+  <div id="list"></div>
+
+  <footer>Nourish N Narrate · personal QA checklist</footer>
+</div>
+
+<script>
+const DATA = [
+  {
+    id:'cleanup', icon:'🧹', title:'1. Verify the cleanup',
+    note:'The changes I just made. Do this first.',
+    items:[
+      ['block','Every page loads with no red console errors','Open all six: index, all-recipes, calculator, tracker, profile, login.'],
+      ['block','Recipe cards appear on the home page','Click <b>Vegetarian</b> and <b>Non-Vegetarian</b> — cards should fill in, not stay as dashed "coming soon" placeholders.'],
+      ['block','Recipe photos load (not emoji fallbacks)','If you see emoji instead of photos, the Supabase Storage URLs aren\'t resolving.'],
+      ['block','All Recipes page shows the full set','Should be ~41 recipes. Search and the category pills both filter.'],
+      ['imp','Opening a recipe shows ingredients, steps and the comparison table','Tests that the JSON columns still parse after I rewrote the parser.'],
+      ['imp','The site still looks right','I merged two stylesheets that had drifted apart — nav height and logo size changed on the inner pages. Confirm the header looks consistent everywhere.'],
+      ['imp','Dark mode toggle works and persists across pages','Click the moon, then navigate — it should stay dark.'],
+      ['imp','Favicon shows in the browser tab','New green leaf icon; you may need a hard refresh (<code>Ctrl+Shift+R</code>).'],
+      ['nice','Footer and back-to-top button now appear on every page','These were missing from All Recipes and Login before.'],
+      ['nice','Loading screen fades out rather than snapping away','']
+    ]
+  },
+  {
+    id:'phone', icon:'📱', title:'2. On a real phone',
+    note:'The emulator lies about tap targets and browser chrome — use an actual device.',
+    items:[
+      ['block','No sideways scrolling on any page','Swipe left/right. Nothing should shift.'],
+      ['block','Hamburger menu opens, closes, and every link works','Test on all six pages — inner pages use different menu code from the home page.'],
+      ['imp','Nothing hides behind the notch or home bar','Especially the top nav and the back-to-top button.'],
+      ['imp','Tapping a form field doesn\'t zoom the page in','Calculator and login inputs. If it zooms, a font-size is under 16px.'],
+      ['imp','Recipe modal is readable and scrolls','Open a recipe, scroll to the bottom, close it with the ✕.'],
+      ['imp','The comparison table scrolls sideways inside the modal','It shouldn\'t stretch the whole page.'],
+      ['imp','Calculator is usable end to end','Fill it in, submit, read every result card without pinching.'],
+      ['imp','Tracker is usable','Add a food entry and an exercise entry; check the calorie ring and totals.'],
+      ['nice','Category filter pills swipe sideways in one row',''],
+      ['nice','Buttons feel big enough to hit with a thumb',''],
+      ['nice','Try landscape orientation too','']
+    ]
+  },
+  {
+    id:'desktop', icon:'💻', title:'3. Desktop & browsers',
+    items:[
+      ['imp','Check at a narrow window as well as full screen','Drag the window narrower slowly and watch for anything jumping or clipping.'],
+      ['imp','Test in Chrome and Safari at minimum','Safari handles dates and backdrop-filter differently. Add Firefox and Edge if you can.'],
+      ['imp','Test on an iPhone <em>and</em> an Android if possible','iOS Safari is where mobile bugs usually hide.'],
+      ['nice','Keyboard only: Tab through the page','Focus outlines should be visible, and recipe cards should open with Enter.'],
+      ['nice','Very wide monitor still looks intentional','Content should stay centred, not stretch edge to edge.']
+    ]
+  },
+  {
+    id:'content', icon:'📝', title:'4. Content & links',
+    items:[
+      ['block','Every nav link goes where it should','Home, Recipes, Calculator, About, FAQ, Contact — on every page.'],
+      ['imp','The "Suggest a Food" Google Form opens and accepts a submission',''],
+      ['imp','The "Rate Our Project" Google Form opens',''],
+      ['imp','The contact email link opens a mail app','<code>nourishnnarrate6@gmail.com</code>'],
+      ['imp','Instagram and YouTube links go to your real accounts','They appear in the nav and the new footer.'],
+      ['imp','Five recipes use photos hotlinked from Pexels, not your own storage','These can break if Pexels changes them. Consider uploading copies to your <code>recipe-images</code> bucket.'],
+      ['nice','Proofread the hero, About, and all six FAQ answers',''],
+      ['nice','Founders list and the member count look right','The member count pulls live from Supabase.'],
+      ['nice','Recipe nutrition numbers are accurate','You\'re publishing calorie advice — worth a second pass.']
+    ]
+  },
+  {
+    id:'auth', icon:'🔐', title:'5. Accounts & login',
+    note:'Test with a brand-new email address, not one you already used.',
+    items:[
+      ['block','Create a fresh account and receive the confirmation email','Check spam too.'],
+      ['block','The confirmation link brings you back signed in','It redirects to <code>login.html</code> — that exact URL must be allow-listed in Supabase → Authentication → URL Configuration, or the link will fail on the live site.'],
+      ['block','Sign in, then sign out, then sign in again',''],
+      ['imp','Signed-in nav shows Tracker and Profile, and hides "Log In / Sign Up"','Check both the desktop nav and the mobile menu.'],
+      ['imp','Visiting tracker.html while signed out shows the sign-in gate, not a broken page',''],
+      ['imp','A wrong password shows a friendly message, not a raw error',''],
+      ['imp','Your data survives a sign-out and sign-in','Saved plans, food logs, weight entries.'],
+      ['nice','Try the flow on a second device with the same account','']
+    ]
+  },
+  {
+    id:'tools', icon:'🧮', title:'6. Calculator & tracker',
+    items:[
+      ['block','Calculator produces sensible numbers','Sanity-check one result against any online TDEE calculator.'],
+      ['imp','Metric and imperial units both work','Switch kg/lb and cm/ft and confirm results change correctly.'],
+      ['imp','Silly inputs are rejected gracefully','Try blank fields, 0, a negative number, age 200.'],
+      ['imp','Results save to your profile when signed in','Then appear under Profile → history.'],
+      ['imp','Tracker: add food, add exercise, delete an entry','Totals and the ring should update each time.'],
+      ['imp','Tracker date navigation works','Go back a day, forward a day; yesterday\'s entries stay put.'],
+      ['imp','Weight check-in saves, and saving twice on the same day updates rather than duplicating',''],
+      ['imp','Barcode scanner only works over HTTPS','Camera access is blocked on plain <code>file://</code> or <code>http://</code>. Test it on the deployed site, not locally.'],
+      ['nice','Photo food recognition works, and fails politely when it can\'t tell','Requires being signed in.'],
+      ['nice','"+ Track" on a recipe card logs it to today','Signed out, it should send you to login first.']
+    ]
+  },
+  {
+    id:'data', icon:'🗄️', title:'7. Supabase & data',
+    items:[
+      ['imp','Confirm you\'re on the right project','<code>qonuiowgfwhgqnojzjxy</code> — it\'s the only one on your account, and all six pages now read it from <code>nn-config.js</code>.'],
+      ['imp','Open the site in a private window and confirm you can\'t see anyone\'s data','Row Level Security is on for every table, but verify it holds.'],
+      ['imp','The <code>tmp-photos</code> storage bucket is public and holds 16 files','If those are food photos people uploaded, a public bucket means anyone with the URL can view them. Worth making private.'],
+      ['imp','Check your Supabase free-tier usage','Database size, storage, monthly active users, edge function calls.'],
+      ['nice','Know where the anon key lives','Only in <code>nn-config.js</code> now. It\'s safe to be public — RLS is what protects your data — but never put the <em>service role</em> key in any file in this folder.'],
+      ['nice','Have a backup plan for the recipes table','41 rows of hand-written content. Export a CSV occasionally.'],
+      ['nice','Know how to add a new recipe','Insert a row in the <code>recipes</code> table + upload a photo to the <code>recipe-images</code> bucket. No code change needed.']
+    ]
+  },
+  {
+    id:'deploy', icon:'🚀', title:'8. Deploying',
+    note:'The repo has a GitHub remote but no commits yet — nothing is pushed.',
+    items:[
+      ['block','Commit and push the site','From the <code>nourish-n-narrate</code> folder: <code>git add -A</code>, <code>git commit -m "Clean up and mobile polish"</code>, <code>git push -u origin master</code>.'],
+      ['block','Turn on GitHub Pages and confirm the live URL loads','Repo → Settings → Pages.'],
+      ['block','Confirm the live site is HTTPS','The barcode scanner and camera need it.'],
+      ['block','Add the live URL to Supabase → Authentication → URL Configuration','Both Site URL and Redirect URLs, or confirmation emails will bounce users to the wrong place.'],
+      ['imp','Re-test signup and login on the live URL, not locally',''],
+      ['imp','Re-test recipes, calculator and tracker on the live URL',''],
+      ['nice','Check it loads on mobile data, not just wifi','Reveals slow-loading images.'],
+      ['nice','Consider a custom domain','']
+    ]
+  },
+  {
+    id:'seo', icon:'🔎', title:'9. Sharing & findability',
+    items:[
+      ['imp','Paste the live link into WhatsApp or Instagram DM and see the preview','I added Open Graph tags, but no preview <em>image</em> — it\'ll show text only. Add one if you want a picture.'],
+      ['nice','Run Google Lighthouse','Chrome DevTools → Lighthouse → Analyze. Aim for 90+ on Performance and Accessibility.'],
+      ['nice','Page titles read well in a browser tab',''],
+      ['nice','Add a sitemap.xml and submit to Google Search Console','']
+    ]
+  },
+  {
+    id:'watch', icon:'👀', title:'10. Worth knowing',
+    note:'Not tasks — things I noticed that you may want to decide on.',
+    items:[
+      ['nice','<code>form-handlers.js</code> loads but does nothing right now','It wires up contact/suggestion forms to Supabase, but the site uses Google Forms instead. I kept it because the database tables exist. Delete it and its two script tags if you\'re staying with Google Forms.'],
+      ['nice','<code>recipe_suggestions</code> and <code>contact_submissions</code> tables are empty','Same reason — nothing writes to them yet.'],
+      ['nice','I deleted two files I shouldn\'t have','<code>Instagram_Post_Caption.txt</code> and <code>Welcome_Email_Template.txt</code> were caught by a wildcard when clearing setup notes. If you had content in them, you\'ll need to rewrite it — sorry.'],
+      ['nice','<code>recipe-tiles/</code> in the parent folder is untouched','Nine SVG tiles, not used by the site. Kept in case they\'re source artwork.'],
+      ['nice','Your anon key is valid until 2036','No action needed for a long time.']
+    ]
+  }
+];
+
+const TAGS = {block:['t-block','Blocker'], imp:['t-imp','Important'], nice:['t-nice','Nice']};
+const KEY = 'nn-checklist-v1';
+let state = {};
+try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){ state = {}; }
+
+const list = document.getElementById('list');
+
+DATA.forEach(sec => {
+  const el = document.createElement('section');
+  el.innerHTML = `
+    <button class="head" aria-expanded="false">
+      <span class="icon" aria-hidden="true">${sec.icon}</span>
+      <span class="htext">
+        <span class="htitle">${sec.title}</span>
+        ${sec.note ? `<span class="hnote">${sec.note}</span>` : ''}
+      </span>
+      <span class="hcount" data-c="${sec.id}"></span>
+      <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"
+           aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="body">
+      ${sec.items.map(([lvl, txt, why], i) => {
+        const id = sec.id + '-' + i;
+        const [cls, label] = TAGS[lvl];
+        return `<div class="item">
+          <input type="checkbox" id="${id}" ${state[id] ? 'checked' : ''} />
+          <label class="lbl" for="${id}">
+            <span class="txt">${txt}<span class="tag ${cls}">${label}</span></span>
+            ${why ? `<span class="why">${why}</span>` : ''}
+          </label>
+        </div>`;
+      }).join('')}
+    </div>`;
+  list.appendChild(el);
+
+  el.querySelector('.head').addEventListener('click', () => {
+    const open = el.classList.toggle('open');
+    el.querySelector('.head').setAttribute('aria-expanded', String(open));
+  });
+});
+
+function refresh(){
+  const all = [...document.querySelectorAll('.item input')];
+  const done = all.filter(i => i.checked).length;
+  document.getElementById('fill').style.width = (all.length ? done/all.length*100 : 0) + '%';
+  document.getElementById('count').textContent = done + ' / ' + all.length;
+  DATA.forEach(sec => {
+    const items = [...document.querySelectorAll(`.item input[id^="${sec.id}-"]`)];
+    const d = items.filter(i => i.checked).length;
+    const badge = document.querySelector(`[data-c="${sec.id}"]`);
+    badge.textContent = d + '/' + items.length;
+    badge.style.color = (d === items.length) ? 'var(--green)' : '';
+  });
+}
+
+list.addEventListener('change', e => {
+  if (e.target.type !== 'checkbox') return;
+  state[e.target.id] = e.target.checked;
+  try { localStorage.setItem(KEY, JSON.stringify(state)); } catch(err){}
+  refresh();
+});
+
+document.getElementById('expand').addEventListener('click', e => {
+  const secs = [...document.querySelectorAll('section')];
+  const openAll = !secs.every(s => s.classList.contains('open'));
+  secs.forEach(s => {
+    s.classList.toggle('open', openAll);
+    s.querySelector('.head').setAttribute('aria-expanded', String(openAll));
+  });
+  e.target.textContent = openAll ? 'Collapse all' : 'Expand all';
+});
+
+document.getElementById('reset').addEventListener('click', () => {
+  if (!confirm('Clear every tick and start over?')) return;
+  state = {};
+  try { localStorage.removeItem(KEY); } catch(err){}
+  document.querySelectorAll('.item input').forEach(i => i.checked = false);
+  refresh();
+});
+
+// Open the first section by default
+document.querySelector('section').classList.add('open');
+document.querySelector('.head').setAttribute('aria-expanded','true');
+refresh();
+</script>
+</body>
+</html>

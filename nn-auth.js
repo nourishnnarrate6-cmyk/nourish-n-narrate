@@ -23,8 +23,14 @@
 
 const NNAuth = (() => {
 
-  const SUPABASE_URL = 'https://qonuiowgfwhgqnojzjxy.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvbnVpb3dnZndoZ3Fub2p6anh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDYzNDQsImV4cCI6MjA5OTUyMjM0NH0.u2SxUdFzufbJk9L0WHASepfvHcxw-RiwqufemQ3ywFs';
+  /* Credentials live in nn-config.js — load it before this file. */
+  const CFG = window.NN_CONFIG || {};
+  const SUPABASE_URL = CFG.SUPABASE_URL;
+  const SUPABASE_ANON_KEY = CFG.SUPABASE_ANON_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    console.error('NNAuth: nn-config.js is missing or was loaded after nn-auth.js.');
+  }
 
   let client = null;
   const readyCallbacks = [];
