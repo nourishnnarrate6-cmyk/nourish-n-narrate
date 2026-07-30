@@ -17,7 +17,14 @@
 
   <!-- Icons, theme colour and social preview -->
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
-  <link rel="apple-touch-icon" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <!-- Installable web app. Status bar stays "default": the CSS defines
+       safe-area insets for left/right/bottom but not top, so a
+       translucent bar would slide the nav under the notch. -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
   <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
   <meta name="color-scheme" content="light dark" />
@@ -1033,6 +1040,17 @@
         })
         .catch(function () { /* keep fallback number */ });
     })();
+  </script>
+
+  <!-- PWA: register the service worker (offline support + installability) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function (err) {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
   </script>
 </body>
 </html>
