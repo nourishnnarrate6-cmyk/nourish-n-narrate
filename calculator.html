@@ -663,6 +663,7 @@
     <a href="calculator.html">Calculator</a>
     <a href="tracker.html">Tracker</a>
     <a href="profile.html">Profile</a>
+    <a href="login.html?redirect=calculator.html" id="m-auth-link">🔑 Log In</a>
   </div>
 
 
@@ -1474,15 +1475,18 @@
     const session = await NNAuth.getSession();
     if (!session) return; // logged out — defaults already correct
 
-    // Nav: swap "Log In" for "Sign Out"
-    const authLink = document.getElementById('auth-link');
-    authLink.textContent = 'Sign Out';
-    authLink.href = '#';
-    authLink.title = 'Signed in as ' + session.user.email;
-    authLink.addEventListener('click', async e => {
-      e.preventDefault();
-      await NNAuth.signOut();
-      location.reload();
+    // Nav + mobile menu: swap "Log In" for "Sign Out"
+    [['auth-link', 'Sign Out'], ['m-auth-link', '🔓 Sign Out']].forEach(([id, label]) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.textContent = label;
+      el.href = '#';
+      el.title = 'Signed in as ' + session.user.email;
+      el.addEventListener('click', async e => {
+        e.preventDefault();
+        await NNAuth.signOut();
+        location.reload();
+      });
     });
 
     // Results footer: show the save button instead of the login prompt

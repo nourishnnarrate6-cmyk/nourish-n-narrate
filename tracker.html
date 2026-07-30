@@ -1019,6 +1019,7 @@
         <li><a href="profile.html">Profile</a></li>
       </ul>
       <div class="nav-actions">
+        <a class="nav-auth" id="auth-link" href="login.html?redirect=tracker.html">Log In</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
         <a class="nav-cta" href="profile.html" style="text-decoration:none;">👤 My Profile</a>
         <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
@@ -1035,6 +1036,7 @@
     <a href="calculator.html">Calculator</a>
     <a href="tracker.html">Tracker</a>
     <a href="profile.html">Profile</a>
+    <a href="login.html?redirect=tracker.html" id="m-auth-link">🔑 Log In</a>
   </div>
 
 
@@ -2765,6 +2767,20 @@
         return;
       }
       document.getElementById('tracker-content').style.display = 'block';
+
+      // Nav + mobile menu: swap "Log In" for "Sign Out"
+      [['auth-link', 'Sign Out'], ['m-auth-link', '🔓 Sign Out']].forEach(([id, label]) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.textContent = label;
+        el.href = '#';
+        el.title = 'Signed in as ' + session.user.email;
+        el.addEventListener('click', async e => {
+          e.preventDefault();
+          await NNAuth.signOut();
+          location.reload();
+        });
+      });
 
       // Load the food & exercise libraries from Supabase
       // (the built-in lists remain as an offline fallback)
