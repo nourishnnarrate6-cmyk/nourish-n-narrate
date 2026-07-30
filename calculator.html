@@ -2,9 +2,23 @@
 <html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Nutrition Calculator — Nourish N Narrate</title>
   <meta name="description" content="Calculate your daily calories, macros, water and fiber targets — plus personalized tips and a sample meal plan." />
+
+  <!-- Icons, theme colour and social preview -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="favicon.svg" />
+  <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="apple-mobile-web-app-title" content="Nourish N Narrate" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nourish N Narrate" />
+  <meta property="og:title" content="Nutrition Calculator — Nourish N Narrate" />
+  <meta property="og:description" content="Find your daily calorie, protein, carb, fat, water and fiber targets in seconds." />
+  <meta name="twitter:card" content="summary" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -558,6 +572,53 @@
     width: 100%; justify-content: center;
     padding: 0.95rem 1.5rem; font-size: 1rem;
   }
+  
+  /* ==================================================================
+     SMALL-SCREEN REFINEMENTS
+     The results dashboard is dense — on phones the number groups get
+     laid out as grids instead of flex rows so nothing is squeezed or
+     pushed off the edge.
+  ================================================================== */
+
+  /* Charts scale with their card instead of forcing it wider */
+  .donut-wrap svg { max-width: 100%; height: auto; }
+
+  @media (max-width: 560px) {
+    #calc-hero { padding-top: calc(var(--nav-h) + 2.25rem); }
+    .calc-form-card { padding: 1.4rem 1.15rem; border-radius: var(--radius); }
+    .results-grid { gap: 1.1rem; margin-top: 1.75rem; }
+    .res-card { padding: 1.3rem 1.15rem; border-radius: var(--radius); }
+
+    .cal-context {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.65rem;
+    }
+    .cal-context strong { font-size: 0.98rem; }
+    .cal-context span { font-size: 0.64rem; letter-spacing: 0.03em; }
+
+    .targets-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+    .target-tile { padding: 1.1rem 0.65rem; }
+    .target-tile .t-emoji { font-size: 1.6rem; }
+    .target-tile strong { font-size: 0.94rem; }
+    .target-tile span { font-size: 0.75rem; }
+
+    /* Meal rows: calorie pill drops under the text rather than squashing it */
+    .meal-row { flex-wrap: wrap; }
+    .meal-kcal { align-self: flex-start; margin-left: calc(46px + 1rem); }
+
+    .dual-inputs { flex-direction: column; gap: 0.6rem; }
+    .segmented label { padding: 0.6rem 0.5rem; font-size: 0.84rem !important; }
+    .segmented.mini { max-width: none; }
+    .btn-calculate { padding: 1rem 1.5rem; font-size: 1rem; }
+    .calc-disclaimer { padding: 1rem 1.1rem; font-size: 0.8rem; }
+  }
+
+  @media (max-width: 380px) {
+    .cal-context { grid-template-columns: repeat(2, 1fr); }
+    .targets-grid { grid-template-columns: 1fr; }
+  }
+
   </style>
 </head>
 <body>
@@ -891,24 +952,7 @@
     </div>
   </section>
 
-  <!-- ============================================================
-       FOOTER (matches the home page)
-  ============================================================ -->
-  <footer>
-    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
-    <p>© 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
-    <div style="margin:1.1rem 0 0.2rem;">
-      <a href="https://www.youtube.com/channel/UCIHTdS000vhikhav7c141bA" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on YouTube"
-         style="display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.05rem;border-radius:999px;font-size:.9rem;font-weight:600;color:#fff;text-decoration:none;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);">
-        <svg viewBox="0 0 24 24" fill="#FF0000" aria-hidden="true" style="width:22px;height:22px;flex-shrink:0;"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
-        <span>Watch us on YouTube</span>
-      </a>
-    </div>
-    <p style="margin-top:.5rem;font-size:.8rem;opacity:.6">Made with 💚 by students, for everyone.</p>
-  </footer>
 
-  <!-- Scroll to top -->
-  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">↑</button>
 
 
   <!-- Sign-up prompt — appears after calculating while logged out -->
@@ -922,7 +966,30 @@
   </div>
 
 
+  <!-- ============================================================
+       FOOTER  (identical on every page — edit all six together)
+  ============================================================ -->
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>&copy; 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <div class="foot-social">
+      <a href="https://www.youtube.com/channel/UCIHTdS000vhikhav7c141bA" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on YouTube">
+        <svg viewBox="0 0 24 24" fill="#FF0000" aria-hidden="true"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
+        <span>YouTube</span>
+      </a>
+      <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <span>Instagram</span>
+      </a>
+    </div>
+    <p class="foot-note">Made with &#128154; by students, for everyone.</p>
+  </footer>
+
+  <!-- Scroll to top (wired up by nn-premium.js) -->
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">&#8593;</button>
+
   <!-- Supabase + shared auth helper (saving results) -->
+  <script src="nn-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="nn-auth.js"></script>
   <script>

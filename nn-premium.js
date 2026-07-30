@@ -46,6 +46,29 @@
     });
   })();
 
+  /* ---------------- Shared "back to top" button ----------------
+     Every page has the same #scroll-top button in its footer; this
+     fades it in once the visitor has scrolled past the first screen. */
+  (function () {
+    var btn = document.getElementById('scroll-top');
+    if (!btn) return;
+    function sync() { btn.classList.toggle('visible', window.scrollY > 400); }
+    window.addEventListener('scroll', sync, { passive: true });
+    sync();
+  })();
+
+  /* ---------------- Loading screen safety net ----------------
+     If a page's own loader logic never runs (slow network, a script
+     error), make sure the overlay still clears rather than trapping
+     the visitor on a blank screen. */
+  (function () {
+    var screenEl = document.getElementById('loading-screen');
+    if (!screenEl) return;
+    window.addEventListener('load', function () {
+      setTimeout(function () { screenEl.classList.add('hidden'); }, 1200);
+    });
+  })();
+
   var fine = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if (!fine || reduce) return;
