@@ -547,6 +547,38 @@
     margin-bottom: 2.2rem;
   }
 
+  /* "Get the app" pill — sits on its own row just above the hero buttons.
+     Deliberately lighter than .btn-primary so it invites without competing
+     with Explore Recipes. */
+  .hero-install {
+    display: inline-flex; align-items: center; gap: 0.55rem;
+    padding: 0.62rem 1.2rem;
+    margin-bottom: 1.15rem;
+    font-size: 0.9rem; font-weight: 600;
+    color: var(--green-deep);
+    text-decoration: none;
+    background: rgba(255, 255, 255, 0.75);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(5, 150, 105, 0.28);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.3s var(--ease-spring), box-shadow 0.3s ease,
+                border-color 0.3s ease, background 0.3s ease;
+  }
+  .hero-install:hover {
+    transform: translateY(-2px);
+    border-color: var(--green);
+    background: rgba(255, 255, 255, 0.92);
+  }
+  .hero-install .hi-arrow { transition: transform 0.3s var(--ease-out); }
+  .hero-install:hover .hi-arrow { transform: translateX(4px); }
+  /* The pill must never wrap to two lines — drop the long tail on narrow phones */
+  @media (max-width: 430px) {
+    .hero-install { font-size: 0.84rem; padding: 0.55rem 1rem; }
+    .hero-install .hi-long { display: none; }
+  }
+
   .hero-actions { display: flex; flex-wrap: wrap; gap: 0.9rem; margin-bottom: 2.6rem; }
 
   .hero-stats {
@@ -1691,6 +1723,15 @@
   [data-theme="dark"] .hero-badge {
     background: rgba(17, 26, 46, 0.75);
     color: var(--green-light);
+  }
+  [data-theme="dark"] .hero-install {
+    background: rgba(17, 26, 46, 0.75);
+    color: var(--green-light);
+    border-color: rgba(52, 211, 153, 0.3);
+  }
+  [data-theme="dark"] .hero-install:hover {
+    background: rgba(17, 26, 46, 0.92);
+    border-color: var(--green-light);
   }
   [data-theme="dark"] .hero-bg::before {
     background-image: radial-gradient(rgba(52, 211, 153, 0.12) 1px, transparent 1px);

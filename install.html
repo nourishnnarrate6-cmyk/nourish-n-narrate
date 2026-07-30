@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Get the App — Nourish N Narrate</title>
+  <meta name="description" content="Add Nourish N Narrate to your home screen and use it like an app — works on iPhone, Android and desktop." />
+
+  <!-- Icons, theme colour and social preview -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <!-- Installable web app. Status bar stays "default": the CSS defines
+       safe-area insets for left/right/bottom but not top, so a
+       translucent bar would slide the nav under the notch. -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="apple-mobile-web-app-title" content="Nourish N Narrate" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nourish N Narrate" />
+  <meta property="og:title" content="Get the App — Nourish N Narrate" />
+  <meta property="og:description" content="Add Nourish N Narrate to your home screen and use it like an app." />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Shared modern stylesheet (same design system as the home page) -->
+  <link rel="stylesheet" href="nn-modern.css" />
+
+  <style>
+    .inst-header { padding-top: calc(var(--nav-h) + 3rem); padding-bottom: 4rem; }
+    #install.inst-header {
+      background:
+        radial-gradient(800px 400px at 88% 0%, rgba(5, 150, 105, 0.06), transparent 70%),
+        radial-gradient(700px 420px at 5% 100%, rgba(234, 88, 12, 0.05), transparent 70%),
+        var(--bg);
+      min-height: 100vh;
+    }
+    .back-link {
+      display: inline-flex; align-items: center; gap: .5rem;
+      color: var(--green); font-weight: 600; text-decoration: none;
+      font-size: .95rem; margin-bottom: 1.25rem;
+      transition: gap 0.3s var(--ease-out), color 0.25s ease;
+    }
+    .back-link:hover { gap: .85rem; color: var(--green-mid); }
+
+    .inst-intro { max-width: 620px; color: var(--text); margin-bottom: 2.5rem; line-height: 1.7; }
+
+    /* Banner shown when the visitor is already running the installed app */
+    .inst-done {
+      display: none;
+      align-items: center; gap: .85rem;
+      padding: 1.1rem 1.35rem; margin-bottom: 2.5rem;
+      background: var(--green-pale);
+      border: 1px solid rgba(5, 150, 105, 0.28);
+      border-radius: var(--radius-lg);
+      color: var(--green-deep); font-weight: 600;
+    }
+    .inst-done.show { display: flex; }
+
+    /* Platform tabs */
+    .inst-tabs {
+      display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 2rem;
+    }
+    .inst-tab {
+      display: inline-flex; align-items: center; gap: .5rem;
+      padding: .7rem 1.3rem;
+      font-size: .93rem; font-weight: 600;
+      color: var(--text); background: var(--surface);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      transition: all .25s ease;
+    }
+    .inst-tab:hover { border-color: var(--green); color: var(--green); }
+    .inst-tab.active {
+      color: #fff; background: var(--grad-green);
+      border-color: transparent;
+      box-shadow: var(--shadow-sm);
+    }
+    .inst-tab .tab-you {
+      font-size: .7rem; font-weight: 700; letter-spacing: .04em;
+      padding: .15rem .45rem; border-radius: var(--radius-full);
+      background: rgba(255,255,255,.25);
+    }
+    .inst-tab:not(.active) .tab-you { background: var(--green-pale); color: var(--green-deep); }
+
+    /* Step panels */
+    .inst-panel { display: none; }
+    .inst-panel.active { display: block; animation: instFade .35s var(--ease-out); }
+    @keyframes instFade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+    .inst-steps { list-style: none; padding: 0; margin: 0 0 2rem; counter-reset: instep; }
+    .inst-step {
+      position: relative;
+      display: flex; gap: 1.1rem; align-items: flex-start;
+      padding: 1.25rem 1.4rem;
+      margin-bottom: .9rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .inst-step .num {
+      flex: 0 0 auto;
+      width: 32px; height: 32px;
+      display: grid; place-items: center;
+      font-size: .9rem; font-weight: 700; color: #fff;
+      background: var(--grad-green);
+      border-radius: 50%;
+    }
+    .inst-step .body { flex: 1; min-width: 0; }
+    .inst-step .body strong { display: block; color: var(--ink); margin-bottom: .2rem; font-size: 1rem; }
+    .inst-step .body span { color: var(--text-muted); font-size: .93rem; line-height: 1.6; }
+    .inst-step .glyph {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 26px; height: 26px; padding: 0 .4rem; margin: 0 .15rem;
+      vertical-align: -6px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      font-size: .95rem;
+    }
+
+    /* One-tap install button (Android / desktop Chromium only) */
+    .inst-cta { display: none; margin-bottom: 1.6rem; }
+    .inst-cta.show { display: inline-flex; }
+
+    .inst-note {
+      padding: 1.1rem 1.3rem;
+      background: var(--surface-2);
+      border-left: 3px solid var(--green);
+      border-radius: 0 var(--radius-md, 12px) var(--radius-md, 12px) 0;
+      color: var(--text); font-size: .92rem; line-height: 1.65;
+    }
+    .inst-note + .inst-note { margin-top: .8rem; }
+
+    .inst-perks {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 1rem; margin: 2.75rem 0 0;
+    }
+    .inst-perk {
+      padding: 1.35rem 1.4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+    .inst-perk .ico { font-size: 1.5rem; display: block; margin-bottom: .55rem; }
+    .inst-perk strong { display: block; color: var(--ink); margin-bottom: .25rem; font-size: .98rem; }
+    .inst-perk span { color: var(--text-muted); font-size: .89rem; line-height: 1.6; }
+
+    @media (max-width: 560px) {
+      .inst-header { padding-top: calc(var(--nav-h) + 2rem); }
+      .inst-step { padding: 1.05rem 1.1rem; gap: .85rem; }
+      .inst-tab { padding: .6rem 1rem; font-size: .87rem; }
+    }
+  </style>
+</head>
+<body data-view="install">
+
+  <!-- Loading screen -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html#home">Home</a></li>
+        <li><a href="index.html#recipes">Recipes</a></li>
+        <li><a href="calculator.html">Calculator</a></li>
+        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#faq">FAQ</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu (same tabs as the desktop nav) -->
+  <div class="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
+    <a href="index.html#home">Home</a>
+    <a href="index.html#recipes">Recipes</a>
+    <a href="calculator.html">Calculator</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="profile.html">Profile</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#faq">FAQ</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+
+  <section id="install" class="inst-header">
+    <div class="container">
+
+      <div class="reveal">
+        <a href="index.html#home" class="back-link">← Back to home</a>
+        <span class="section-label">Install</span>
+        <h2 class="section-title">Use Nourish N Narrate as an app</h2>
+        <div class="divider"></div>
+      </div>
+
+      <p class="inst-intro reveal">
+        Add Nourish N Narrate to your home screen and it opens like a normal app —
+        full screen, its own icon, no address bar, and your tracker works even with
+        a patchy signal. It takes about ten seconds and installs nothing from an
+        app store.
+      </p>
+
+      <!-- Shown only when the visitor is already inside the installed app -->
+      <div class="inst-done" id="inst-done">
+        <span aria-hidden="true">✅</span>
+        <span>You're already using the installed app — nothing more to do. Enjoy!</span>
+      </div>
+
+      <!-- One tap install, where the browser supports it -->
+      <button class="btn-primary inst-cta" id="inst-cta" type="button">
+        ⬇️ Install app <span class="btn-arrow" aria-hidden="true">→</span>
+      </button>
+
+      <div class="inst-tabs reveal" role="tablist" aria-label="Choose your device">
+        <button class="inst-tab" id="tab-ios"     role="tab" type="button" data-panel="panel-ios">🍎 iPhone &amp; iPad</button>
+        <button class="inst-tab" id="tab-android" role="tab" type="button" data-panel="panel-android">🤖 Android</button>
+        <button class="inst-tab" id="tab-desktop" role="tab" type="button" data-panel="panel-desktop">💻 Computer</button>
+      </div>
+
+      <!-- iOS -->
+      <div class="inst-panel" id="panel-ios" role="tabpanel" aria-labelledby="tab-ios">
+        <ol class="inst-steps">
+          <li class="inst-step">
+            <div class="num">1</div>
+            <div class="body">
+              <strong>Open this page in Safari</strong>
+              <span>This only works in Safari. If you arrived from Instagram, a text
+                message or another app, tap the <span class="glyph">⋯</span> or
+                <span class="glyph">↗</span> menu and choose <em>Open in Safari</em> first.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">2</div>
+            <div class="body">
+              <strong>Tap the Share button</strong>
+              <span>The square with an arrow pointing up
+                <span class="glyph">↑</span> — at the bottom of the screen on an
+                iPhone, or the top on an iPad.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">3</div>
+            <div class="body">
+              <strong>Scroll down and tap “Add to Home Screen”</strong>
+              <span>It sits below the row of sharing apps, next to a
+                <span class="glyph">＋</span> icon. You may need to scroll a little way down the list.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">4</div>
+            <div class="body">
+              <strong>Tap “Add”</strong>
+              <span>The leaf-and-book icon appears on your home screen. Open it from
+                there and it runs full screen.</span>
+            </div>
+          </li>
+        </ol>
+        <div class="inst-note">
+          <strong>Heads up:</strong> iPhones don't show an automatic “install” pop-up
+          for web apps — Apple doesn't offer one, so the Share menu is the only way in.
+          You'll also need to sign in once inside the app, because iOS treats it as a
+          separate browser.
+        </div>
+      </div>
+
+      <!-- Android -->
+      <div class="inst-panel" id="panel-android" role="tabpanel" aria-labelledby="tab-android">
+        <ol class="inst-steps">
+          <li class="inst-step">
+            <div class="num">1</div>
+            <div class="body">
+              <strong>Open this page in Chrome</strong>
+              <span>If you tapped a link inside another app, choose
+                <em>Open in Chrome</em> from that app's menu first.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">2</div>
+            <div class="body">
+              <strong>Tap the ⋮ menu, top right</strong>
+              <span>Or just use the <em>Install app</em> button above if it appeared —
+                that does the whole thing in one tap.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">3</div>
+            <div class="body">
+              <strong>Choose “Install app” or “Add to Home screen”</strong>
+              <span>The wording depends on your Chrome version — both do the same thing.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">4</div>
+            <div class="body">
+              <strong>Confirm with “Install”</strong>
+              <span>It lands on your home screen and in your app drawer, like any other app.</span>
+            </div>
+          </li>
+        </ol>
+        <div class="inst-note">
+          Chrome sometimes offers this by itself after you've used the site for a
+          while. If you've dismissed that prompt before, it won't ask again — the
+          ⋮ menu always works.
+        </div>
+      </div>
+
+      <!-- Desktop -->
+      <div class="inst-panel" id="panel-desktop" role="tabpanel" aria-labelledby="tab-desktop">
+        <ol class="inst-steps">
+          <li class="inst-step">
+            <div class="num">1</div>
+            <div class="body">
+              <strong>Use Chrome or Edge</strong>
+              <span>Safari and Firefox on a computer can't install web apps yet.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">2</div>
+            <div class="body">
+              <strong>Look at the right of the address bar</strong>
+              <span>There's a small install icon — a screen with a downward arrow
+                <span class="glyph">⊕</span>. Click it.</span>
+            </div>
+          </li>
+          <li class="inst-step">
+            <div class="num">3</div>
+            <div class="body">
+              <strong>Click “Install”</strong>
+              <span>Nourish N Narrate opens in its own window and pins to your dock,
+                taskbar or Start menu.</span>
+            </div>
+          </li>
+        </ol>
+        <div class="inst-note">
+          No install icon? Open the ⋮ menu → <em>Cast, save and share</em> →
+          <em>Install page as app</em>, or <em>Apps → Install this site as an app</em>.
+        </div>
+      </div>
+
+      <div class="inst-perks">
+        <div class="inst-perk">
+          <span class="ico" aria-hidden="true">📴</span>
+          <strong>Works offline</strong>
+          <span>Recipes and your tracker layout load without a signal. Logs sync the moment you're back online.</span>
+        </div>
+        <div class="inst-perk">
+          <span class="ico" aria-hidden="true">⚡</span>
+          <strong>Opens instantly</strong>
+          <span>The app is stored on your device, so there's no page load to wait through.</span>
+        </div>
+        <div class="inst-perk">
+          <span class="ico" aria-hidden="true">🗑️</span>
+          <strong>Easy to remove</strong>
+          <span>Delete the icon like any app. Your account and logs stay safe in your profile.</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>&copy; 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <div class="foot-social">
+      <a href="https://www.youtube.com/channel/UCIHTdS000vhikhav7c141bA" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on YouTube">
+        <svg viewBox="0 0 24 24" fill="#FF0000" aria-hidden="true"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
+        <span>YouTube</span>
+      </a>
+      <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <span>Instagram</span>
+      </a>
+    </div>
+    <p class="foot-note">Made with &#128154; by students, for everyone.</p>
+  </footer>
+
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">&#8593;</button>
+
+  <script src="nn-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="nn-auth.js"></script>
+  <script src="nn-premium.js"></script>
+
+  <script>
+    /* ---------- Theme + navbar (same behaviour as every other page) ---------- */
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeBtn.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* ---------- Tabs ---------- */
+    const tabs = [
+      { btn: 'tab-ios',     panel: 'panel-ios' },
+      { btn: 'tab-android', panel: 'panel-android' },
+      { btn: 'tab-desktop', panel: 'panel-desktop' },
+    ];
+    function showPanel(panelId) {
+      tabs.forEach(t => {
+        const b = document.getElementById(t.btn);
+        const p = document.getElementById(t.panel);
+        const on = t.panel === panelId;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-selected', on ? 'true' : 'false');
+        p.classList.toggle('active', on);
+      });
+    }
+    tabs.forEach(t => {
+      document.getElementById(t.btn)
+        .addEventListener('click', () => showPanel(t.panel));
+    });
+
+    /* ---------- Detect the visitor's platform and open that tab first ----------
+       iPadOS 13+ reports itself as a Mac, so the touch-point check is what
+       actually catches modern iPads. */
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPad|iPhone|iPod/.test(ua) ||
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isAndroid = /Android/i.test(ua);
+    const mine = isIOS ? 'panel-ios' : isAndroid ? 'panel-android' : 'panel-desktop';
+    showPanel(mine);
+
+    // Mark the matching tab so it's obvious which one applies to them
+    const mineTab = tabs.find(t => t.panel === mine);
+    if (mineTab) {
+      const b = document.getElementById(mineTab.btn);
+      const tag = document.createElement('span');
+      tag.className = 'tab-you';
+      tag.textContent = 'YOU';
+      b.appendChild(tag);
+    }
+
+    /* ---------- Already installed? ---------- */
+    const standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       window.navigator.standalone === true;
+    if (standalone) document.getElementById('inst-done').classList.add('show');
+
+    /* ---------- One-tap install (Chromium only; iOS has no such API) ---------- */
+    let deferredPrompt = null;
+    const cta = document.getElementById('inst-cta');
+    window.addEventListener('beforeinstallprompt', e => {
+      e.preventDefault();
+      deferredPrompt = e;
+      if (!standalone) cta.classList.add('show');
+    });
+    cta.addEventListener('click', async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      if (outcome === 'accepted') cta.classList.remove('show');
+    });
+    window.addEventListener('appinstalled', () => {
+      cta.classList.remove('show');
+      document.getElementById('inst-done').classList.add('show');
+    });
+
+    /* ---------- Reveal-on-scroll parity with the rest of the site ---------- */
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+  </script>
+
+  <!-- PWA: register the service worker (offline support + installability) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function (err) {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

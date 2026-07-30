@@ -153,6 +153,15 @@
           alternatives—one recipe at a time.
         </p>
 
+        <!-- Get-the-app pill. Sits on its own row directly above the buttons.
+             Hidden automatically when the visitor is already in the installed
+             app (see the display-mode check at the bottom of this page). -->
+        <a href="install.html" class="hero-install anim-d4" id="hero-install">
+          <span aria-hidden="true">📱</span>
+          Get the app<span class="hi-long"> — add it to your home screen</span>
+          <span class="hi-arrow" aria-hidden="true">→</span>
+        </a>
+
         <!-- ✏️ Button labels -->
         <div class="hero-actions anim-d4">
           <button class="btn-primary" onclick="document.getElementById('recipes').scrollIntoView({behavior:'smooth'})">
@@ -1039,6 +1048,16 @@
           if (typeof n === 'number' && n > 0) el.textContent = n;
         })
         .catch(function () { /* keep fallback number */ });
+    })();
+  </script>
+
+  <!-- Hide the "Get the app" pill for anyone already inside the installed app -->
+  <script>
+    (function () {
+      var standalone = window.matchMedia('(display-mode: standalone)').matches ||
+                       window.navigator.standalone === true;
+      var pill = document.getElementById('hero-install');
+      if (standalone && pill) pill.style.display = 'none';
     })();
   </script>
 

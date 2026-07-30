@@ -1148,7 +1148,12 @@
 
             <!-- Photo recognition: snap the food, AI guesses it -->
             <button class="photo-btn" id="btn-photo" type="button">📸 Snap a Photo — AI guesses the food</button>
-            <input type="file" id="photo-input" accept="image/*" capture="environment" style="display:none;" aria-hidden="true" />
+            <!-- No `capture` attribute on purpose: with it, iOS jumps straight
+                 into a full-screen camera with no easy way back out. Without it
+                 the normal action sheet appears (Take Photo / Photo Library /
+                 Cancel), so a mis-tap is one tap to undo — and users can log a
+                 meal they photographed earlier. -->
+            <input type="file" id="photo-input" accept="image/*" style="display:none;" aria-hidden="true" />
 
             <!-- #2 EXTRA FEATURE: recent foods quick-add -->
             <div class="recent-chips" id="recent-chips"></div>
@@ -1315,8 +1320,9 @@
       <img class="photo-preview" id="photo-preview" alt="Your food photo" />
       <div class="scan-status" id="photo-status" aria-live="polite"></div>
       <div id="photo-results"></div>
-      <p class="photo-note">AI runs on your device — the photo never leaves your phone.
-        Estimates are per typical serving; tap ✎ to adjust before logging.</p>
+      <p class="photo-note">Your photo is sent securely to our AI to identify the food, and
+        the result may be saved to speed up future scans. Estimates are per typical serving;
+        tap ✎ to adjust before logging.</p>
     </div>
   </div>
 
@@ -2075,12 +2081,26 @@
 
     /* ===========================================================
        PHOTO FOOD RECOGNITION
-       On-device AI (TensorFlow.js MobileNet, lazy-loaded from CDN).
-       The photo is analyzed locally — it never leaves the device.
+
+       Two-tier. The primary path uploads the photo to the
+       `analyze-food` Edge Function, which asks Gemini what is on the
+       plate — so the photo DOES leave the device. A perceptual hash
+       goes with it so the server can reuse a saved scan of a
+       lookalike, and user corrections feed a shared scan cache.
+
+       Only if that call fails or times out do we fall back to the
+       on-device model (TensorFlow.js MobileNet, lazy-loaded from CDN),
+       which does run locally.
+
        Guesses are matched to the food library / Open Food Facts
        for calories, then confirmed by the user before logging.
     =========================================================== */
     let photoModel = null, photoModelLoading = null, photoObjectUrl = null;
+    /* Bumped every time a scan starts or the modal is closed. A running
+       analysis compares its own token against this and bails out if it no
+       longer matches, so closing the modal truly cancels the scan instead of
+       letting a 35s job finish and repopulate a dialog the user shut. */
+    let photoRun = 0;
 
     function loadScriptOnce(src) {
       return new Promise(function (resolve, reject) {
@@ -2118,9 +2138,14 @@
     }
 
     function closePhotoModal() {
+      photoRun++; // cancels any analysis still in flight
       document.getElementById('photo-modal').classList.remove('open');
       if (photoObjectUrl) { URL.revokeObjectURL(photoObjectUrl); photoObjectUrl = null; }
       document.getElementById('photo-input').value = '';
+      const status = document.getElementById('photo-status');
+      const results = document.getElementById('photo-results');
+      if (status) status.textContent = '';
+      if (results) results.innerHTML = '';
     }
 
     /** Downscale the photo (max 1536px, high quality) → raw base64 JPEG for
@@ -2169,10 +2194,15 @@
       results.innerHTML = '';
       modal.classList.add('open');
 
+      const myRun = ++photoRun;
+      /** True once the user has closed the modal or started another scan. */
+      const cancelled = function () { return myRun !== photoRun; };
+
       photoObjectUrl = URL.createObjectURL(file);
       preview.src = photoObjectUrl;
       preview.style.display = 'block';
       await new Promise(function (r) { preview.onload = r; preview.onerror = r; });
+      if (cancelled()) return;
 
       /* 1) Cloud AI (Gemini via Edge Function) — understands whole dishes,
             estimates the portion actually on the plate, and now looks at its
@@ -2187,7 +2217,10 @@
           [20000, '🧠 Still working — giving this one the full treatment…'],
         ];
         const stageTimers = statusStages.map(function (stage) {
-          return setTimeout(function () { status.textContent = stage[1]; }, stage[0]);
+          return setTimeout(function () {
+            if (cancelled()) return;
+            status.textContent = stage[1];
+          }, stage[0]);
         });
 
         const base64 = photoToBase64(preview);
@@ -2203,6 +2236,7 @@
           })
         ]);
         stageTimers.forEach(clearTimeout);
+        if (cancelled()) return;
 
         if (cloud.ok) {
           if (!cloud.foods.length) {
@@ -2231,14 +2265,17 @@
       try {
         status.textContent = '🧠 Loading the on-device AI (first time takes a moment)…';
         const model = await ensurePhotoModel();
+        if (cancelled()) return;
         status.textContent = '🔎 Analyzing your photo…';
         const preds = await model.classify(preview, 10);
+        if (cancelled()) return;
 
         const seen = {};
         const found = [];
         for (let i = 0; i < preds.length && found.length < 5; i++) {
           if (preds[i].probability < 0.03) continue;
           const food = await resolvePhotoFood(preds[i].className);
+          if (cancelled()) return;
           if (food && !seen[food.label.toLowerCase()]) {
             seen[food.label.toLowerCase()] = true;
             food.confidence = Math.round(preds[i].probability * 100);
