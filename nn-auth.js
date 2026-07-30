@@ -23,14 +23,8 @@
 
 const NNAuth = (() => {
 
-  /* Credentials live in nn-config.js — load it before this file. */
-  const CFG = window.NN_CONFIG || {};
-  const SUPABASE_URL = CFG.SUPABASE_URL;
-  const SUPABASE_ANON_KEY = CFG.SUPABASE_ANON_KEY;
-
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    console.error('NNAuth: nn-config.js is missing or was loaded after nn-auth.js.');
-  }
+  const SUPABASE_URL = 'https://qonuiowgfwhgqnojzjxy.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFvbnVpb3dnZndoZ3Fub2p6anh5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM5NDYzNDQsImV4cCI6MjA5OTUyMjM0NH0.u2SxUdFzufbJk9L0WHASepfvHcxw-RiwqufemQ3ywFs';
 
   let client = null;
   const readyCallbacks = [];
@@ -234,15 +228,7 @@ const NNAuth = (() => {
       const { data, error } = await client.functions.invoke('analyze-food', { body: body });
       if (error) return { ok: false, reason: error.message || 'invoke_failed' };
       if (!data || data.error) return { ok: false, reason: (data && data.error) || 'empty' };
-      return {
-        ok: true,
-        foods: data.foods || [],
-        cached: !!data.cached,
-        model: data.model,
-        scanId: data.scan_id || null,
-        mealTotal: typeof data.mealTotal === 'number' ? data.mealTotal : null,
-        refined: !!data.refined,
-      };
+      return { ok: true, foods: data.foods || [], cached: !!data.cached, model: data.model, scanId: data.scan_id || null };
     } catch (e) {
       return { ok: false, reason: 'network' };
     }
