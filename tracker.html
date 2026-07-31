@@ -1529,6 +1529,9 @@
       }
       delete calEl.dataset.scanId; delete calEl.dataset.scanLabel; delete calEl.dataset.scanKcal;
 
+      // They've just logged something — the daily habit this app is for.
+      if (window.NNInstall) NNInstall.nudge('logged-meal');
+
       nameEl.value = ''; calEl.value = '';
       msg.textContent = '';
       loadDay();
@@ -3022,6 +3025,7 @@
     }, { passive: true });
   </script>
   <script src="nn-premium.js"></script>
+  <script src="nn-install.js"></script>
   <script src="nn-tour.js"></script>
 
   <!-- PWA: register the service worker (offline support + installability) -->

@@ -1426,6 +1426,8 @@
     status.textContent = res.ok
       ? '✅ Saved to your account automatically.'
       : '⚠️ ' + (res.message || 'Could not save.');
+    // They now have a plan worth coming back to — best moment to offer the app.
+    if (res.ok && window.NNInstall) NNInstall.nudge('saved-plan');
   }
 
   /** Stash the last calculation locally so it can be saved right after sign-up. */
@@ -1550,6 +1552,7 @@
   });
   </script>
   <script src="nn-premium.js"></script>
+  <script src="nn-install.js"></script>
   <script src="nn-tour.js"></script>
 
   <!-- PWA: register the service worker (offline support + installability) -->
