@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Donate — Nourish N Narrate</title>
+  <meta name="description" content="Help us raise $10,000 for the North Texas Food Bank. Every donation helps provide nutritious meals to families in need." />
+
+  <!-- Icons, theme colour and social preview -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="apple-mobile-web-app-title" content="Nourish N Narrate" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nourish N Narrate" />
+  <meta property="og:title" content="Help Us Fight Hunger — Nourish N Narrate" />
+  <meta property="og:description" content="Every donation helps us provide nutritious meals and support families in need." />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Shared modern stylesheet (same design system as the home page) -->
+  <link rel="stylesheet" href="nn-modern.css" />
+
+  <style>
+    /* ---------- Hero ---------- */
+    .dn-hero {
+      padding: calc(var(--nav-h) + 4rem) 0 4rem;
+      text-align: center;
+      background:
+        radial-gradient(900px 460px at 80% 0%, rgba(5, 150, 105, 0.10), transparent 70%),
+        radial-gradient(700px 420px at 8% 100%, rgba(234, 88, 12, 0.06), transparent 70%),
+        var(--bg);
+    }
+    .dn-hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 6vw, 3.6rem);
+      color: var(--ink); line-height: 1.1; margin-bottom: 1.1rem;
+    }
+    .dn-hero p.lede {
+      max-width: 620px; margin: 0 auto 2.2rem;
+      font-size: 1.05rem; line-height: 1.75; color: var(--text);
+    }
+
+    /* Donate button — used in the hero and the closing CTA */
+    .dn-btn {
+      display: inline-flex; align-items: center; gap: .65rem;
+      padding: 1.05rem 2.4rem;
+      font-family: inherit; font-size: 1.08rem; font-weight: 700;
+      color: #fff; text-decoration: none;
+      background: var(--grad-green);
+      border: none; border-radius: var(--radius-full);
+      box-shadow: 0 12px 34px rgba(5, 150, 105, .30);
+      transition: transform .3s var(--ease-spring), box-shadow .3s ease;
+    }
+    .dn-btn:hover { transform: translateY(-3px); box-shadow: 0 18px 44px rgba(5, 150, 105, .38); }
+    .dn-btn.xl { padding: 1.2rem 3rem; font-size: 1.15rem; }
+
+    .dn-section { padding: 4rem 0; }
+    .dn-section.alt { background: var(--surface-2); }
+
+    /* Shown when no donation link is configured yet */
+    .dn-notice {
+      display: none;
+      max-width: 520px; margin: 1.4rem auto 0;
+      padding: 1.1rem 1.35rem;
+      text-align: left;
+      background: var(--orange-pale);
+      border: 1px solid rgba(234, 88, 12, 0.28);
+      border-radius: var(--radius-lg);
+      color: var(--ink); font-size: 0.95rem; line-height: 1.65;
+    }
+    .dn-notice.show { display: block; animation: fadeInUp 0.4s var(--ease-out) both; }
+    .dn-notice a { color: var(--orange); font-weight: 700; }
+
+    /* ---------- Progress card ---------- */
+    .dn-progress {
+      max-width: 640px; margin: 0 auto;
+      padding: 2.2rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .dn-figures {
+      display: flex; justify-content: space-between; align-items: flex-end;
+      margin-bottom: 1rem; gap: 1rem;
+    }
+    .dn-fig span { display: block; font-size: .82rem; color: var(--text-muted); margin-bottom: .2rem; }
+    .dn-fig strong { font-family: var(--font-display); font-size: 2rem; color: var(--ink); line-height: 1; }
+    .dn-fig.goal { text-align: right; }
+    .dn-fig.goal strong { color: var(--text-muted); font-size: 1.5rem; }
+
+    .dn-bar {
+      position: relative; height: 16px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-full);
+      overflow: hidden;
+    }
+    .dn-bar-fill {
+      height: 100%; width: 0;
+      background: var(--grad-green);
+      border-radius: var(--radius-full);
+      transition: width 1.4s var(--ease-out);
+    }
+    .dn-pct { margin-top: .7rem; font-size: .9rem; font-weight: 700; color: var(--green); text-align: right; }
+    .dn-progress .note {
+      margin-top: 1.2rem; padding-top: 1.2rem;
+      border-top: 1px solid var(--border);
+      font-size: .95rem; line-height: 1.7; color: var(--text);
+    }
+
+    /* ---------- Timeline ---------- */
+    .dn-timeline { position: relative; max-width: 680px; margin: 0 auto; padding-left: 2.6rem; }
+    .dn-timeline::before {
+      content: ''; position: absolute; left: 9px; top: .5rem; bottom: .5rem;
+      width: 2px; background: linear-gradient(var(--green), var(--border));
+    }
+    .dn-item { position: relative; margin-bottom: 1.5rem; }
+    .dn-item::before {
+      content: ''; position: absolute; left: -2.6rem; top: 1.45rem;
+      width: 20px; height: 20px; border-radius: 50%;
+      background: var(--surface); border: 3px solid var(--green);
+      box-shadow: 0 0 0 4px var(--green-pale);
+    }
+    .dn-item.upcoming::before { border-color: var(--border); box-shadow: none; background: var(--surface-2); }
+    .dn-card {
+      padding: 1.3rem 1.5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+    }
+    .dn-item.upcoming .dn-card { background: transparent; border-style: dashed; box-shadow: none; }
+    .dn-date {
+      display: inline-block; margin-bottom: .4rem;
+      font-size: .78rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+      color: var(--green-deep);
+      background: var(--green-pale);
+      padding: .22rem .7rem; border-radius: var(--radius-full);
+    }
+    .dn-item.upcoming .dn-date { color: var(--text-muted); background: var(--surface-2); }
+    .dn-card p { margin: 0; font-size: 1rem; line-height: 1.65; color: var(--text); }
+    .dn-card p strong { color: var(--ink); }
+
+    /* ---------- Card grids ---------- */
+    .dn-grid {
+      display: grid; gap: 1.2rem;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      max-width: 980px; margin: 0 auto;
+    }
+    .dn-why {
+      padding: 2rem 1.7rem; text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      transition: transform .3s var(--ease-out), box-shadow .3s ease;
+    }
+    .dn-why:hover { transform: translateY(-4px); box-shadow: var(--shadow-md, 0 16px 40px rgba(10,18,30,.10)); }
+    .dn-why .ico { font-size: 2.4rem; display: block; margin-bottom: .8rem; }
+    .dn-why h3 { font-size: 1.1rem; color: var(--ink); margin-bottom: .5rem; }
+    .dn-why p { font-size: .93rem; line-height: 1.65; color: var(--text-muted); margin: 0; }
+
+    /* ---------- Impact stats ---------- */
+    .dn-stats {
+      display: grid; gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      max-width: 980px; margin: 0 auto;
+    }
+    .dn-stat {
+      padding: 1.8rem 1.4rem; text-align: center;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+    }
+    .dn-stat strong {
+      display: block; font-family: var(--font-display);
+      font-size: clamp(1.6rem, 4vw, 2.2rem); color: var(--green); line-height: 1.1; margin-bottom: .35rem;
+    }
+    .dn-stat span { font-size: .9rem; color: var(--text-muted); }
+
+    /* ---------- Final CTA ---------- */
+    .dn-final { padding: 5rem 0; text-align: center; background: var(--surface-2); }
+    .dn-final h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.9rem, 5vw, 2.8rem); color: var(--ink); margin-bottom: 1rem;
+    }
+    .dn-final p {
+      max-width: 600px; margin: 0 auto 2.2rem;
+      font-size: 1.03rem; line-height: 1.75; color: var(--text);
+    }
+
+    @media (max-width: 560px) {
+      .dn-hero { padding-top: calc(var(--nav-h) + 2.5rem); }
+      .dn-progress { padding: 1.6rem 1.3rem; }
+      .dn-fig strong { font-size: 1.7rem; }
+      .dn-timeline { padding-left: 2.2rem; }
+      .dn-item::before { left: -2.2rem; width: 16px; height: 16px; }
+    }
+  </style>
+</head>
+<body data-view="donate">
+
+  <!-- Loading screen -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html#home">Home</a></li>
+        <li><a href="index.html#recipes">Recipes</a></li>
+        <li><a href="calculator.html">Calculator</a></li>
+        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
+        <li><a href="donate.html" class="active">Donate</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu -->
+  <div class="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
+    <a href="index.html#home">Home</a>
+    <a href="index.html#recipes">Recipes</a>
+    <a href="calculator.html">Calculator</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="profile.html">Profile</a>
+    <a href="donate.html">💚 Donate</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+
+
+  <!-- ============================================================
+       1. HERO
+       ✏️ DONATION_LINK — replace both occurrences on this page with
+          your real donation URL (this one and the final CTA below).
+  ============================================================ -->
+  <section class="dn-hero">
+    <div class="container">
+      <span class="section-label">Support Our Mission</span>
+      <h1>Help Us Fight Hunger</h1>
+      <p class="lede">
+        Every donation helps us provide nutritious meals and support families in
+        need. Together, we can make healthy food more accessible.
+      </p>
+      <a class="dn-btn xl js-donate" href="DONATION_LINK" target="_blank" rel="noopener noreferrer">
+        💚 Donate Now
+      </a>
+      <div class="dn-notice" id="dn-notice-top" role="status" aria-live="polite">
+        💚 We don’t have a donation option set up at this moment. Please contact
+        <a href="mailto:nourishnnarrate6@gmail.com">nourishnnarrate6@gmail.com</a>
+        and we’ll get straight back to you.
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       2. PROGRESS CARD
+  ============================================================ -->
+  <section class="dn-section">
+    <div class="container">
+      <div class="dn-progress">
+        <div class="dn-figures">
+          <div class="dn-fig">
+            <span>Raised so far</span>
+            <strong id="dn-raised">$642</strong>
+          </div>
+          <div class="dn-fig goal">
+            <span>Our goal</span>
+            <strong id="dn-goal">$10,000</strong>
+          </div>
+        </div>
+
+        <div class="dn-bar" role="progressbar" id="dn-bar"
+             aria-valuenow="6" aria-valuemin="0" aria-valuemax="100"
+             aria-label="Fundraising progress">
+          <div class="dn-bar-fill" id="dn-fill"></div>
+        </div>
+        <div class="dn-pct" id="dn-pct">6% of our goal</div>
+
+        <p class="note">
+          Our mission is to raise $10,000 for the North Texas Food Bank. Every
+          contribution brings us one step closer.
+        </p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       3. MILESTONE TIMELINE
+       ✏️ To add a milestone: copy one <li> block, drop the
+          "upcoming" class once it's reached, and fill in the date.
+  ============================================================ -->
+  <section class="dn-section alt">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:2.6rem;">
+        <span class="section-label">Our Journey</span>
+        <h2 class="section-title">Milestones</h2>
+        <div class="divider" style="margin-inline:auto;"></div>
+      </div>
+
+      <ul class="dn-timeline" role="list" id="dn-timeline">
+        <li class="dn-item">
+          <div class="dn-card">
+            <span class="dn-date">June 20, 2026</span>
+            <p>🚀 <strong>Nourish N Narrate officially launched.</strong></p>
+          </div>
+        </li>
+
+        <li class="dn-item">
+          <div class="dn-card">
+            <span class="dn-date">July 2026</span>
+            <p>💚 <strong>Raised our first $600</strong> toward our $10,000 goal.</p>
+          </div>
+        </li>
+
+        <!-- Upcoming — remove class="upcoming" and add the date when reached -->
+        <li class="dn-item upcoming">
+          <div class="dn-card">
+            <span class="dn-date">Up next</span>
+            <p>🎯 <strong>$1,000 raised</strong></p>
+          </div>
+        </li>
+
+        <li class="dn-item upcoming">
+          <div class="dn-card">
+            <span class="dn-date">Upcoming</span>
+            <p>🌟 <strong>$2,500 raised</strong></p>
+          </div>
+        </li>
+
+        <li class="dn-item upcoming">
+          <div class="dn-card">
+            <span class="dn-date">Upcoming</span>
+            <p>🏅 <strong>$5,000 raised</strong> — halfway there</p>
+          </div>
+        </li>
+
+        <li class="dn-item upcoming">
+          <div class="dn-card">
+            <span class="dn-date">The finish line</span>
+            <p>🎉 <strong>Goal achieved — $10,000 for the North Texas Food Bank</strong></p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       4. WHY DONATE?
+  ============================================================ -->
+  <section class="dn-section">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:2.6rem;">
+        <span class="section-label">Why Give</span>
+        <h2 class="section-title">Why Donate?</h2>
+        <div class="divider" style="margin-inline:auto;"></div>
+      </div>
+
+      <div class="dn-grid">
+        <div class="dn-why">
+          <span class="ico" aria-hidden="true">🍎</span>
+          <h3>Fight Hunger</h3>
+          <p>Help provide nutritious meals to families.</p>
+        </div>
+        <div class="dn-why">
+          <span class="ico" aria-hidden="true">🌎</span>
+          <h3>Build Community</h3>
+          <p>Support a student-led initiative promoting healthy eating.</p>
+        </div>
+        <div class="dn-why">
+          <span class="ico" aria-hidden="true">❤️</span>
+          <h3>Every Dollar Matters</h3>
+          <p>100% of donations go toward supporting our fundraising mission for
+             the North Texas Food Bank.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       5. IMPACT
+  ============================================================ -->
+  <section class="dn-section alt">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:2.6rem;">
+        <span class="section-label">Our Impact</span>
+        <h2 class="section-title">Where We Stand</h2>
+        <div class="divider" style="margin-inline:auto;"></div>
+      </div>
+
+      <div class="dn-stats">
+        <div class="dn-stat"><strong id="dn-stat-raised">$642</strong><span>Raised</span></div>
+        <div class="dn-stat"><strong id="dn-stat-goal">$10,000</strong><span>Goal</span></div>
+        <div class="dn-stat"><strong>June 20, 2026</strong><span>Started</span></div>
+        <div class="dn-stat"><strong>Growing</strong><span>Every month</span></div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ============================================================
+       6. FINAL CTA
+  ============================================================ -->
+  <section class="dn-final">
+    <div class="container">
+      <h2>Be Part of the Change</h2>
+      <p>
+        Together, we can make healthy eating more accessible while supporting
+        families facing food insecurity.
+      </p>
+      <a class="dn-btn xl js-donate" href="DONATION_LINK" target="_blank" rel="noopener noreferrer">
+        💚 Donate Now
+      </a>
+      <div class="dn-notice" id="dn-notice-bottom" role="status" aria-live="polite">
+        💚 We don’t have a donation option set up at this moment. Please contact
+        <a href="mailto:nourishnnarrate6@gmail.com">nourishnnarrate6@gmail.com</a>
+        and we’ll get straight back to you.
+      </div>
+    </div>
+  </section>
+
+
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>&copy; 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <div class="foot-social">
+      <a href="https://www.youtube.com/channel/UCIHTdS000vhikhav7c141bA" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on YouTube">
+        <svg viewBox="0 0 24 24" fill="#FF0000" aria-hidden="true"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
+        <span>YouTube</span>
+      </a>
+      <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <span>Instagram</span>
+      </a>
+    </div>
+    <p class="foot-note">Made with &#128154; by students, for everyone.</p>
+  </footer>
+
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">&#8593;</button>
+
+  <script src="nn-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="nn-auth.js"></script>
+  <script src="nn-premium.js"></script>
+
+  <script>
+    /* ===========================================================
+       ✏️ UPDATE THE TOTAL HERE — one place.
+       Changing RAISED updates the progress bar, the percentage
+       and both impact figures automatically.
+    =========================================================== */
+    var FUNDRAISER = { raised: 642, goal: 10000 };
+
+    /* ===========================================================
+       ✏️ DONATION LINK — paste your real donation URL here when you
+       have one. While it is empty, the Donate buttons show a short
+       "contact us" notice instead of going nowhere.
+    =========================================================== */
+    var DONATION_URL = '';
+
+    (function () {
+      var buttons = document.querySelectorAll('.js-donate');
+      if (DONATION_URL) {
+        // Live: point every button at the real link.
+        Array.prototype.forEach.call(buttons, function (b) { b.href = DONATION_URL; });
+        return;
+      }
+      // Not set up yet: never navigate to the placeholder.
+      Array.prototype.forEach.call(buttons, function (b) {
+        b.removeAttribute('target');
+        b.setAttribute('href', '#');
+        b.setAttribute('aria-haspopup', 'true');
+        b.addEventListener('click', function (e) {
+          e.preventDefault();
+          // Reveal the notice nearest the button that was clicked.
+          var notice = b.parentNode.querySelector('.dn-notice');
+          if (!notice) return;
+          notice.classList.add('show');
+          notice.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
+      });
+    })();
+
+    (function () {
+      var money = function (n) { return '$' + n.toLocaleString('en-US'); };
+      var pct = Math.min(100, Math.round((FUNDRAISER.raised / FUNDRAISER.goal) * 100));
+
+      var set = function (id, val) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = val;
+      };
+      set('dn-raised', money(FUNDRAISER.raised));
+      set('dn-goal', money(FUNDRAISER.goal));
+      set('dn-stat-raised', money(FUNDRAISER.raised));
+      set('dn-stat-goal', money(FUNDRAISER.goal));
+      set('dn-pct', pct + '% of our goal');
+
+      var bar = document.getElementById('dn-bar');
+      if (bar) bar.setAttribute('aria-valuenow', String(pct));
+
+      // Animate the fill once the card scrolls into view.
+      var fill = document.getElementById('dn-fill');
+      if (!fill) return;
+      var grow = function () { fill.style.width = pct + '%'; };
+      if ('IntersectionObserver' in window && bar) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (e) {
+            if (e.isIntersecting) { grow(); io.disconnect(); }
+          });
+        }, { threshold: 0.35 });
+        io.observe(bar);
+      } else {
+        setTimeout(grow, 300);
+      }
+    })();
+
+    /* ---------- Theme + navbar (same as every other page) ---------- */
+    var htmlEl = document.documentElement;
+    var themeBtn = document.getElementById('theme-toggle');
+    var savedTheme = localStorage.getItem('nnTheme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeBtn.addEventListener('click', function () {
+      var next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+    var navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', function () {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* Signed-in users see their Tracker / Profile tabs here too. */
+    if (window.NNAuth) {
+      NNAuth.onReady(async function () {
+        var session = await NNAuth.getSession();
+        if (!session) return;
+        ['nav-tracker-li', 'nav-profile-li'].forEach(function (id) {
+          var el = document.getElementById(id);
+          if (el) el.style.display = '';
+        });
+      });
+    }
+  </script>
+
+  <!-- PWA: register the service worker (offline support + installability) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function (err) {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

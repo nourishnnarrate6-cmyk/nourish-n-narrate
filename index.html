@@ -98,10 +98,10 @@
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
         <!-- Log In / Sign Up (hidden once the user is signed in) -->
         <a href="login.html" class="nav-auth" id="nav-login">Log In / Sign Up</a>
-        <!-- ✏️ CTA button text -->
-        <button class="nav-cta" onclick="document.getElementById('request').scrollIntoView({behavior:'smooth'})">
-          Suggest a Food
-        </button>
+        <!-- ✏️ CTA button — now points at the donation page -->
+        <a class="nav-cta" href="donate.html" style="text-decoration:none;">
+          💚 Donate
+        </a>
         <!-- Hamburger — mobile only -->
         <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
@@ -120,7 +120,7 @@
     <a href="#about"   onclick="closeMobileMenu()">About</a>
     <a href="#contact" onclick="closeMobileMenu()">Contact</a>
     <a href="login.html" id="m-nav-login">🔑 Log In / Sign Up</a>
-    <a href="#request" class="mobile-cta" onclick="closeMobileMenu()">Suggest a Food 🍽️</a>
+    <a href="donate.html" class="mobile-cta">💚 Donate</a>
   </div>
 
 
@@ -276,7 +276,8 @@
   <section id="recipes">
     <div class="container">
 
-      <div class="recipes-header">
+      <!-- Landing point for the ↑ side rail -->
+      <div class="recipes-header" data-rail-top>
         <div class="reveal">
           <!-- ✏️ Section label and title -->
           <span class="section-label">Recipes</span>
@@ -295,7 +296,19 @@
           <div class="diet-icon" aria-hidden="true">🍗</div>
           <div class="diet-label">Non-Vegetarian</div>
         </button>
+        <!-- Additional collection — recipes here also stay in Vegetarian
+             or Non-Vegetarian above; this is a tag, not a category. -->
+        <button class="diet-btn high-protein-btn diet-btn-wide" onclick="showRecipesByType('high-protein')">
+          <div class="diet-icon" aria-hidden="true">💪</div>
+          <div class="diet-label">High Protein</div>
+          <div class="diet-sub" id="hp-count"></div>
+        </button>
         <a href="all-recipes.html" class="diet-see-all see-more-btn">📖 Show All Recipes <span aria-hidden="true">→</span></a>
+
+        <!-- AI Recipe Finder — searches only the recipes already in our
+             database. Built by nn-finder.js; sits inside the selector so it
+             shows and hides along with the collection chooser. -->
+        <div class="nn-finder" id="nn-finder"></div>
       </div>
 
       <!-- Recipes View — hidden until a diet type is selected -->
@@ -340,8 +353,8 @@
         <a href="all-recipes.html" id="see-more-btn" class="see-more-btn">See all recipes →</a>
       </div>
 
-      <!-- Rate Us -->
-      <div class="text-center reveal" style="margin-top:3rem;">
+      <!-- Rate Us — also the landing point for the ↓ side rail -->
+      <div class="text-center reveal" data-rail-bottom style="margin-top:3rem;">
         <p class="rate-note">Enjoyed our recipes? Let us know what you think!</p>
         <a href="https://docs.google.com/forms/d/e/1FAIpQLScGB0JQA7vv-c65fRwx55KJVPVipxNZvfVxurwDjiCBD-AezQ/viewform?usp=publish-editor"
            target="_blank" rel="noopener noreferrer" class="btn-rate">
@@ -673,6 +686,7 @@
   <script src="form-handlers.js"></script>
   <script src="nn-auth.js"></script>
   <script src="nn-cards.js"></script>
+  <script src="nn-finder.js"></script>
   <script>
 
     /* ===========================================================
@@ -705,11 +719,19 @@
 
         grid.innerHTML = '';
 
-        // Filter and render recipes of the selected type
+        // Render the recipes in the selected collection. A recipe can belong
+        // to several, so this is a membership test rather than an equality
+        // check on `type` — nothing is moved or duplicated.
         let count = 0;
         RECIPES.forEach((r, i) => {
-          if (r.type === currentTypeFilter) {
-            grid.appendChild(buildRecipeCard(r, i));
+          if (inCollection(r, currentTypeFilter)) {
+            const card = buildRecipeCard(r, i);
+            // Stamp collections here too, in case an older nn-cards.js is
+            // cached and didn't set them — otherwise filtering finds nothing.
+            if (!card.dataset.collections) {
+              card.dataset.collections = collectionsOf(r).join('|');
+            }
+            grid.appendChild(card);
             count++;
           }
         });
@@ -738,7 +760,52 @@
     =========================================================== */
 
     let currentFilter = 'all';     // Active category filter
-    let currentTypeFilter = 'all'; // Selected veg / non-veg type
+    let currentTypeFilter = 'all'; // Selected collection: veg | non-veg | high-protein
+
+    /* Collections are worked out here rather than relying on nn-cards.js, so
+       the page still filters correctly if an older copy of that file is
+       served from cache after a partial deploy. */
+    const COLLECTION_NAMES = {
+      'veg': 'Vegetarian', 'non-veg': 'Non-Vegetarian', 'high-protein': 'High Protein',
+    };
+
+    /** Collections for a recipe: the stored array, or derived from its data. */
+    function collectionsOf(recipe) {
+      if (Array.isArray(recipe.collections) && recipe.collections.length) {
+        return recipe.collections;
+      }
+      const out = [recipe.type === 'non-veg' ? 'Non-Vegetarian' : 'Vegetarian'];
+      // High Protein: 15 g+ per serving AND either 20 g+ or 20%+ of calories.
+      const p = parseFloat(recipe.protein) || 0;
+      const kcal = Number(recipe.calories) || 0;
+      if (p >= 15 && (p >= 20 || (kcal > 0 && (p * 4) / kcal >= 0.20))) {
+        out.push('High Protein');
+      }
+      return out;
+    }
+
+    function inCollection(recipe, key) {
+      if (!key || key === 'all') return true;
+      return collectionsOf(recipe).indexOf(COLLECTION_NAMES[key] || key) !== -1;
+    }
+
+    function cardMatchesCollection(card, key) {
+      if (!key || key === 'all') return true;
+      const name = COLLECTION_NAMES[key] || key;
+      return ('|' + (card.dataset.collections || '') + '|').indexOf('|' + name + '|') !== -1;
+    }
+
+    /* Show how many recipes sit in the High Protein collection. They remain
+       listed under Vegetarian / Non-Vegetarian as well — this is a tag. */
+    function updateCollectionCounts() {
+      const el = document.getElementById('hp-count');
+      // RECIPES is declared with `let`, so it is not on window — read the
+      // binding directly or this silently does nothing.
+      if (!el || typeof RECIPES === 'undefined' || !Array.isArray(RECIPES)) return;
+      const n = RECIPES.filter(r => inCollection(r, 'high-protein')).length;
+      el.textContent = n ? n + ' recipes' : '';
+    }
+    window.addEventListener('recipesLoaded', updateCollectionCounts);
 
     function showRecipesByType(type) {
       try {
@@ -803,10 +870,9 @@
           return;
         }
         const cat  = card.dataset.category || '';
-        const type = card.dataset.type || '';
         const text = card.textContent.toLowerCase();
         const matchCat  = currentFilter === 'all' || cat === currentFilter;
-        const matchType = type === currentTypeFilter;
+        const matchType = cardMatchesCollection(card, currentTypeFilter);
         const matchQ    = !query || text.includes(query);
         let show = matchCat && matchType && matchQ;
         if (show && collapsed && card.classList.contains('extra-recipe')) show = false;

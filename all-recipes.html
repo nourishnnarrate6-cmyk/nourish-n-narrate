@@ -114,7 +114,7 @@
   <section id="recipes" class="allrx-header">
     <div class="container">
 
-      <div class="recipes-header">
+      <div class="recipes-header" data-rail-top>
         <div class="reveal">
           <a href="index.html#recipes" class="back-link">← Back to home</a>
           <span class="section-label">Full Menu</span>
@@ -137,10 +137,19 @@
         <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
       </div>
 
+      <!-- Collections. Additive tags — a recipe can match more than one, and
+           High Protein recipes still appear under their own diet. -->
+      <div class="filter-pills reveal" role="group" aria-label="Filter by collection">
+        <button class="pill active" data-collection="all"          onclick="setCollection(this,'all')">All Recipes</button>
+        <button class="pill"        data-collection="veg"          onclick="setCollection(this,'veg')">🌱 Vegetarian</button>
+        <button class="pill"        data-collection="non-veg"      onclick="setCollection(this,'non-veg')">🍗 Non-Vegetarian</button>
+        <button class="pill"        data-collection="high-protein" onclick="setCollection(this,'high-protein')">💪 High Protein</button>
+      </div>
+
 
       <div class="recipe-grid" id="recipe-grid"></div>
 
-      <div class="text-center allrx-bottom">
+      <div class="text-center allrx-bottom" data-rail-bottom>
         <a href="index.html#home" class="see-more-btn" style="text-decoration:none;">← Back to Home</a>
       </div>
 
@@ -246,8 +255,35 @@
       RECIPES.forEach((r, i) => (FEATURED.includes(r.title) ? featuredIdx : extraIdx).push(i));
       featuredIdx.sort((a, b) =>
         FEATURED.indexOf(RECIPES[a].title) - FEATURED.indexOf(RECIPES[b].title));
-      [...featuredIdx, ...extraIdx].forEach(i => grid.appendChild(buildRecipeCard(RECIPES[i], i)));
+      [...featuredIdx, ...extraIdx].forEach(i => {
+        const card = buildRecipeCard(RECIPES[i], i);
+        // Stamp collections here too, in case an older nn-cards.js is cached.
+        if (!card.dataset.collections) {
+          card.dataset.collections = collectionsOf(RECIPES[i]).join('|');
+        }
+        grid.appendChild(card);
+      });
       filterRecipes();
+    }
+
+    /* Collections worked out locally so the filters keep working even if an
+       older nn-cards.js is served from cache after a partial deploy. */
+    const COLLECTION_NAMES = {
+      'veg': 'Vegetarian', 'non-veg': 'Non-Vegetarian', 'high-protein': 'High Protein',
+    };
+
+    function collectionsOf(recipe) {
+      if (Array.isArray(recipe.collections) && recipe.collections.length) {
+        return recipe.collections;
+      }
+      const out = [recipe.type === 'non-veg' ? 'Non-Vegetarian' : 'Vegetarian'];
+      // High Protein: 15 g+ per serving AND either 20 g+ or 20%+ of calories.
+      const p = parseFloat(recipe.protein) || 0;
+      const kcal = Number(recipe.calories) || 0;
+      if (p >= 15 && (p >= 20 || (kcal > 0 && (p * 4) / kcal >= 0.20))) {
+        out.push('High Protein');
+      }
+      return out;
     }
 
     function setFilter(btn, category) {
@@ -257,15 +293,25 @@
       filterRecipes();
     }
 
+    /** Collection filter — independent of the category row above, so you can
+        combine them (e.g. High Protein + Dinner). */
+    function setCollection(btn, key) {
+      currentTypeFilter = key;
+      document.querySelectorAll('[data-collection]').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      filterRecipes();
+    }
+
 
     function filterRecipes() {
       const query = document.getElementById('recipe-search').value.toLowerCase().trim();
       document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
         const cat  = card.dataset.category || '';
-        const type = card.dataset.type || '';
         const text = card.textContent.toLowerCase();
         const matchCat = currentFilter === 'all' || cat === currentFilter;
-        const matchType = currentTypeFilter === 'all' || type === currentTypeFilter;
+        const name = COLLECTION_NAMES[currentTypeFilter] || currentTypeFilter;
+        const matchType = currentTypeFilter === 'all' ||
+          ('|' + (card.dataset.collections || '') + '|').indexOf('|' + name + '|') !== -1;
         const matchQ   = !query || text.includes(query);
         card.style.display = (matchCat && matchType && matchQ) ? '' : 'none';
       });

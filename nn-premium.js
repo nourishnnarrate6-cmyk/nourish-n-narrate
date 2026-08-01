@@ -57,6 +57,84 @@
     sync();
   })();
 
+  /* ---------------- Side scroll rails ----------------
+     Recipe listings get long, so give people a way out of the middle:
+     jump to top on the left edge, jump to bottom on the right. Only
+     built on pages that actually have a recipe grid, and on the home
+     page only while the recipe view is open (not on the collection
+     chooser, which is short). */
+  (function () {
+    var grid = document.getElementById('recipe-grid');
+    if (!grid) return;
+
+    function make(cls, label, glyph, onClick) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'nn-rail ' + cls;
+      b.setAttribute('aria-label', label);
+      b.title = label;
+      b.textContent = glyph;
+      b.addEventListener('click', onClick);
+      document.body.appendChild(b);
+      return b;
+    }
+
+    /* Height of the fixed navbar, so the ↑ target isn't hidden behind it. */
+    function navOffset() {
+      var v = getComputedStyle(document.documentElement).getPropertyValue('--nav-h');
+      var n = parseInt(v, 10);
+      return (isNaN(n) ? 80 : n) + 16;
+    }
+
+    var toTop = make('nn-rail-top', 'Jump to the top of the recipes', '↑', function () {
+      // Land on the recipes heading, not the page banner — that's the part
+      // people actually want back: the title, filters and search.
+      var t = document.querySelector('[data-rail-top]');
+      if (!t) { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+      var y = t.getBoundingClientRect().top + window.scrollY - navOffset();
+      window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+    });
+
+    var toBottom = make('nn-rail-bottom', 'Jump to the end of the recipes', '↓', function () {
+      // Land on the end of the list, not deep in the footer.
+      var b = document.querySelector('[data-rail-bottom]');
+      if (!b) { window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'smooth' }); return; }
+      b.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    });
+
+    function railsAllowed() {
+      // Home page: nothing until a collection has actually been chosen and
+      // rendered. The chooser screen gets no rails.
+      var view = document.getElementById('recipes-view');
+      if (view) {
+        var open = view.style.display !== 'none' && view.offsetParent !== null;
+        if (!open) return false;
+        if (!grid.querySelector('.recipe-card')) return false;
+      }
+      // Nothing worth jumping on a page that barely scrolls.
+      return document.documentElement.scrollHeight > window.innerHeight + 240;
+    }
+
+    function sync() {
+      if (!railsAllowed()) {
+        toTop.classList.remove('visible');
+        toBottom.classList.remove('visible');
+        return;
+      }
+      var y = window.scrollY;
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      toTop.classList.toggle('visible', y > 300);
+      toBottom.classList.toggle('visible', y < max - 300);
+    }
+
+    window.addEventListener('scroll', sync, { passive: true });
+    window.addEventListener('resize', sync);
+    // Recipes arrive asynchronously, and the home page swaps views on click.
+    window.addEventListener('recipesLoaded', function () { setTimeout(sync, 60); });
+    document.addEventListener('click', function () { setTimeout(sync, 400); });
+    sync();
+  })();
+
   /* ---------------- Loading screen safety net ----------------
      If a page's own loader logic never runs (slow network, a script
      error), make sure the overlay still clears rather than trapping

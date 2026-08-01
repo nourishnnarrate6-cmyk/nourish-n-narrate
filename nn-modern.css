@@ -890,7 +890,127 @@
   .diet-btn:hover .diet-icon { transform: scale(1.12) rotate(-5deg); }
   .diet-label { position: relative; font-size: 1.15rem; font-weight: 700; color: var(--ink); }
 
+  /* An extra collection card sits on its own row under the diet pair.
+     Recipes in it also remain in Vegetarian / Non-Vegetarian above. */
+  .diet-btn-wide { grid-column: 1 / -1; padding-block: 1.9rem; }
+  .diet-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: -0.35rem; }
+  .high-protein-btn .diet-icon { filter: saturate(1.15); }
+  .high-protein-btn:hover { border-color: var(--orange); }
+  .high-protein-btn:hover .diet-label { color: var(--orange); }
+
   .diet-see-all { grid-column: 1 / -1; justify-self: center; margin-top: 0.75rem; }
+
+  /* ---------- AI Recipe Finder ---------- */
+  .nn-finder {
+    grid-column: 1 / -1;
+    margin-top: 2.25rem;
+    padding: 2rem 1.75rem;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .nnf-head { text-align: center; margin-bottom: 1.4rem; }
+  .nnf-badge {
+    display: inline-block; margin-bottom: .7rem;
+    padding: .35rem .9rem;
+    font-size: .78rem; font-weight: 700; letter-spacing: .04em;
+    color: var(--green-deep); background: var(--green-pale);
+    border-radius: var(--radius-full);
+  }
+  .nnf-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 3.4vw, 1.7rem);
+    color: var(--ink); margin-bottom: .45rem;
+  }
+  .nnf-sub { font-size: .92rem; line-height: 1.6; color: var(--text-muted); margin: 0 auto; max-width: 560px; }
+
+  .nnf-bar {
+    position: relative;
+    display: flex; align-items: center; gap: .6rem;
+    max-width: 680px; margin: 0 auto 1.1rem;
+  }
+  .nnf-icon { position: absolute; left: 1rem; font-size: .95rem; pointer-events: none; opacity: .7; }
+  .nnf-bar input {
+    flex: 1; min-width: 0;
+    padding: .9rem 1rem .9rem 2.6rem;
+    font-family: inherit; font-size: .95rem; color: var(--ink);
+    background: var(--surface-2);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-full);
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  .nnf-bar input:focus {
+    outline: none; border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.14);
+  }
+  .nnf-go {
+    flex: 0 0 auto;
+    padding: .9rem 1.5rem;
+    font-family: inherit; font-size: .92rem; font-weight: 700; color: #fff;
+    background: var(--grad-green);
+    border: none; border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: transform .25s var(--ease-spring), box-shadow .25s ease;
+  }
+  .nnf-go:hover { transform: translateY(-2px); box-shadow: var(--shadow-green); }
+
+  .nnf-chips {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem;
+    max-width: 680px; margin: 0 auto;
+  }
+  .nnf-chip {
+    padding: .45rem 1rem;
+    font-family: inherit; font-size: .85rem; font-weight: 600;
+    color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .nnf-chip:hover { color: var(--green); border-color: var(--green); background: var(--green-pale); }
+
+  .nnf-status {
+    margin: 1.2rem 0 0; text-align: center;
+    font-size: .9rem; font-weight: 600; color: var(--text-muted);
+  }
+  .nnf-results:empty { display: none; }
+  .nnf-results { margin-top: 1.4rem; }
+
+  /* Why a recipe was recommended — appended to the normal recipe card. */
+  .nnf-why {
+    display: flex; flex-wrap: wrap; gap: .35rem;
+    padding: 0 1.1rem 1.1rem;
+  }
+  .nnf-why-chip {
+    font-size: .74rem; font-weight: 700;
+    color: var(--green-deep); background: var(--green-pale);
+    border-radius: var(--radius-full);
+    padding: .22rem .6rem;
+  }
+
+  .nnf-foot { text-align: center; }
+  .nnf-clear {
+    margin-top: 1.3rem;
+    padding: .6rem 1.4rem;
+    font-family: inherit; font-size: .88rem; font-weight: 600;
+    color: var(--text-muted); background: transparent;
+    border: 1.5px solid var(--border); border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .nnf-clear:hover { color: var(--orange); border-color: var(--orange); }
+
+  [data-theme="dark"] .nnf-why-chip { color: var(--green-light); background: rgba(52, 211, 153, 0.12); }
+
+  @media (max-width: 560px) {
+    .nn-finder { padding: 1.5rem 1.1rem; }
+    .nnf-bar { flex-direction: column; }
+    .nnf-bar input { width: 100%; }
+    .nnf-go { width: 100%; }
+    .nnf-icon { top: 1rem; }
+  }
 
   /* Slide-in when switching views */
   .slide-in { animation: fadeInUp 0.5s var(--ease-out) both; }
@@ -1674,6 +1794,45 @@
   }
   #scroll-top.visible { opacity: 1; visibility: visible; transform: translateY(0); }
   #scroll-top:hover { transform: translateY(-3px); box-shadow: 0 16px 36px -8px rgba(5, 150, 105, 0.55); }
+
+  /* ---------- Side scroll rails (recipe pages only) ----------
+     Long recipe lists are tiring to scroll, so a jump-to-top sits on
+     the left edge and a jump-to-bottom on the right, both vertically
+     centred. They stay clear of #scroll-top, which lives bottom-right. */
+  .nn-rail {
+    position: fixed;
+    top: 50%; transform: translateY(-50%) scale(0.85);
+    z-index: 700;
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    font-size: 1.05rem; line-height: 1;
+    color: var(--green-deep);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    opacity: 0; visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease, transform .3s var(--ease-spring),
+                background .25s ease, color .25s ease, border-color .25s ease;
+  }
+  .nn-rail.visible { opacity: 1; visibility: visible; transform: translateY(-50%) scale(1); }
+  .nn-rail:hover {
+    color: #fff; background: var(--grad-green); border-color: transparent;
+    box-shadow: var(--shadow-green);
+  }
+  .nn-rail-top    { left:  calc(1rem + var(--safe-l, 0px)); }
+  .nn-rail-bottom { right: calc(1rem + var(--safe-r, 0px)); }
+
+  [data-theme="dark"] .nn-rail { background: rgba(17, 26, 46, 0.9); color: var(--green-light); }
+
+  @media (max-width: 560px) {
+    .nn-rail { width: 38px; height: 38px; font-size: 0.95rem; }
+    .nn-rail-top    { left:  calc(0.5rem + var(--safe-l, 0px)); }
+    .nn-rail-bottom { right: calc(0.5rem + var(--safe-r, 0px)); }
+    /* Keep the right rail clear of the round back-to-top button */
+    .nn-rail-bottom { top: 42%; }
+  }
 
   /* ---------- 15. SCROLL-REVEAL & SHARED KEYFRAMES ---------- */
   .reveal {

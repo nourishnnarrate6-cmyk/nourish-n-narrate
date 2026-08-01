@@ -7,6 +7,42 @@
 
     const PLACEHOLDER_COUNT = 6; // How many placeholder cards to show when there are no recipes
 
+    /* ===========================================================
+       COLLECTIONS
+       Additive tags — a recipe keeps its Vegetarian / Non-Vegetarian
+       home and can appear in any number of further collections.
+       Add a new one here and in the database `collections` column;
+       no recipe data needs duplicating.
+    =========================================================== */
+    const NN_COLLECTIONS = {
+      'veg':          'Vegetarian',
+      'non-veg':      'Non-Vegetarian',
+      'high-protein': 'High Protein',
+    };
+
+    /** The collections a recipe belongs to, always as an array of names. */
+    function recipeCollections(recipe) {
+      if (Array.isArray(recipe.collections) && recipe.collections.length) {
+        return recipe.collections;
+      }
+      // Older data with only `type` — fall back so nothing disappears.
+      return [recipe.type === 'non-veg' ? 'Non-Vegetarian' : 'Vegetarian'];
+    }
+
+    /** Does a recipe belong to this collection? `key` is a NN_COLLECTIONS key. */
+    function recipeInCollection(recipe, key) {
+      if (!key || key === 'all') return true;
+      const name = NN_COLLECTIONS[key] || key;
+      return recipeCollections(recipe).indexOf(name) !== -1;
+    }
+
+    /** Same test against a rendered card, for the DOM-based filters. */
+    function cardInCollection(card, key) {
+      if (!key || key === 'all') return true;
+      const name = NN_COLLECTIONS[key] || key;
+      return ('|' + (card.dataset.collections || '') + '|').indexOf('|' + name + '|') !== -1;
+    }
+
     /** Build one placeholder card element */
     function buildPlaceholderCard() {
       const card = document.createElement('div');
@@ -39,6 +75,8 @@
       card.className = 'recipe-card';
       card.dataset.category = recipe.category || 'all';
       card.dataset.type = recipe.type || 'veg';
+      // Pipe-delimited so a single card can match several collections.
+      card.dataset.collections = recipeCollections(recipe).join('|');
       // Store the recipe index on the card so the modal can retrieve it
       card.dataset.index = index;
       card.setAttribute('role', 'button');
