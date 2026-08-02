@@ -2087,25 +2087,20 @@
 
      Below 430px the logo and icons meet in the middle and there is no
      gap to sit in, so it steps aside. */
+  /* The count appears twice in the markup and exactly one copy is ever
+     visible: the navbar on a computer, the hero on a phone. Squeezing it
+     into a phone navbar meant fighting the logo and the hamburger for a
+     40px gap, so on small screens it moves to the hero instead, sitting
+     just above the "Student-led healthy eating project" badge. */
+  .hero-views { display: none; margin-bottom: .6rem; }
+  .hero-views-pill { font-size: .74rem; }
+
   @media (max-width: 900px) {
-    .nav-inner { position: relative; }
-    .nav-views {
-      position: absolute;
-      left: 50%; top: 50%;
-      transform: translate(-50%, -50%);
-      padding: .22rem .55rem;
-      font-size: .7rem;
-      pointer-events: none;      /* never blocks a tap meant for the nav */
-    }
+    .nav-views { display: none; }                 /* navbar copy steps aside */
+    .hero-views { display: block; }               /* hero copy takes over */
+    .hero-views .nav-views[hidden] { display: none; }
+    .hero-views .nav-views { display: inline-flex; }
   }
-  /* Tighter still on a narrow handset, where the gap between the logo and
-     the icons is only 40-50px. 430px was too aggressive a cut-off — it hid
-     the count on most phones, which is exactly where it was wanted. */
-  @media (max-width: 560px) {
-    .nav-views { padding: .18rem .45rem; font-size: .66rem; }
-  }
-  /* Below this the logo and icons genuinely meet and there is no gap left. */
-  @media (max-width: 340px) { .nav-views { display: none; } }
 
   /* Slide-in when switching views */
   .slide-in { animation: fadeInUp 0.5s var(--ease-out) both; }
