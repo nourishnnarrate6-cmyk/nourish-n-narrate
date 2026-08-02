@@ -11,10 +11,14 @@
        separately, since those are large and effectively immutable.
 
    Bump CACHE_VERSION whenever you change any file in the app shell —
+   INCLUDING when you edit one again after already bumping. The version is
+   what names the cache, so a file edited after install is never re-fetched:
+   v29 shipped, nn-modern.css was then edited twice, and every visitor kept
+   the stylesheet as it was at install time. If in doubt, bump. —
    that is what tells existing installs to pull the new build.
 =================================================================== */
 
-const CACHE_VERSION = 'v29';
+const CACHE_VERSION = 'v30';
 const SHELL_CACHE = 'nn-shell-' + CACHE_VERSION;
 const ASSET_CACHE = 'nn-assets-' + CACHE_VERSION;
 const VALID_CACHES = [SHELL_CACHE, ASSET_CACHE];
