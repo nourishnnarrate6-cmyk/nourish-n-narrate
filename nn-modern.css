@@ -1590,6 +1590,478 @@
     .nnc-result.show { border: none; background: none; padding: 0; }
   }
 
+  /* ================================================================
+     NUTRITION SCORE
+
+     One number out of 100 per recipe, worked out by nn-score.js from
+     the recipe's own data. Three places show it: a badge on the card,
+     a "Why this score?" panel in the modal, and the filter/sort bar.
+
+     The five bands share four colours, so 80–89 and 90–100 both read
+     green — the number itself carries the finer distinction.
+  ================================================================ */
+
+  /* ---------- Colour bands ---------- */
+  /* --score-solid is the filled version, used where the number sits ON the
+     colour and has to be white. Yellow is darkened from #ca8a04 because
+     white on that only reaches 2.9:1 — every other band clears 3:1 as is. */
+  .score-green  { --score-ink: var(--green-deep);  --score-bg: var(--green-pale);  --score-line: #059669; --score-solid: #059669; }
+  .score-yellow { --score-ink: #92400e;            --score-bg: #fef9c3;            --score-line: #ca8a04; --score-solid: #a16207; }
+  .score-orange { --score-ink: #9a3412;            --score-bg: var(--orange-pale); --score-line: #ea580c; --score-solid: #ea580c; }
+  .score-red    { --score-ink: #991b1b;            --score-bg: #fee2e2;            --score-line: #dc2626; --score-solid: #dc2626; }
+
+  [data-theme="dark"] .score-green  { --score-ink: #6ee7b7; --score-bg: rgba(5, 150, 105, 0.20); --score-solid: #059669; }
+  [data-theme="dark"] .score-yellow { --score-ink: #fde047; --score-bg: rgba(202, 138, 4, 0.22); --score-solid: #a16207; }
+  [data-theme="dark"] .score-orange { --score-ink: #fdba74; --score-bg: rgba(234, 88, 12, 0.22); --score-solid: #ea580c; }
+  [data-theme="dark"] .score-red    { --score-ink: #fca5a5; --score-bg: rgba(220, 38, 38, 0.22); --score-solid: #dc2626; }
+
+  /* ---------- Badge on the card ----------
+     Sits over the top-right of the image so it costs no vertical space
+     and never pushes the card layout around. */
+  .card-score {
+    position: absolute;
+    top: .7rem; right: .7rem;
+    z-index: 2;
+    display: inline-flex; align-items: baseline; gap: .1rem;
+    padding: .3rem .6rem;
+    color: var(--score-ink);
+    background: var(--score-bg);
+    border: 1px solid var(--score-line);
+    border-radius: var(--radius-full);
+    box-shadow: 0 2px 10px rgba(10, 18, 30, .16);
+    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);
+    pointer-events: none;            /* the whole card is the click target */
+    transition: transform .3s var(--ease-spring);
+  }
+  .recipe-card:hover .card-score { transform: scale(1.06); }
+  .card-score-num { font-size: .95rem; font-weight: 800; line-height: 1; }
+  .card-score-out { font-size: .65rem; font-weight: 600; opacity: .75; }
+
+  /* ---------- Filter + sort bar ---------- */
+  .score-bar {
+    display: flex; flex-wrap: wrap; align-items: center;
+    justify-content: space-between; gap: .75rem 1rem;
+    margin-bottom: 2.5rem;
+  }
+  .score-pills { display: flex; flex-wrap: wrap; gap: .6rem; }
+  .score-sort {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-size: .82rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .score-sort select {
+    padding: .5rem 2rem .5rem .9rem;
+    font-family: inherit; font-size: .88rem; font-weight: 600;
+    letter-spacing: 0; text-transform: none;
+    color: var(--text); background: var(--surface);
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    /* Custom caret — the native one ignores the border radius. */
+    -webkit-appearance: none; appearance: none;
+    background-image: linear-gradient(45deg, transparent 50%, currentColor 50%),
+                      linear-gradient(135deg, currentColor 50%, transparent 50%);
+    background-position: calc(100% - 1.1rem) 52%, calc(100% - .8rem) 52%;
+    background-size: 5px 5px, 5px 5px;
+    background-repeat: no-repeat;
+    transition: border-color .25s ease, box-shadow .25s ease;
+  }
+  .score-sort select:hover { border-color: var(--green); }
+  .score-sort select:focus-visible {
+    outline: none; border-color: var(--green);
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.14);
+  }
+
+  /* ---------- "Why this score?" panel in the modal ---------- */
+  .modal-score:empty { display: none; }
+  .modal-score {
+    margin: 0 0 2rem;
+    padding: 1.4rem 1.5rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  .mscore-head { display: flex; align-items: center; gap: 1rem; margin-bottom: .9rem; }
+  /* Solid disc, white numerals. A pale disc with dark ink read badly against
+     the dark-mode modal, and the score is the one number that has to be
+     legible at a glance — so it gets the strongest contrast available. */
+  .mscore-dial {
+    flex: 0 0 auto;
+    width: 72px; height: 72px;
+    display: grid; place-content: center; justify-items: center;
+    color: #fff;
+    background: var(--score-solid);
+    border: none;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+  }
+  .mscore-num { font-size: 1.5rem; font-weight: 800; line-height: 1; color: #fff; }
+  .mscore-out { font-size: .62rem; font-weight: 700; color: #fff; opacity: .85; }
+  .mscore-headtext { min-width: 0; }
+  .mscore-title {
+    font-size: .78rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-muted); margin-bottom: .2rem;
+  }
+  .mscore-band {
+    font-family: var(--font-display);
+    font-size: 1.2rem; color: var(--ink);
+  }
+  .mscore-summary {
+    margin: 0 0 1.2rem;
+    font-size: .95rem; line-height: 1.65; color: var(--text);
+  }
+
+  .mscore-factors { display: grid; gap: .9rem; }
+  .mscore-frow { display: flex; align-items: baseline; justify-content: space-between; gap: .75rem; }
+  .mscore-fname { font-size: .9rem; font-weight: 700; color: var(--ink); }
+  .mscore-fpts { font-size: .8rem; font-weight: 700; color: var(--text-muted); }
+  .mscore-bar {
+    height: 6px; margin: .35rem 0 .3rem;
+    background: var(--border);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+  }
+  .mscore-bar span {
+    display: block; height: 100%;
+    border-radius: var(--radius-full);
+    transition: width .6s var(--ease-out);
+  }
+  /* The bar colour says how this one factor did, independently of the
+     overall band — a great recipe can still be light on fibre. */
+  .mscore-factor.is-good span { background: var(--grad-green); }
+  .mscore-factor.is-ok   span { background: #ca8a04; }
+  .mscore-factor.is-poor span { background: #ea580c; }
+  .mscore-note { margin: 0; font-size: .86rem; line-height: 1.55; color: var(--text-muted); }
+
+  .mscore-foot {
+    margin: 1.3rem 0 0; padding-top: 1rem;
+    border-top: 1px solid var(--border);
+    font-size: .78rem; line-height: 1.6; color: var(--text-muted);
+  }
+
+  @media (max-width: 560px) {
+    .card-score { top: .55rem; right: .55rem; padding: .25rem .5rem; }
+    .card-score-num { font-size: .85rem; }
+    .modal-score { padding: 1.1rem 1rem; }
+    .mscore-dial { width: 60px; height: 60px; }
+    .mscore-num { font-size: 1.25rem; }
+    .score-bar { justify-content: flex-start; }
+    .score-sort { width: 100%; }
+    .score-sort select { flex: 1; }
+  }
+
+  /* ================================================================
+     SMART RECIPE COMPARISON
+
+     A Compare button on each card, a tray docked along the bottom,
+     and a slide-over panel. Everything is fixed-position or inside
+     the panel, so it overlays the recipes page without shifting a
+     single card.
+  ================================================================ */
+
+  /* ---------- Button on the card ---------- */
+  .card-compare {
+    margin-left: auto;
+    padding: .3rem .7rem;
+    font-family: inherit; font-size: .74rem; font-weight: 700;
+    color: var(--text-muted); background: transparent;
+    border: 1.5px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    cursor: pointer; white-space: nowrap;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .card-compare:hover { color: var(--green); border-color: var(--green); background: var(--green-pale); }
+  .card-compare.active {
+    color: #fff; background: var(--grad-green); border-color: transparent;
+  }
+  /* The Track button already claims the right edge when it is present. */
+  .card-track + .card-compare { margin-left: .4rem; }
+
+  /* ---------- Tray ---------- */
+  .nncmp-tray {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 900;
+    padding: 0 1rem calc(1rem + env(safe-area-inset-bottom, 0px));
+    transform: translateY(140%);
+    transition: transform .4s var(--ease-spring);
+    pointer-events: none;
+  }
+  .nncmp-tray.show { transform: translateY(0); }
+  .nncmp-tray-inner {
+    pointer-events: auto;
+    display: flex; align-items: center; flex-wrap: wrap; gap: .75rem 1rem;
+    max-width: 1140px; margin: 0 auto;
+    padding: .9rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 -6px 34px rgba(10, 18, 30, .18);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+  .nncmp-tray-head { display: flex; flex-direction: column; gap: .1rem; }
+  .nncmp-tray-title {
+    font-size: .8rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--green);
+  }
+  .nncmp-tray-count { font-size: .76rem; color: var(--text-muted); }
+
+  .nncmp-slots { display: flex; flex: 1; flex-wrap: wrap; gap: .55rem; min-width: 0; }
+  .nncmp-slot {
+    display: flex; align-items: center; gap: .5rem;
+    min-width: 0; max-width: 260px;
+    padding: .45rem .7rem;
+    font-size: .85rem; color: var(--ink);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+  }
+  .nncmp-slot.empty {
+    color: var(--text-muted); font-style: italic;
+    border-style: dashed; background: transparent;
+  }
+  .nncmp-slot-emoji { flex: 0 0 auto; }
+  .nncmp-slot-name {
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    font-weight: 600;
+  }
+  .nncmp-slot-x {
+    flex: 0 0 auto;
+    font-size: .7rem; color: var(--text-muted);
+    background: none; border: none; cursor: pointer; padding: 0 0 0 .1rem;
+  }
+  .nncmp-slot-x:hover { color: var(--orange); }
+
+  .nncmp-tray-actions { display: flex; align-items: center; gap: .5rem; }
+  .nncmp-go {
+    padding: .6rem 1.3rem;
+    font-family: inherit; font-size: .88rem; font-weight: 700; color: #fff;
+    background: var(--grad-green);
+    border: none; border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: transform .25s var(--ease-spring), box-shadow .25s ease;
+  }
+  .nncmp-go:hover:not(:disabled) { transform: translateY(-2px); box-shadow: var(--shadow-green); }
+  .nncmp-go:disabled { opacity: .5; cursor: default; }
+  .nncmp-ghost, .nncmp-min {
+    padding: .55rem .9rem;
+    font-family: inherit; font-size: .84rem; font-weight: 600;
+    color: var(--text-muted); background: transparent;
+    border: 1.5px solid var(--border); border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .nncmp-ghost:hover { color: var(--orange); border-color: var(--orange); }
+  .nncmp-min { padding: .55rem .75rem; }
+  .nncmp-min:hover { color: var(--green); border-color: var(--green); }
+
+  /* Minimised: just the header and the restore arrow. */
+  .nncmp-tray.mini .nncmp-slots,
+  .nncmp-tray.mini .nncmp-go,
+  .nncmp-tray.mini .nncmp-ghost { display: none; }
+  .nncmp-tray.mini .nncmp-tray-inner { justify-content: space-between; }
+
+  /* ---------- Slide-over panel ---------- */
+  .nncmp-panel-overlay {
+    position: fixed; inset: 0; z-index: 1100;
+    display: flex; justify-content: flex-end;
+    background: rgba(10, 18, 30, .55);
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+    opacity: 0; visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+  }
+  .nncmp-panel-overlay.open { opacity: 1; visibility: visible; }
+  .nncmp-panel {
+    width: min(680px, 100%);
+    height: 100%;
+    display: flex; flex-direction: column;
+    background: var(--surface);
+    box-shadow: -12px 0 44px rgba(10, 18, 30, .28);
+    transform: translateX(100%);
+    transition: transform .38s var(--ease-out);
+  }
+  .nncmp-panel-overlay.open .nncmp-panel { transform: translateX(0); }
+
+  .nncmp-panel-head {
+    flex: 0 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    padding: 1.3rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .nncmp-panel-title {
+    font-family: var(--font-display); font-size: 1.3rem; color: var(--ink); margin: 0;
+  }
+  .nncmp-panel-x {
+    width: 36px; height: 36px;
+    display: grid; place-items: center;
+    font-size: .9rem; color: var(--text-muted);
+    background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 50%;
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .nncmp-panel-x:hover { color: var(--orange); border-color: var(--orange); }
+
+  .nncmp-panel-body {
+    flex: 1; min-height: 0; overflow-y: auto;
+    padding: 1.5rem;
+    padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Summary */
+  .nncmp-summary {
+    padding: 1.15rem 1.3rem; margin-bottom: 1.5rem;
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, .22);
+    border-radius: var(--radius-lg);
+  }
+  .nncmp-summary-label {
+    font-size: .74rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--green-deep); margin-bottom: .35rem;
+  }
+  .nncmp-summary-text { margin: 0; font-size: .95rem; line-height: 1.65; color: var(--ink); }
+
+  /* The shared three-column shape: label, recipe A, recipe B. */
+  .nncmp-grid {
+    display: grid;
+    grid-template-columns: minmax(90px, 1.1fr) 1fr 1fr;
+    gap: .5rem .75rem;
+    align-items: center;
+  }
+  .nncmp-heads { padding-bottom: .9rem; border-bottom: 2px solid var(--border); }
+  .nncmp-head { text-align: center; min-width: 0; }
+  .nncmp-head-emoji { font-size: 1.6rem; line-height: 1.2; }
+  .nncmp-head-title {
+    font-size: .9rem; font-weight: 700; color: var(--ink);
+    line-height: 1.3; margin-top: .2rem;
+  }
+  .nncmp-head-cat {
+    font-size: .7rem; text-transform: uppercase; letter-spacing: .05em;
+    color: var(--text-muted); margin-top: .15rem;
+  }
+
+  .nncmp-rows { margin-top: .3rem; }
+  .nncmp-row { padding: .7rem 0; border-bottom: 1px solid var(--border); }
+  .nncmp-row.is-key {
+    background: var(--surface-2);
+    border-radius: var(--radius-md, 12px);
+    padding: .85rem .6rem;
+    margin: .3rem 0;
+    border-bottom: none;
+  }
+  .nncmp-rowlabel {
+    display: flex; flex-direction: column; gap: .05rem;
+    font-size: .84rem; font-weight: 600; color: var(--text-muted);
+  }
+  .nncmp-rownote {
+    font-size: .68rem; font-weight: 500; font-style: italic;
+    color: var(--text-muted); opacity: .8;
+  }
+  .nncmp-cell {
+    display: flex; align-items: center; justify-content: center; gap: .35rem;
+    padding: .35rem .4rem;
+    font-size: .92rem; color: var(--text);
+    border-radius: var(--radius-full);
+    text-align: center;
+  }
+  /* The win is shown with colour, weight AND a tick, so it does not rely
+     on colour alone. */
+  .nncmp-cell.is-better {
+    color: var(--green-deep); font-weight: 800;
+    background: var(--green-pale);
+  }
+  .nncmp-val { min-width: 0; }
+  .nncmp-better { font-size: .75rem; }
+
+  .nncmp-legend {
+    margin: 1.3rem 0 0;
+    font-size: .78rem; line-height: 1.6; color: var(--text-muted);
+  }
+
+  .nncmp-actions-row { margin-top: 1.4rem; padding-top: 1.3rem; border-top: 1px solid var(--border); }
+  .nncmp-actions { display: flex; flex-direction: column; gap: .4rem; }
+  .nncmp-act {
+    padding: .55rem .8rem;
+    font-family: inherit; font-size: .82rem; font-weight: 600;
+    color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, background .2s ease;
+  }
+  .nncmp-act:hover { border-color: var(--green); color: var(--green); }
+  .nncmp-act-primary {
+    color: #fff; background: var(--grad-green); border-color: transparent;
+  }
+  .nncmp-act-primary:hover { color: #fff; }
+  .nncmp-act-quiet { background: transparent; color: var(--text-muted); }
+  .nncmp-act-quiet:hover { color: var(--orange); border-color: var(--orange); }
+
+  [data-theme="dark"] .nncmp-cell.is-better { background: rgba(5, 150, 105, .18); color: var(--green-light); }
+  [data-theme="dark"] .nncmp-summary { background: rgba(5, 150, 105, .12); }
+
+  @media (max-width: 620px) {
+    .nncmp-tray-inner { padding: .75rem .85rem; gap: .6rem .7rem; }
+    .nncmp-tray-head { flex-direction: row; align-items: baseline; gap: .5rem; width: 100%; }
+    .nncmp-slots { flex: 1 1 100%; }
+    .nncmp-slot { max-width: 100%; flex: 1 1 100%; }
+    .nncmp-tray-actions { width: 100%; }
+    .nncmp-go { flex: 1; }
+    .nncmp-panel { width: 100%; }
+    .nncmp-panel-body { padding: 1.1rem; }
+    .nncmp-grid { grid-template-columns: minmax(72px, .9fr) 1fr 1fr; gap: .4rem .5rem; }
+    .nncmp-head-title { font-size: .8rem; }
+    .nncmp-cell { font-size: .85rem; }
+    .nncmp-rowlabel { font-size: .78rem; }
+  }
+
+  /* The tray floats over the page bottom, so give the last section room
+     to breathe and keep the scroll rails clear of it. */
+  body.nncmp-tray-open { padding-bottom: 5rem; }
+
+  /* ---------- Recipe count ----------
+     Sits at the top of a collection, above the search box. The number
+     carries the weight; the wording after it stays quiet so the line
+     reads as a heading rather than a sentence. */
+  .recipe-count {
+    display: flex; align-items: baseline; gap: .4rem;
+    margin: 0 0 1.5rem;
+  }
+  .recipe-count:empty { display: none; }
+  .recipe-count-num {
+    font-family: var(--font-display);
+    font-size: 1.9rem; font-weight: 700; line-height: 1;
+    color: var(--green);
+  }
+  .recipe-count-label {
+    font-size: .95rem; font-weight: 600;
+    color: var(--text-muted);
+  }
+  @media (max-width: 560px) {
+    .recipe-count { margin-bottom: 1.15rem; }
+    .recipe-count-num { font-size: 1.55rem; }
+    .recipe-count-label { font-size: .88rem; }
+  }
+
+  /* Admin dashboard link in the footer. Deliberately quiet — it is a
+     tool for one or two people, not a call to action. */
+  .foot-admin {
+    display: inline-block;
+    margin-top: 1.25rem;
+    padding: .4rem .95rem;
+    font-size: .78rem; font-weight: 600;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-full);
+    text-decoration: none;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .foot-admin:hover { color: var(--green); border-color: var(--green); }
+  .foot-admin[hidden] { display: none; }
+
   /* Slide-in when switching views */
   .slide-in { animation: fadeInUp 0.5s var(--ease-out) both; }
 
@@ -1655,6 +2127,7 @@
   }
 
   .recipe-card {
+    position: relative;              /* anchors the Nutrition Score badge */
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);

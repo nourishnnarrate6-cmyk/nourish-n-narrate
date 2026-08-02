@@ -509,8 +509,28 @@
     setBusy(true, another ? 'Writing a different version…' : 'Writing your recipe…');
     skeleton();
 
+    var startedAt = (w.performance && w.performance.now) ? w.performance.now() : Date.now();
     w.NNAuth.generateRecipe(spec).then(function (res) {
       setBusy(false, '');
+
+      // Usage analytics — response time and success rate come from here.
+      try {
+        if (w.NNAnalytics) {
+          var done = (w.performance && w.performance.now) ? w.performance.now() : Date.now();
+          w.NNAnalytics.track('recipe_generate', {
+            ok: !!(res.ok && res.feasible),
+            ms: Math.round(done - startedAt),
+            diet: spec.diet,
+            mealType: spec.mealType,
+            difficulty: spec.difficulty,
+            targetCalories: spec.targetCalories,
+            proteinGoal: spec.proteinGoal,
+            maxMinutes: spec.maxMinutes,
+            ingredients: spec.ingredients,
+            retry: !!another,
+          });
+        }
+      } catch (e) {}
 
       if (!res.ok) {
         var msg = res.reason === 'not_configured'

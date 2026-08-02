@@ -36,6 +36,33 @@
       return recipeCollections(recipe).indexOf(name) !== -1;
     }
 
+    /* ===========================================================
+       NUTRITION SCORE
+       Worked out by nn-score.js from the recipe's own numbers and
+       ingredient list — nothing is stored, so a recipe added later
+       is scored the moment it appears. If that file is missing the
+       badge is simply left off and everything else still works.
+    =========================================================== */
+
+    /** The score for a recipe, or null when scoring is unavailable. */
+    function scoreOf(recipe) {
+      if (!window.NNScore || !recipe) return null;
+      try { return window.NNScore.score(recipe); } catch (e) { return null; }
+    }
+
+    /** The badge that sits on a recipe card. */
+    function buildScoreBadge(s) {
+      const badge = document.createElement('div');
+      badge.className = 'card-score score-' + s.color;
+      badge.title = 'Nutrition Score ' + s.total + ' out of 100 — ' + s.label;
+      badge.setAttribute('aria-label',
+        'Nutrition Score ' + s.total + ' out of 100, ' + s.label);
+      badge.innerHTML =
+        '<span class="card-score-num">' + s.total + '</span>' +
+        '<span class="card-score-out">/100</span>';
+      return badge;
+    }
+
     /** Same test against a rendered card, for the DOM-based filters. */
     function cardInCollection(card, key) {
       if (!key || key === 'all') return true;
@@ -111,6 +138,16 @@
           </div>
         </div>`;
 
+      // Nutrition Score — sits over the image corner so it reads at a glance
+      // without pushing the card layout around. The number also goes on the
+      // card as data, which is what the sort and the 90+/80+ filters use.
+      const s = scoreOf(recipe);
+      if (s) {
+        card.dataset.score = s.total;
+        card.dataset.scoreBand = s.band;
+        card.appendChild(buildScoreBadge(s));
+      }
+
       // "+ Track" — log this recipe to today's tracker (requires login)
       const meta = card.querySelector('.card-meta');
       if (meta && window.NNAuth) {
@@ -143,6 +180,13 @@
         meta.appendChild(trackBtn);
       }
 
+      // "⇄ Compare" — adds this recipe to the comparison tray. Built by
+      // nn-compare.js so the button and the tray stay in one place; if that
+      // file is absent the card simply has no Compare button.
+      if (meta && window.NNCompare) {
+        meta.appendChild(window.NNCompare.buildButton(recipe));
+      }
+
       // Click or Enter/Space key → open modal
       card.addEventListener('click', () => openModal(index));
       card.addEventListener('keydown', e => {
@@ -153,6 +197,81 @@
       return card;
     }
 
+    /** Fill the "Why this score?" block in the open recipe modal.
+        Silent no-op on a page whose modal predates this section. */
+    function renderScorePanel(recipe) {
+      const host = document.getElementById('modal-score');
+      if (!host) return;
+
+      const s = scoreOf(recipe);
+      if (!s) { host.style.display = 'none'; return; }
+      host.style.display = '';
+      host.innerHTML = '';
+
+      // Headline: the number, the band, and a one-line summary.
+      const head = document.createElement('div');
+      head.className = 'mscore-head score-' + s.color;
+      head.innerHTML =
+        '<div class="mscore-dial">' +
+          '<span class="mscore-num">' + s.total + '</span>' +
+          '<span class="mscore-out">/100</span>' +
+        '</div>' +
+        '<div class="mscore-headtext">' +
+          '<div class="mscore-title">⭐ Nutrition Score</div>' +
+          '<div class="mscore-band">' + s.emoji + ' ' + s.label + '</div>' +
+        '</div>';
+      host.appendChild(head);
+
+      const summary = document.createElement('p');
+      summary.className = 'mscore-summary';
+      summary.textContent = s.summary;
+      host.appendChild(summary);
+
+      // Every factor, with its bar. Written as text nodes rather than
+      // innerHTML because the notes contain ingredient names.
+      const list = document.createElement('div');
+      list.className = 'mscore-factors';
+      s.factors.forEach(f => {
+        const row = document.createElement('div');
+        row.className = 'mscore-factor is-' + f.verdict;
+
+        const top = document.createElement('div');
+        top.className = 'mscore-frow';
+        const name = document.createElement('span');
+        name.className = 'mscore-fname';
+        name.textContent = f.label;
+        const pts = document.createElement('span');
+        pts.className = 'mscore-fpts';
+        pts.textContent = Math.round(f.points) + '/' + f.max;
+        top.appendChild(name);
+        top.appendChild(pts);
+        row.appendChild(top);
+
+        const bar = document.createElement('div');
+        bar.className = 'mscore-bar';
+        const fill = document.createElement('span');
+        fill.style.width = Math.round((f.points / f.max) * 100) + '%';
+        bar.appendChild(fill);
+        row.appendChild(bar);
+
+        const note = document.createElement('p');
+        note.className = 'mscore-note';
+        note.textContent = f.note;
+        row.appendChild(note);
+
+        list.appendChild(row);
+      });
+      host.appendChild(list);
+
+      // Say plainly what the number is and is not.
+      const foot = document.createElement('p');
+      foot.className = 'mscore-foot';
+      foot.textContent = 'Worked out from this recipe’s protein, fibre, fat and ' +
+        'ingredient list. Sugar and sodium are estimated from the ingredients rather ' +
+        'than measured, so treat the score as a guide, not a lab result.';
+      host.appendChild(foot);
+    }
+
     /* ✏️ FEATURED RECIPES — these 6 show first, before the "See all recipes" button.
        Titles must match the recipe "title" fields exactly. Reorder to change which
        cards appear on top; the rest stay hidden until the visitor expands them. */
@@ -160,6 +279,17 @@
     function openModal(recipeIndex) {
       const r = RECIPES[recipeIndex];
       if (!r) return; // Safety check
+
+      // Usage analytics — fire-and-forget, never awaited.
+      try {
+        if (window.NNAnalytics) {
+          window.NNAnalytics.track('recipe_view', {
+            title: r.title,
+            category: r.category || '',
+            score: window.NNScore ? window.NNScore.of(r) : null,
+          });
+        }
+      } catch (e) {}
 
       // Header: real image or emoji fallback
       const header = document.getElementById('modal-header');
@@ -181,6 +311,10 @@
       document.getElementById('modal-protein').textContent  = r.protein  || '—';
       document.getElementById('modal-fiber').textContent    = r.fiber    || '—';
       document.getElementById('modal-fat').textContent      = r.fat      || '—';
+
+      // "Why this score?" — the six factors in plain language, strengths
+      // first and then anything holding the score back.
+      renderScorePanel(r);
 
       // Ingredients list
       const ingEl = document.getElementById('modal-ingredients-list');

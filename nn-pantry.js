@@ -936,6 +936,19 @@
           (out.results.length === 1 ? ' recipe' : ' recipes') + ' with what you have.'
         : 'We couldn’t find a recipe with your current pantry, but these are the closest healthy options.';
 
+      // Usage analytics — fire-and-forget, never awaited.
+      try {
+        if (w.NNAnalytics) {
+          w.NNAnalytics.track('pantry_search', {
+            ingredients: pantry,
+            results: out.results.length,
+            matched: out.results.slice(0, 10).map(function (m) { return m.recipe.title; }),
+            full: out.results.filter(function (m) { return m.pct >= 1; })
+                    .slice(0, 10).map(function (m) { return m.recipe.title; }),
+          });
+        }
+      } catch (e) {}
+
       out.results.forEach(function (m, n) {
         var card = buildRecipeCard(m.recipe, m.index);
         card.classList.add('nnf-in');

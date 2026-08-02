@@ -679,10 +679,25 @@
     showSkeletons(3);
     els.clear.style.display = '';
 
+        var startedAt = (w.performance && w.performance.now) ? w.performance.now() : Date.now();
+
     searchSmart(query).then(function (out) {
       if (mine !== runToken) return;
       els.status.classList.remove('thinking');
       draw(out);
+
+            // Usage analytics — fire-and-forget, never awaited.
+            try {
+              if (w.NNAnalytics) {
+                var done = (w.performance && w.performance.now) ? w.performance.now() : Date.now();
+                w.NNAnalytics.track('assistant_search', {
+                  q: query,
+                  results: out.results.length,
+                  ingredients: (out.intent && out.intent.ingredients) || [],
+                  ms: Math.round(done - startedAt),
+                });
+              }
+            } catch (e) {}
     });
   }
 
@@ -878,7 +893,21 @@
       var at = p.favorites.indexOf(title);
       if (at === -1) p.favorites.push(title); else p.favorites.splice(at, 1);
       saveProfile(p);
-      return p.favorites.indexOf(title) !== -1;
+      var on = p.favorites.indexOf(title) !== -1;
+
+      /* localStorage stays the source of truth for ranking, so favourites
+         keep working offline and for signed-out visitors. When someone is
+         signed in we mirror the change to the favorites table too — that is
+         the only copy the admin dashboard can see, and it also means their
+         picks survive a change of device. Fire-and-forget: a failure here
+         must never undo the click. */
+      try {
+        if (w.NNAuth && typeof w.NNAuth.setFavorite === 'function') {
+          w.NNAuth.setFavorite(title, on);
+        }
+      } catch (e) {}
+
+      return on;
     },
     noteViewed: function (title) {
       var p = profile();

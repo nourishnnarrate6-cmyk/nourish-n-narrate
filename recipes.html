@@ -146,6 +146,10 @@
           <button class="see-more-btn btn-back" onclick="backToSelector()">← Back to Diet Selection</button>
         </div>
 
+        <!-- Which collection you are in, and how many recipes it holds.
+             Kept in step by updateRecipeCount() on every filter change. -->
+        <div class="recipe-count" id="recipe-count" aria-live="polite"></div>
+
         <!-- Search bar -->
         <div class="search-wrap">
           <span class="search-icon" aria-hidden="true">🔍</span>
@@ -166,6 +170,25 @@
           <button class="pill"        data-filter="dinner"    onclick="setFilter(this,'dinner')">Dinner</button>
           <button class="pill"        data-filter="snack"     onclick="setFilter(this,'snack')">Snacks</button>
           <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
+        </div>
+
+        <!-- Nutrition Score — filter and sort. Scores are worked out by
+             nn-score.js and stamped onto each card by buildRecipeCard(),
+             so this only ever reads what is already on the card. -->
+        <div class="score-bar">
+          <div class="score-pills" role="group" aria-label="Filter by Nutrition Score">
+            <button class="pill active" data-score-min="0"  onclick="setScoreFilter(this,0)">All Scores</button>
+            <button class="pill"        data-score-min="90" onclick="setScoreFilter(this,90)">🟢 90+</button>
+            <button class="pill"        data-score-min="80" onclick="setScoreFilter(this,80)">🟢 80+</button>
+          </div>
+          <label class="score-sort">
+            <span>Sort</span>
+            <select id="score-sort" onchange="setSort(this.value)" aria-label="Sort recipes">
+              <option value="default">Featured</option>
+              <option value="score-desc">Highest Nutrition Score</option>
+              <option value="score-asc">Lowest Nutrition Score</option>
+            </select>
+          </label>
         </div>
 
         <!-- Recipe cards are injected here by renderRecipes() -->
@@ -210,6 +233,9 @@
           <div class="modal-stat"><div class="modal-stat-val" id="modal-fiber"></div><div class="modal-stat-label">Fiber</div></div>
           <div class="modal-stat"><div class="modal-stat-val" id="modal-fat"></div><div class="modal-stat-label">Fat</div></div>
         </div>
+
+        <!-- Why this score? — filled by renderScorePanel() in nn-cards.js -->
+        <div class="modal-score" id="modal-score"></div>
         <div class="modal-ingredients">
           <div class="modal-section-title">🛒 Ingredients</div>
           <div id="modal-ingredients-list"></div>
@@ -272,6 +298,9 @@
   <script src="recipes-data-supabase.js"></script>
   <script src="form-handlers.js"></script>
   <script src="nn-auth.js"></script>
+  <script src="nn-analytics.js"></script>
+  <script src="nn-score.js"></script>
+  <script src="nn-compare.js"></script>
   <script src="nn-cards.js"></script>
   <script src="nn-finder.js"></script>
   <script src="nn-pantry.js"></script>
@@ -320,6 +349,7 @@
             if (!card.dataset.collections) {
               card.dataset.collections = collectionsOf(r).join('|');
             }
+            card.dataset.order = count;   // remembers the Featured order
             grid.appendChild(card);
             count++;
           }
@@ -329,6 +359,9 @@
         for (let i = count; i < 6; i++) {
           grid.appendChild(buildPlaceholderCard());
         }
+
+        applySort();       // keep the visitor's chosen sort across a re-render
+        filterRecipes();   // applies the active filters and fills the count
       } catch (e) {
         console.error('Error in renderRecipes:', e);
       }
@@ -449,13 +482,104 @@
       filterRecipes();
     }
 
+    /* ---------- Nutrition Score: filter + sort ----------
+       Both work purely on the DOM. RECIPES is never reordered, so every card
+       keeps the data-index the modal opens by. */
+
+    /* Titles for the count heading, one per collection button. */
+    const COLLECTION_TITLES = {
+      'veg': '🌱 Vegetarian',
+      'non-veg': '🍗 Non-Vegetarian',
+      'high-protein': '💪 High Protein',
+      'all': 'All',
+    };
+
+    /** "24 vegetarian recipes", or "12 of 24" once a filter narrows it. */
+    function updateRecipeCount() {
+      const host = document.getElementById('recipe-count');
+      if (!host) return;
+      const cards = document.querySelectorAll('#recipe-grid .recipe-card:not(.placeholder)');
+      let shown = 0;
+      cards.forEach(c => { if (c.style.display !== 'none') shown++; });
+      const total = cards.length;
+      const name = COLLECTION_TITLES[currentTypeFilter] || 'All';
+      const noun = shown === 1 ? 'recipe' : 'recipes';
+
+      host.innerHTML = '';
+
+      // Nothing matching reads better as a sentence than as "0 of 56".
+      if (!shown) {
+        const none = document.createElement('span');
+        none.className = 'recipe-count-label';
+        none.textContent = 'No recipes match these filters';
+        host.appendChild(none);
+        return;
+      }
+
+      const big = document.createElement('span');
+      big.className = 'recipe-count-num';
+      big.textContent = shown === total ? String(total) : shown + ' of ' + total;
+      const label = document.createElement('span');
+      label.className = 'recipe-count-label';
+      label.textContent = ' ' + name + ' ' + noun;
+      host.appendChild(big);
+      host.appendChild(label);
+    }
+
+    let currentScoreMin = 0;      // 0 | 80 | 90
+    let currentSort = 'default';  // default | score-desc | score-asc
+
+    function setScoreFilter(btn, min) {
+      currentScoreMin = min;
+      document.querySelectorAll('[data-score-min]').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      filterRecipes();
+    }
+
+    function setSort(value) {
+      currentSort = value;
+      applySort();
+      filterRecipes();
+    }
+
+    /** Reorder the cards in the grid. Placeholders always sit last. */
+    function applySort() {
+      const grid = document.getElementById('recipe-grid');
+      if (!grid) return;
+      const all   = Array.prototype.slice.call(grid.children);
+      const cards = all.filter(c => !c.classList.contains('placeholder'));
+      const tail  = all.filter(c =>  c.classList.contains('placeholder'));
+      const order = c => Number(c.dataset.order) || 0;
+      const score = c => (c.dataset.score === undefined ? -1 : Number(c.dataset.score));
+
+      if (currentSort === 'default') {
+        cards.sort((a, b) => order(a) - order(b));
+      } else {
+        const sign = currentSort === 'score-asc' ? 1 : -1;
+        // Ties fall back to the featured order, so two equally-scored recipes
+        // never shuffle unpredictably between renders.
+        cards.sort((a, b) => {
+          const d = (score(a) - score(b)) * sign;
+          return d !== 0 ? d : order(a) - order(b);
+        });
+      }
+      cards.concat(tail).forEach(c => grid.appendChild(c));
+    }
+
+    /** Does this card pass the active Nutrition Score filter? */
+    function cardMatchesScore(card) {
+      if (!currentScoreMin) return true;
+      if (card.dataset.score === undefined) return false;   // placeholder
+      return Number(card.dataset.score) >= currentScoreMin;
+    }
+
     function filterRecipes() {
       const query = document.getElementById('recipe-search').value.toLowerCase().trim();
       const collapsed = currentFilter === 'all' && !query;
 
       document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
         if (card.classList.contains('placeholder')) {
-          card.style.display = query ? 'none' : '';
+          card.style.display = (query || currentScoreMin) ? 'none' : '';
           return;
         }
         const cat  = card.dataset.category || '';
@@ -463,12 +587,13 @@
         const matchCat  = currentFilter === 'all' || cat === currentFilter;
         const matchType = cardMatchesCollection(card, currentTypeFilter);
         const matchQ    = !query || text.includes(query);
-        let show = matchCat && matchType && matchQ;
+        let show = matchCat && matchType && matchQ && cardMatchesScore(card);
         if (show && collapsed && card.classList.contains('extra-recipe')) show = false;
         card.style.display = show ? '' : 'none';
       });
 
       updateSeeMoreButton();
+      updateRecipeCount();
     }
 
 

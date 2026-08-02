@@ -532,6 +532,13 @@
       </a>
     </div>
     <p class="foot-note">Made with &#128154; by students, for everyone.</p>
+
+    <!-- Admin dashboard. Hidden by default and only revealed once the
+         database confirms the signed-in account is an administrator.
+         Hiding it is a convenience, not the security: admin.html and
+         every figure on it are gated server-side, so revealing this
+         link in devtools would gain nothing. -->
+    <a class="foot-admin" id="admin-link" href="admin.html" hidden>&#9881; Admin dashboard</a>
   </footer>
 
   <!-- Scroll to top (wired up by nn-premium.js) -->
@@ -763,6 +770,21 @@
     });
 
   </script>
+  <script>
+    /* Reveal the footer's admin link only to administrators. is_admin() is
+       a database function, so a signed-out or ordinary visitor never sees
+       it — and could not use it if they did. */
+    (function () {
+      var link = document.getElementById('admin-link');
+      if (!link || !window.NNAuth || typeof NNAuth.isAdmin !== 'function') return;
+      NNAuth.onReady(function () {
+        NNAuth.isAdmin().then(function (ok) {
+          if (ok) link.hidden = false;
+        }, function () { /* signed out — leave it hidden */ });
+      });
+    })();
+  </script>
+
   <script src="nn-premium.js"></script>
   <script src="nn-tour.js"></script>
   <!-- Live member count from Supabase Auth -->

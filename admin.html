@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Admin — Nourish N Narrate</title>
+
+  <!-- Private page. Keep it out of search results and link previews. -->
+  <meta name="robots" content="noindex, nofollow, noarchive" />
+  <meta name="referrer" content="no-referrer" />
+
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="nn-modern.css" />
+
+  <style>
+    /* ================================================================
+       ADMIN DASHBOARD
+
+       Deliberately NOT registered in the service worker and NOT linked
+       from any public page. It is reachable only by typing the address,
+       and every figure on it comes from an admin-gated database
+       function — so knowing the address alone gets you nothing.
+    ================================================================ */
+
+    body { background: var(--bg); }
+
+    .adm-shell { max-width: 1180px; margin: 0 auto; padding: 1.75rem 1.25rem 4rem; }
+
+    /* ---------- Gate ---------- */
+    .adm-gate {
+      max-width: 460px; margin: 12vh auto; padding: 2.25rem 2rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+    .adm-gate h1 { font-family: var(--font-display); font-size: 1.5rem; color: var(--ink); margin: 0 0 .5rem; }
+    .adm-gate p { font-size: .95rem; line-height: 1.65; color: var(--text-muted); margin: 0 0 1.4rem; }
+    .adm-gate a { color: var(--green); font-weight: 700; }
+
+    /* ---------- Header ---------- */
+    .adm-head {
+      display: flex; flex-wrap: wrap; align-items: flex-end;
+      justify-content: space-between; gap: 1rem; margin-bottom: 1.75rem;
+    }
+    .adm-title { font-family: var(--font-display); font-size: 1.9rem; color: var(--ink); margin: 0; }
+    .adm-sub { font-size: .88rem; color: var(--text-muted); margin: .25rem 0 0; }
+    .adm-tools { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; }
+    .adm-btn {
+      padding: .55rem 1rem;
+      font-family: inherit; font-size: .84rem; font-weight: 600;
+      color: var(--text); background: var(--surface);
+      border: 1.5px solid var(--border-strong); border-radius: var(--radius-full);
+      cursor: pointer; transition: color .2s ease, border-color .2s ease;
+    }
+    .adm-btn:hover { color: var(--green); border-color: var(--green); }
+    .adm-btn.primary { color: #fff; background: var(--grad-green); border-color: transparent; }
+    .adm-select {
+      padding: .55rem 1rem; font-family: inherit; font-size: .84rem; font-weight: 600;
+      color: var(--text); background: var(--surface);
+      border: 1.5px solid var(--border-strong); border-radius: var(--radius-full);
+      cursor: pointer;
+    }
+
+    /* ---------- KPI cards ---------- */
+    .adm-kpis {
+      display: grid; gap: .85rem; margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+    }
+    .kpi {
+      padding: 1.1rem 1.15rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      animation: fadeInUp .4s var(--ease-out) both;
+    }
+    .kpi-label {
+      display: flex; align-items: center; gap: .4rem;
+      font-size: .76rem; font-weight: 600; color: var(--text-muted);
+      margin-bottom: .45rem;
+    }
+    .kpi-value {
+      font-family: var(--font-display); font-size: 1.75rem; font-weight: 700;
+      color: var(--ink); line-height: 1;
+    }
+    .kpi-note { margin-top: .3rem; font-size: .74rem; color: var(--text-muted); }
+    .kpi.muted .kpi-value { color: var(--text-muted); font-size: 1.05rem; font-family: var(--font-sans, inherit); }
+
+    /* ---------- Panels ---------- */
+    .adm-grid { display: grid; gap: 1.15rem; grid-template-columns: 1fr; margin-bottom: 1.15rem; }
+    @media (min-width: 900px) { .adm-grid.two { grid-template-columns: 1fr 1fr; } }
+
+    .panel {
+      padding: 1.35rem 1.4rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+      min-width: 0;
+    }
+    .panel h2 {
+      font-family: inherit; font-size: .82rem; font-weight: 700;
+      letter-spacing: .06em; text-transform: uppercase; color: var(--green);
+      margin: 0 0 1rem;
+    }
+    .panel h2 span { color: var(--text-muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
+
+    /* Shown wherever a metric has no data behind it yet. Never a zero
+       pretending to be a measurement. */
+    .adm-empty {
+      padding: 1.1rem; text-align: center;
+      font-size: .86rem; line-height: 1.6; color: var(--text-muted);
+      background: var(--surface-2); border: 1px dashed var(--border-strong);
+      border-radius: var(--radius-md, 12px);
+    }
+
+    /* ---------- Ranked lists ---------- */
+    .rank { display: grid; gap: .5rem; }
+    .rank-row { display: grid; grid-template-columns: 1.6rem 1fr auto; gap: .6rem; align-items: center; }
+    .rank-n { font-size: .76rem; font-weight: 700; color: var(--text-muted); text-align: right; }
+    .rank-bar {
+      position: relative; min-width: 0;
+      padding: .35rem .55rem; border-radius: var(--radius-md, 10px);
+      background: var(--surface-2); overflow: hidden;
+    }
+    .rank-fill {
+      position: absolute; inset: 0 auto 0 0;
+      background: var(--green-pale); border-radius: inherit;
+    }
+    [data-theme="dark"] .rank-fill { background: rgba(5, 150, 105, .22); }
+    .rank-text {
+      position: relative; font-size: .85rem; color: var(--ink);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .rank-val { font-size: .82rem; font-weight: 700; color: var(--green); }
+
+    /* ---------- Tables ---------- */
+    .adm-table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+    .adm-table th {
+      text-align: left; padding: .5rem .5rem;
+      font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+      text-transform: uppercase; color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+    }
+    .adm-table td { padding: .55rem .5rem; border-bottom: 1px solid var(--border); color: var(--text); }
+    .adm-table tr:last-child td { border-bottom: none; }
+    .adm-table td.num { text-align: right; font-weight: 700; color: var(--ink); }
+    .adm-scroll { overflow-x: auto; }
+
+    /* ---------- Charts ---------- */
+    .chart { width: 100%; height: auto; display: block; overflow: visible; }
+    .chart .grid { stroke: var(--border); stroke-width: 1; }
+    .chart .axis { fill: var(--text-muted); font-size: 10px; }
+    .chart .line { fill: none; stroke: #059669; stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; }
+    .chart .area { fill: rgba(5, 150, 105, .12); }
+    .chart .bar { fill: #059669; }
+    .chart .bar.alt { fill: #ea580c; }
+    .chart .dot { fill: #059669; }
+
+    /* ---------- Progress ---------- */
+    .prog { height: 12px; background: var(--surface-2); border: 1px solid var(--border); border-radius: 99px; overflow: hidden; }
+    .prog span { display: block; height: 100%; background: var(--grad-green); border-radius: 99px; transition: width 1s var(--ease-out); }
+    .prog-row { display: flex; justify-content: space-between; font-size: .85rem; margin-bottom: .45rem; color: var(--text); }
+
+    .adm-note { margin: 1.75rem 0 0; font-size: .78rem; line-height: 1.65; color: var(--text-muted); }
+
+    @media print {
+      .adm-tools, #adm-gate { display: none !important; }
+      .panel, .kpi { box-shadow: none; break-inside: avoid; }
+      .adm-shell { max-width: none; padding: 0; }
+    }
+  </style>
+</head>
+<body data-view="admin">
+
+  <!-- Shown until we know who this is. Also the whole page for anyone
+       who is not an administrator. -->
+  <div class="adm-gate" id="adm-gate">
+    <h1 id="gate-title">Checking access…</h1>
+    <p id="gate-msg">One moment.</p>
+    <div id="gate-actions"></div>
+  </div>
+
+  <div class="adm-shell" id="adm-app" style="display:none;">
+
+    <div class="adm-head">
+      <div>
+        <h1 class="adm-title">Dashboard</h1>
+        <p class="adm-sub" id="adm-sub">Nourish N Narrate</p>
+      </div>
+      <div class="adm-tools">
+        <select class="adm-select" id="adm-range" aria-label="Time range">
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last year</option>
+        </select>
+        <button class="adm-btn" id="adm-refresh" type="button">↻ Refresh</button>
+        <button class="adm-btn" id="adm-csv" type="button">⬇ CSV</button>
+        <button class="adm-btn" id="adm-pdf" type="button">🖨 PDF / Print</button>
+        <a class="adm-btn" href="index.html#home">← Site</a>
+      </div>
+    </div>
+
+    <div class="adm-kpis" id="adm-kpis"></div>
+
+    <div class="adm-grid two">
+      <div class="panel"><h2>User growth <span id="lbl-growth"></span></h2><div id="chart-growth"></div></div>
+      <div class="panel"><h2>New signups per day</h2><div id="chart-signups"></div></div>
+    </div>
+
+    <div class="adm-grid two">
+      <div class="panel"><h2>Feature usage</h2><div id="panel-features"></div></div>
+      <div class="panel"><h2>New vs returning</h2><div id="panel-newret"></div></div>
+    </div>
+
+    <div class="adm-grid two">
+      <div class="panel"><h2>Donations <span>— goal progress</span></h2><div id="panel-donations"></div></div>
+      <div class="panel"><h2>Highest nutrition scores</h2><div id="panel-scores"></div></div>
+    </div>
+
+    <div class="adm-grid two">
+      <div class="panel"><h2>Recipe analytics</h2><div id="panel-recipes"></div></div>
+      <div class="panel"><h2>AI assistant &amp; creator</h2><div id="panel-ai"></div></div>
+    </div>
+
+    <div class="adm-grid two">
+      <div class="panel"><h2>Pantry mode</h2><div id="panel-pantry"></div></div>
+      <div class="panel"><h2>People</h2><div id="panel-people"></div></div>
+    </div>
+
+    <div class="adm-grid two">
+      <div class="panel"><h2>Recent signups</h2><div id="table-signups"></div></div>
+      <div class="panel"><h2>Recent activity</h2><div id="table-events"></div></div>
+    </div>
+
+    <p class="adm-note" id="adm-footnote"></p>
+  </div>
+
+  <script src="nn-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="recipes-data-supabase.js"></script>
+  <script src="nn-auth.js"></script>
+  <script src="nn-score.js"></script>
+
+  <script>
+  /* ===================================================================
+     ADMIN DASHBOARD
+
+     Three things worth knowing about how this page works:
+
+     1. It never queries a table directly. Every figure comes from an
+        admin_* database function that refuses anyone who is not in
+        admin_users. The check below is only there to show a friendly
+        message — the real gate is in Postgres, so tampering with this
+        page in devtools yields nothing.
+
+     2. Charts are hand-drawn SVG, matching tracker.html. No chart
+        library, so nothing extra to load and the page keeps working
+        without a CDN.
+
+     3. Anything with no data behind it says so. A metric that reads
+        zero because nobody has used the feature yet is different from
+        a metric that reads zero because it cannot be measured, and the
+        panels distinguish the two.
+  =================================================================== */
+  (function (w, d) {
+    'use strict';
+
+    var CACHE_MS = 60000;         // don't re-query on every small change
+    var cache = {};
+    var data = {};                // last successful payloads, for export
+
+    /* ---------------- Small helpers ---------------- */
+
+    function el(tag, cls, text) {
+      var n = d.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    }
+    function n(v) { return typeof v === 'number' && isFinite(v) ? v : 0; }
+    function fmt(v) { return n(v).toLocaleString(); }
+    function when(iso) {
+      if (!iso) return '—';
+      var t = new Date(iso);
+      return isNaN(t) ? '—' : t.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+        + ' ' + t.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+    }
+    function empty(host, msg) {
+      host.innerHTML = '';
+      host.appendChild(el('div', 'adm-empty', msg));
+    }
+
+    /* ---------------- Access gate ---------------- */
+
+    function gate(title, msg, actions) {
+      d.getElementById('gate-title').textContent = title;
+      d.getElementById('gate-msg').textContent = msg;
+      var box = d.getElementById('gate-actions');
+      box.innerHTML = '';
+      (actions || []).forEach(function (a) {
+        var link = el('a', 'adm-btn' + (a.primary ? ' primary' : ''), a.label);
+        link.href = a.href;
+        link.style.marginRight = '.4rem';
+        box.appendChild(link);
+      });
+    }
+
+    function start() {
+      if (!w.NNAuth) {
+        gate('Unavailable', 'The sign-in service did not load. Refresh and try again.', []);
+        return;
+      }
+      NNAuth.onReady(function () {
+        NNAuth.getSession().then(function (session) {
+          if (!session) {
+            gate('Sign in required', 'This page is for administrators.',
+              [{ label: 'Sign in', href: 'login.html?redirect=admin.html', primary: true },
+               { label: 'Back to site', href: 'index.html#home' }]);
+            return;
+          }
+          NNAuth.isAdmin().then(function (ok) {
+            if (!ok) {
+              // Same wording whether or not the page exists for them —
+              // no hint that there is anything here to find.
+              gate('Not available', 'This account does not have access to this page.',
+                [{ label: 'Back to site', href: 'index.html#home', primary: true }]);
+              return;
+            }
+            d.getElementById('adm-gate').style.display = 'none';
+            d.getElementById('adm-app').style.display = '';
+            load(true);
+          });
+        });
+      });
+    }
+
+    /* ---------------- Loading ---------------- */
+
+    function fetchStats(fn, arg, force) {
+      var key = fn + ':' + arg;
+      var hit = cache[key];
+      if (!force && hit && Date.now() - hit.at < CACHE_MS) return Promise.resolve(hit.v);
+      return NNAuth.adminStats(fn, arg).then(function (v) {
+        if (v) cache[key] = { at: Date.now(), v: v };
+        return v;
+      });
+    }
+
+    function load(force) {
+      var days = Number(d.getElementById('adm-range').value) || 30;
+      d.getElementById('adm-sub').textContent = 'Loading…';
+
+      // Each panel renders as soon as its own query lands, so a slow one
+      // never holds up the rest of the page.
+      fetchStats('admin_overview', days, force).then(function (o) {
+        if (!o) return;
+        data.overview = o;
+        renderKpis(o);
+        renderGrowth(o, days);
+        renderSignups(o, days);
+        renderFeatures(o);
+        renderNewReturning(o);
+        renderDonations();
+        d.getElementById('adm-sub').textContent =
+          'Nourish N Narrate · updated ' + new Date().toLocaleTimeString();
+      });
+
+      fetchStats('admin_recipe_analytics', 10, force).then(function (r) {
+        if (!r) return; data.recipes = r; renderRecipes(r);
+      });
+      fetchStats('admin_ai_analytics', 10, force).then(function (a) {
+        if (!a) return; data.ai = a; renderAi(a); renderPantry(a);
+      });
+      fetchStats('admin_user_analytics', 10, force).then(function (u) {
+        if (!u) return; data.users = u; renderPeople(u); renderTables(u);
+      });
+
+      renderScores();
+      d.getElementById('adm-footnote').textContent =
+        'Email addresses are masked before they leave the database, and no calculator ' +
+        'or tracker entry is ever read by this page. Usage analytics began the day ' +
+        'tracking was switched on, so panels covering searches, views and comparisons ' +
+        'only reflect activity since then.';
+    }
+
+    /* ---------------- KPI cards ---------------- */
+
+    function kpi(host, icon, label, value, note, muted) {
+      var card = el('div', 'kpi' + (muted ? ' muted' : ''));
+      var lab = el('div', 'kpi-label');
+      lab.appendChild(el('span', null, icon));
+      lab.appendChild(el('span', null, label));
+      card.appendChild(lab);
+      card.appendChild(el('div', 'kpi-value', value));
+      if (note) card.appendChild(el('div', 'kpi-note', note));
+      host.appendChild(card);
+    }
+
+    function renderKpis(o) {
+      var k = o.kpis, host = d.getElementById('adm-kpis');
+      host.innerHTML = '';
+      kpi(host, '👥', 'Total users', fmt(k.total_users));
+      kpi(host, '🟢', 'Active today', fmt(k.active_today), fmt(k.active_7d) + ' in 7 days');
+      kpi(host, '📅', 'New (7 days)', fmt(k.new_users_7d), fmt(k.new_users_30d) + ' in 30 days');
+      kpi(host, '🍽️', 'Recipes', fmt(k.total_recipes));
+      kpi(host, '🤖', 'Assistant searches', fmt(k.assistant_searches));
+      kpi(host, '🥗', 'Pantry searches', fmt(k.pantry_searches));
+      kpi(host, '✨', 'AI recipes made', fmt(k.ai_recipes));
+      kpi(host, '👁️', 'Recipe views', fmt(k.recipe_views));
+      kpi(host, '⇄', 'Comparisons', fmt(k.comparisons));
+      kpi(host, '❤️', 'Favourites saved', fmt(k.favorites));
+      kpi(host, '🧮', 'Calculator runs', fmt(k.calculator_runs));
+      kpi(host, '📆', 'Busiest signup day', o.busiest_day || '—');
+      // Stated rather than faked: there is no session timing on the site.
+      kpi(host, '⏱️', 'Avg session time', 'Not measured', 'No session tracking', true);
+      kpi(host, '📋', 'Meal plans', fmt(k.curated_plans), 'Curated library, not per-user', true);
+    }
+
+    /* ---------------- Charts (hand-drawn SVG) ---------------- */
+
+    function svg(w_, h) {
+      var s = d.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      s.setAttribute('viewBox', '0 0 ' + w_ + ' ' + h);
+      s.setAttribute('class', 'chart');
+      s.setAttribute('role', 'img');
+      return s;
+    }
+    function node(tag, attrs) {
+      var e = d.createElementNS('http://www.w3.org/2000/svg', tag);
+      for (var k in attrs) if (Object.prototype.hasOwnProperty.call(attrs, k)) {
+        e.setAttribute(k, attrs[k]);
+      }
+      return e;
+    }
+
+    function lineChart(host, points, label) {
+      host.innerHTML = '';
+      if (!points || points.length < 2) { empty(host, 'Not enough history yet.'); return; }
+      var W = 560, H = 200, P = 28;
+      var s = svg(W, H);
+      s.appendChild(node('title', {})).textContent = label;
+
+      var max = Math.max.apply(null, points.map(function (p) { return p.n; })) || 1;
+      var stepX = (W - P * 2) / (points.length - 1);
+      var y = function (v) { return H - P - (v / max) * (H - P * 2); };
+
+      for (var g = 0; g <= 3; g++) {
+        var gy = P + g * ((H - P * 2) / 3);
+        s.appendChild(node('line', { x1: P, y1: gy, x2: W - P, y2: gy, class: 'grid' }));
+      }
+
+      var dPath = '', aPath = '';
+      points.forEach(function (p, i) {
+        var px = P + i * stepX, py = y(p.n);
+        dPath += (i ? ' L' : 'M') + px.toFixed(1) + ' ' + py.toFixed(1);
+      });
+      aPath = dPath + ' L' + (W - P) + ' ' + (H - P) + ' L' + P + ' ' + (H - P) + ' Z';
+      s.appendChild(node('path', { d: aPath, class: 'area' }));
+      s.appendChild(node('path', { d: dPath, class: 'line' }));
+
+      var last = points[points.length - 1];
+      s.appendChild(node('circle', { cx: P + (points.length - 1) * stepX, cy: y(last.n), r: 4, class: 'dot' }));
+
+      [points[0], points[points.length - 1]].forEach(function (p, i) {
+        var t = node('text', { x: i ? W - P : P, y: H - 8, class: 'axis',
+          'text-anchor': i ? 'end' : 'start' });
+        t.textContent = p.d;
+        s.appendChild(t);
+      });
+      var mt = node('text', { x: P, y: P - 10, class: 'axis' });
+      mt.textContent = 'peak ' + fmt(max);
+      s.appendChild(mt);
+
+      host.appendChild(s);
+    }
+
+    function barChart(host, rows, label) {
+      host.innerHTML = '';
+      if (!rows || !rows.length) { empty(host, 'Nothing recorded yet.'); return; }
+      var W = 560, H = 200, P = 28;
+      var s = svg(W, H);
+      s.appendChild(node('title', {})).textContent = label;
+      var max = Math.max.apply(null, rows.map(function (r) { return r.n; })) || 1;
+      var bw = (W - P * 2) / rows.length;
+      rows.forEach(function (r, i) {
+        var h = (r.n / max) * (H - P * 2);
+        s.appendChild(node('rect', {
+          x: P + i * bw + bw * 0.15, y: H - P - h,
+          width: bw * 0.7, height: Math.max(h, 1), rx: 3, class: 'bar',
+        }));
+        if (rows.length <= 12) {
+          var t = node('text', { x: P + i * bw + bw / 2, y: H - 10, class: 'axis', 'text-anchor': 'middle' });
+          t.textContent = String(r.d || r.k || '').slice(0, 6);
+          s.appendChild(t);
+        }
+      });
+      host.appendChild(s);
+    }
+
+    function renderGrowth(o, days) {
+      d.getElementById('lbl-growth').textContent = '— last ' + days + ' days';
+      lineChart(d.getElementById('chart-growth'),
+        (o.signups_cumulative || []).map(function (p) { return { d: p.d, n: n(p.n) }; }),
+        'Cumulative registered users');
+    }
+
+    function renderSignups(o, days) {
+      barChart(d.getElementById('chart-signups'),
+        (o.signups || []).map(function (p) { return { d: p.d.slice(5), n: n(p.n) }; }),
+        'New signups per day');
+    }
+
+    /* ---------------- Ranked lists ---------------- */
+
+    function ranked(host, rows, labelKey, valueKey, emptyMsg) {
+      host.innerHTML = '';
+      if (!rows || !rows.length) { empty(host, emptyMsg); return; }
+      var max = Math.max.apply(null, rows.map(function (r) { return n(r[valueKey]); })) || 1;
+      var wrap = el('div', 'rank');
+      rows.forEach(function (r, i) {
+        var row = el('div', 'rank-row');
+        row.appendChild(el('div', 'rank-n', String(i + 1)));
+        var bar = el('div', 'rank-bar');
+        var fill = el('span', 'rank-fill');
+        fill.style.width = Math.max(4, (n(r[valueKey]) / max) * 100) + '%';
+        bar.appendChild(fill);
+        bar.appendChild(el('span', 'rank-text', String(r[labelKey] == null ? '—' : r[labelKey])));
+        row.appendChild(bar);
+        row.appendChild(el('div', 'rank-val', fmt(r[valueKey])));
+        wrap.appendChild(row);
+      });
+      host.appendChild(wrap);
+    }
+
+    function section(host, title) {
+      host.appendChild(el('div', 'kpi-label', title));
+    }
+
+    function renderFeatures(o) {
+      var host = d.getElementById('panel-features');
+      var rows = (o.feature_usage || []).map(function (f) {
+        return { name: prettyEvent(f.name), n: f.n };
+      });
+      ranked(host, rows, 'name', 'n',
+        'No feature usage recorded yet. This fills in as people use the site.');
+    }
+
+    function prettyEvent(name) {
+      var map = {
+        assistant_search: '🤖 Assistant searches',
+        pantry_search: '🥗 Pantry searches',
+        recipe_generate: '✨ AI recipes generated',
+        recipe_view: '👁️ Recipe views',
+        recipe_compare: '⇄ Recipe comparisons',
+      };
+      return map[name] || name;
+    }
+
+    function renderNewReturning(o) {
+      var host = d.getElementById('panel-newret');
+      var nr = o.new_vs_returning || {};
+      var total = n(nr.new) + n(nr.returning);
+      host.innerHTML = '';
+      if (!total) { empty(host, 'No accounts yet.'); return; }
+      [['Returning', nr.returning], ['New / never returned', nr.new]].forEach(function (p) {
+        var row = el('div');
+        row.style.marginBottom = '.9rem';
+        var head = el('div', 'prog-row');
+        head.appendChild(el('span', null, p[0]));
+        head.appendChild(el('span', null, fmt(p[1]) + ' · ' + Math.round(n(p[1]) / total * 100) + '%'));
+        row.appendChild(head);
+        var bar = el('div', 'prog');
+        var fill = el('span');
+        fill.style.width = (n(p[1]) / total * 100) + '%';
+        bar.appendChild(fill);
+        row.appendChild(bar);
+        host.appendChild(row);
+      });
+      host.appendChild(el('p', 'kpi-note',
+        'Returning means they signed in again more than an hour after registering.'));
+    }
+
+    /* ---------------- Donations ----------------
+       Read from nn-config.js so the dashboard and the donate page cannot
+       drift apart. There is no payment provider connected yet, so there
+       are no individual donations to analyse. */
+
+    function renderDonations() {
+      var host = d.getElementById('panel-donations');
+      var cfg = (w.NN_CONFIG && w.NN_CONFIG.DONATIONS) || { raised: 0, goal: 10000 };
+      var pct = cfg.goal ? Math.min(100, (cfg.raised / cfg.goal) * 100) : 0;
+      host.innerHTML = '';
+
+      var head = el('div', 'prog-row');
+      head.appendChild(el('span', null, '$' + fmt(cfg.raised) + ' raised'));
+      head.appendChild(el('span', null, 'goal $' + fmt(cfg.goal)));
+      host.appendChild(head);
+
+      var bar = el('div', 'prog');
+      var fill = el('span');
+      fill.style.width = pct + '%';
+      bar.appendChild(fill);
+      host.appendChild(bar);
+
+      var stats = el('div', 'adm-kpis');
+      stats.style.marginTop = '1rem';
+      kpi(stats, '🎯', 'Progress', pct.toFixed(1) + '%');
+      kpi(stats, '💵', 'Remaining', '$' + fmt(Math.max(0, cfg.goal - cfg.raised)));
+      host.appendChild(stats);
+
+      host.appendChild(el('div', 'adm-empty',
+        'Individual donations are not recorded, so there is no count, average, ' +
+        'largest gift or monthly trend to show. Connect a payment provider — or ' +
+        'ask for a donations table — and these fill in.'));
+    }
+
+    /* ---------------- Nutrition scores ----------------
+       Computed in the browser from the recipe rows by nn-score.js, so no
+       score is stored twice. */
+
+    function renderScores() {
+      var host = d.getElementById('panel-scores');
+      var list = (typeof RECIPES !== 'undefined' && RECIPES) || [];
+      if (!list.length || !w.NNScore) { empty(host, 'Recipes are still loading.'); return; }
+      var rows = list.map(function (r) { return { title: r.title, n: w.NNScore.of(r) }; })
+        .sort(function (a, b) { return b.n - a.n; }).slice(0, 10);
+      ranked(host, rows, 'title', 'n', 'No recipes.');
+    }
+
+    /* ---------------- Recipes / AI / pantry / people ---------------- */
+
+    function block(host, title, rows, labelKey, valueKey, emptyMsg) {
+      section(host, title);
+      var box = el('div');
+      box.style.margin = '.35rem 0 1.1rem';
+      ranked(box, rows, labelKey, valueKey, emptyMsg);
+      host.appendChild(box);
+    }
+
+    function renderRecipes(r) {
+      var host = d.getElementById('panel-recipes');
+      host.innerHTML = '';
+      block(host, 'Most viewed', r.most_viewed, 'title', 'n',
+        'No recipe views recorded yet.');
+      block(host, 'Most favourited', r.most_favorited, 'title', 'n',
+        'No favourites saved to an account yet.');
+      block(host, 'Most compared', r.most_compared, 'title', 'n',
+        'No comparisons yet.');
+      block(host, 'Most generated AI titles', r.top_ai_recipes, 'title', 'n',
+        'No AI recipes saved yet.');
+      host.appendChild(el('div', 'adm-empty',
+        'Ratings live in your Google Form, which this dashboard cannot read, ' +
+        'so there is no "highest rated" list.'));
+    }
+
+    function renderAi(a) {
+      var host = d.getElementById('panel-ai');
+      host.innerHTML = '';
+
+      var stats = el('div', 'adm-kpis');
+      kpi(stats, '⚡', 'Avg generation', a.avg_response_ms ? Math.round(a.avg_response_ms) + ' ms' : '—');
+      kpi(stats, '✅', 'Success rate', a.success_rate != null ? a.success_rate + '%' : '—');
+      host.appendChild(stats);
+
+      block(host, 'Most common searches', a.top_queries, 'q', 'n',
+        'No assistant searches recorded yet.');
+      block(host, 'Most searched ingredients', a.top_ingredients, 'item', 'n',
+        'No ingredients recorded yet.');
+      block(host, 'Requested meal types', a.meal_types, 'k', 'n',
+        'No recipe generations yet.');
+      block(host, 'Requested diets', a.diets, 'k', 'n',
+        'No recipe generations yet.');
+      block(host, 'Calorie targets', a.calorie_goals, 'k', 'n',
+        'No recipe generations yet.');
+      block(host, 'Protein goals', a.protein_goals, 'k', 'n',
+        'No recipe generations yet.');
+    }
+
+    function renderPantry(a) {
+      var host = d.getElementById('panel-pantry');
+      host.innerHTML = '';
+      block(host, 'Most common pantry ingredients', a.pantry_top_items, 'item', 'n',
+        'No pantry searches recorded yet.');
+      block(host, 'Recipes matched most often', a.pantry_matched, 'title', 'n',
+        'No pantry matches yet.');
+      block(host, 'Full matches — nothing to buy', a.pantry_full_matches, 'title', 'n',
+        'No complete pantry matches yet.');
+    }
+
+    function renderPeople(u) {
+      var host = d.getElementById('panel-people');
+      host.innerHTML = '';
+      block(host, 'Most active', u.most_active, 'email', 'actions',
+        'No recorded activity yet.');
+      block(host, 'Most AI recipes', u.most_ai_recipes, 'email', 'n',
+        'No AI recipes saved yet.');
+      block(host, 'Longest tracker streaks', u.longest_streaks, 'email', 'days',
+        'No tracker streaks yet.');
+      host.appendChild(el('div', 'adm-empty',
+        'Your meal_plans table is the curated plan library rather than per-user ' +
+        'generations, so there is no "users with the most meal plans" list.'));
+    }
+
+    function table(host, cols, rows, emptyMsg) {
+      host.innerHTML = '';
+      if (!rows || !rows.length) { empty(host, emptyMsg); return; }
+      var wrap = el('div', 'adm-scroll');
+      var t = el('table', 'adm-table');
+      var thead = el('thead'), tr = el('tr');
+      cols.forEach(function (c) { tr.appendChild(el('th', null, c.label)); });
+      thead.appendChild(tr); t.appendChild(thead);
+      var tb = el('tbody');
+      rows.forEach(function (r) {
+        var row = el('tr');
+        cols.forEach(function (c) {
+          row.appendChild(el('td', c.num ? 'num' : null, c.get(r)));
+        });
+        tb.appendChild(row);
+      });
+      t.appendChild(tb);
+      wrap.appendChild(t);
+      host.appendChild(wrap);
+    }
+
+    function renderTables(u) {
+      table(d.getElementById('table-signups'), [
+        { label: 'Account', get: function (r) { return r.email; } },
+        { label: 'Joined', get: function (r) { return when(r.at); } },
+      ], u.recent_signups, 'No signups yet.');
+
+      table(d.getElementById('table-events'), [
+        { label: 'Event', get: function (r) { return prettyEvent(r.name); } },
+        { label: 'Detail', get: function (r) { return (r.detail || '').slice(0, 40) || '—'; } },
+        { label: 'When', get: function (r) { return when(r.at); } },
+      ], u.recent_events, 'Nothing recorded yet — usage analytics has only just been switched on.');
+    }
+
+    /* ---------------- Export ---------------- */
+
+    function toCsv() {
+      var rows = [['section', 'label', 'value']];
+      var o = data.overview;
+      if (o) {
+        for (var k in o.kpis) if (Object.prototype.hasOwnProperty.call(o.kpis, k)) {
+          rows.push(['kpi', k, o.kpis[k]]);
+        }
+        (o.feature_usage || []).forEach(function (f) { rows.push(['feature', f.name, f.n]); });
+        (o.signups || []).forEach(function (p) { rows.push(['signups_per_day', p.d, p.n]); });
+      }
+      function push(sec, list, lk, vk) {
+        (list || []).forEach(function (r) { rows.push([sec, r[lk], r[vk]]); });
+      }
+      if (data.recipes) {
+        push('most_viewed', data.recipes.most_viewed, 'title', 'n');
+        push('most_favorited', data.recipes.most_favorited, 'title', 'n');
+        push('most_compared', data.recipes.most_compared, 'title', 'n');
+      }
+      if (data.ai) {
+        push('top_queries', data.ai.top_queries, 'q', 'n');
+        push('top_ingredients', data.ai.top_ingredients, 'item', 'n');
+        push('pantry_items', data.ai.pantry_top_items, 'item', 'n');
+      }
+      if (data.users) {
+        push('most_active', data.users.most_active, 'email', 'actions');
+        push('longest_streaks', data.users.longest_streaks, 'email', 'days');
+      }
+      return rows.map(function (r) {
+        return r.map(function (c) {
+          var s = String(c == null ? '' : c);
+          return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+        }).join(',');
+      }).join('\n');
+    }
+
+    function downloadCsv() {
+      var blob = new Blob([toCsv()], { type: 'text/csv;charset=utf-8' });
+      var a = d.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'nourish-n-narrate-analytics-' +
+        new Date().toISOString().slice(0, 10) + '.csv';
+      d.body.appendChild(a);
+      a.click();
+      d.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+    }
+
+    /* ---------------- Wire up ---------------- */
+
+    d.getElementById('adm-refresh').addEventListener('click', function () { load(true); });
+    d.getElementById('adm-range').addEventListener('change', function () { load(false); });
+    d.getElementById('adm-csv').addEventListener('click', downloadCsv);
+    // The browser's own print dialog is also how you save a PDF, so one
+    // button covers both rather than pulling in a PDF library.
+    d.getElementById('adm-pdf').addEventListener('click', function () { w.print(); });
+
+    start();
+  })(window, document);
+  </script>
+
+  <script>
+    /* Dark mode, shared with the rest of the site. */
+    (function () {
+      var saved = localStorage.getItem('nnTheme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+</body>
+</html>

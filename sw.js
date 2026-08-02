@@ -14,7 +14,7 @@
    that is what tells existing installs to pull the new build.
 =================================================================== */
 
-const CACHE_VERSION = 'v26';
+const CACHE_VERSION = 'v29';
 const SHELL_CACHE = 'nn-shell-' + CACHE_VERSION;
 const ASSET_CACHE = 'nn-assets-' + CACHE_VERSION;
 const VALID_CACHES = [SHELL_CACHE, ASSET_CACHE];
@@ -34,6 +34,9 @@ const SHELL = [
   'nn-modern.css',
   'nn-auth.js',
   'nn-cards.js',
+  'nn-analytics.js',
+  'nn-score.js',
+  'nn-compare.js',
   'nn-config.js',
   'nn-premium.js',
   'nn-install.js',

@@ -364,6 +364,72 @@ const NNAuth = (() => {
     return { ok: true };
   }
 
+  /* ---------------- Favourites ----------------
+     Mirrors the AI assistant's localStorage favourites for signed-in
+     users. The browser copy still drives ranking; this one exists so
+     favourites survive a change of device, and so the admin dashboard
+     has something to count. */
+
+  /** Add or remove one favourite. Silent no-op when signed out. */
+  async function setFavorite(title, on) {
+    if (!client || !title) return { ok: false };
+    try {
+      const session = await getSession();
+      if (!session) return { ok: false, message: 'Not signed in.' };
+      if (on) {
+        const { error } = await client.from('favorites')
+          .upsert({ user_id: session.user.id, recipe_title: title },
+                  { onConflict: 'user_id,recipe_title' });
+        return { ok: !error };
+      }
+      const { error } = await client.from('favorites')
+        .delete().eq('user_id', session.user.id).eq('recipe_title', title);
+      return { ok: !error };
+    } catch (e) {
+      return { ok: false };
+    }
+  }
+
+  /** This user's saved favourites, newest first. */
+  async function getFavorites() {
+    if (!client) return [];
+    const session = await getSession();
+    if (!session) return [];
+    const { data, error } = await client
+      .from('favorites').select('recipe_title, created_at')
+      .order('created_at', { ascending: false });
+    if (error || !data) return [];
+    return data.map(r => r.recipe_title);
+  }
+
+  /* ---------------- Admin dashboard ----------------
+     Each of these is refused by the database for a non-admin, so calling
+     them from the browser gets an ordinary user nothing. */
+
+  /** True when the signed-in account is an administrator. */
+  async function isAdmin() {
+    if (!client) return false;
+    try {
+      const { data, error } = await client.rpc('is_admin');
+      return !error && data === true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  /** Call one admin_* aggregation function. Returns null when refused. */
+  async function adminStats(fn, arg) {
+    if (!client) return null;
+    try {
+      const { data, error } = await client.rpc(fn,
+        fn === 'admin_overview' ? { days: arg || 30 } : { top_n: arg || 10 });
+      if (error) return null;
+      return data;
+    } catch (e) {
+      return null;
+    }
+  }
+
   return {
     onReady, getSession, signUp, signIn, signOut,
     saveResult, getLatestResult, getAllResults, deleteResult,
@@ -372,6 +438,8 @@ const NNAuth = (() => {
     getFoodLibrary, getExerciseLibrary, getMealPlans,
     analyzeFoodPhoto, correctFoodScan,
     generateRecipe, saveAiRecipe, getAiRecipes, deleteAiRecipe,
+    setFavorite, getFavorites,
+    isAdmin, adminStats,
     getLogsSince, /* #2 EXTRA FEATURE */
   };
 })();
