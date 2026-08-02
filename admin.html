@@ -214,6 +214,11 @@
     </div>
 
     <div class="adm-grid two">
+      <div class="panel"><h2>Page views per day</h2><div id="chart-views"></div></div>
+      <div class="panel"><h2>Most visited pages</h2><div id="panel-pages"></div></div>
+    </div>
+
+    <div class="adm-grid two">
       <div class="panel"><h2>Feature usage</h2><div id="panel-features"></div></div>
       <div class="panel"><h2>New vs returning</h2><div id="panel-newret"></div></div>
     </div>
@@ -365,6 +370,8 @@
         renderKpis(o);
         renderGrowth(o, days);
         renderSignups(o, days);
+        renderViews(o);
+        renderPages(o);
         renderFeatures(o);
         renderNewReturning(o);
         renderDonations();
@@ -406,6 +413,8 @@
     function renderKpis(o) {
       var k = o.kpis, host = d.getElementById('adm-kpis');
       host.innerHTML = '';
+      kpi(host, '📈', 'Page views', fmt(k.page_views),
+        fmt(k.page_views_today) + ' today · ' + fmt(k.page_views_7d) + ' this week');
       kpi(host, '👥', 'Total users', fmt(k.total_users));
       kpi(host, '🟢', 'Active today', fmt(k.active_today), fmt(k.active_7d) + ' in 7 days');
       kpi(host, '📅', 'New (7 days)', fmt(k.new_users_7d), fmt(k.new_users_30d) + ' in 30 days');
@@ -511,6 +520,17 @@
         'Cumulative registered users');
     }
 
+    function renderViews(o) {
+      barChart(d.getElementById('chart-views'),
+        (o.views_daily || []).map(function (p) { return { d: p.d.slice(5), n: n(p.n) }; }),
+        'Page views per day');
+    }
+
+    function renderPages(o) {
+      ranked(d.getElementById('panel-pages'), o.pages || [], 'page', 'n',
+        'No page views recorded yet. This fills in once the updated files are live.');
+    }
+
     function renderSignups(o, days) {
       barChart(d.getElementById('chart-signups'),
         (o.signups || []).map(function (p) { return { d: p.d.slice(5), n: n(p.n) }; }),
@@ -554,6 +574,7 @@
 
     function prettyEvent(name) {
       var map = {
+        page_view: '📈 Page views',
         assistant_search: '🤖 Assistant searches',
         pantry_search: '🥗 Pantry searches',
         recipe_generate: '✨ AI recipes generated',

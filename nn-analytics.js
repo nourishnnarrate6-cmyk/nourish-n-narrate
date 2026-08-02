@@ -152,8 +152,19 @@
   });
   w.addEventListener('pagehide', function () { flush(true); });
 
-  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', pickUpSession);
-  else pickUpSession();
+  /* One page_view per load. This is what the public counter on the home
+     page reports, and it is the only event recorded automatically —
+     everything else is a deliberate action by the visitor. */
+  function recordPageView() {
+    pickUpSession();
+    var page = (w.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    // Never count the private dashboard as public traffic.
+    if (page === 'admin.html') return;
+    track('page_view', { page: page });
+  }
+
+  if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', recordPageView);
+  else recordPageView();
 
   w.NNAnalytics = {
     track: track,

@@ -2062,6 +2062,44 @@
   .foot-admin:hover { color: var(--green); border-color: var(--green); }
   .foot-admin[hidden] { display: none; }
 
+  /* Live page-view count, sat at the top right in the navbar. Quiet by
+     design — a trust signal, not a headline. */
+  .nav-views {
+    display: inline-flex; align-items: center;
+    padding: .3rem .7rem;
+    font-size: .78rem; font-weight: 700;
+    color: var(--green-deep);
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.22);
+    border-radius: var(--radius-full);
+    white-space: nowrap;
+  }
+  .nav-views[hidden] { display: none; }
+  [data-theme="dark"] .nav-views {
+    color: var(--green-light);
+    background: rgba(5, 150, 105, 0.18);
+    border-color: rgba(52, 211, 153, 0.26);
+  }
+  /* On a phone the nav collapses to logo + icons, leaving a gap in the
+     middle. The count is centred into that gap rather than crowding the
+     icons: taken out of flow so it centres on the bar itself, not on
+     whatever space happens to be left over.
+
+     Below 430px the logo and icons meet in the middle and there is no
+     gap to sit in, so it steps aside. */
+  @media (max-width: 900px) {
+    .nav-inner { position: relative; }
+    .nav-views {
+      position: absolute;
+      left: 50%; top: 50%;
+      transform: translate(-50%, -50%);
+      padding: .25rem .6rem;
+      font-size: .72rem;
+      pointer-events: none;      /* never blocks a tap meant for the nav */
+    }
+  }
+  @media (max-width: 430px) { .nav-views { display: none; } }
+
   /* Slide-in when switching views */
   .slide-in { animation: fadeInUp 0.5s var(--ease-out) both; }
 

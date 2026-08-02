@@ -86,6 +86,9 @@
       </ul>
 
       <div class="nav-actions">
+        <!-- Live page-view count, top right. Hidden until the figure
+             actually loads, so it never flashes a placeholder. -->
+        <span class="nav-views" id="view-count" hidden aria-label="Page views"></span>
         <!-- Instagram -->
         <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" class="nav-social" aria-label="Instagram">
           <span>Instagram</span><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
@@ -551,6 +554,7 @@
   <script src="recipes-data-supabase.js"></script>
   <script src="form-handlers.js"></script>
   <script src="nn-auth.js"></script>
+  <script src="nn-analytics.js"></script>
   <script src="nn-cards.js"></script>
   <script>
 
@@ -804,6 +808,31 @@
           if (typeof n === 'number' && n > 0) el.textContent = n;
         })
         .catch(function () { /* keep fallback number */ });
+    })();
+  </script>
+
+  <!-- Live page-view count. Same public-RPC pattern as the member count:
+       one integer, readable by anyone, with the underlying events kept
+       admin-only. If the figure cannot be read the stat hides itself
+       rather than showing a misleading zero. -->
+  <script>
+    (function () {
+      var cfg = window.NN_CONFIG || {};
+      var URL = cfg.SUPABASE_URL, KEY = cfg.SUPABASE_ANON_KEY;
+      var el = document.getElementById('view-count');
+      if (!el || !URL || !KEY) return;
+      fetch(URL + '/rest/v1/rpc/get_view_count', {
+        method: 'POST',
+        headers: { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY, 'Content-Type': 'application/json' },
+        body: '{}'
+      })
+        .then(function (r) { return r.json(); })
+        .then(function (n) {
+          if (typeof n !== 'number' || n < 1) return;   // stays hidden
+          el.textContent = '👁 ' + n.toLocaleString();
+          el.hidden = false;
+        })
+        .catch(function () { /* leave it hidden */ });
     })();
   </script>
 
