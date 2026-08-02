@@ -1,23 +1,23 @@
 /* ===================================================================
-   NOURISH N NARRATE — AI RECIPE FINDER
+   NOURISH N NARRATE — AI NUTRITION ASSISTANT
 
    Recommends recipes from the site's OWN database. It never invents a
    recipe: every result is an entry from the global RECIPES array, and
-   every card is built by buildRecipeCard() so it looks identical to
-   the rest of the site.
+   every card is built by buildRecipeCard() so it is identical to the
+   rest of the site.
 
-   How a query is handled:
-     1. interpret()  — turn plain English into a structured intent
-                       (diet, collection, meal, calorie cap, time cap,
-                       ingredients, loose keywords).
-     2. score()      — rank every recipe against that intent and record
-                       WHY it matched.
-     3. render()     — draw the winners as normal recipe cards with a
-                       short row of reasons underneath.
+   Pipeline:
+     1. interpret()        plain English → a structured intent
+        interpretRemote()  same job via Gemini, for open-ended phrasing
+     2. rank()             score every recipe and record WHY it matched
+     3. draw()             cards, reasons, a spoken-style summary,
+                           a follow-up question when the ask is vague,
+                           and related searches to try next
 
-   No AI key is required. If one is ever configured, interpret() is the
-   single function to swap for a model call — everything downstream
-   works off the same intent object.
+   Personalisation is stored locally under NN_STORE and applied as soft
+   preferences only — an explicit request always wins. Nothing is sent
+   anywhere; the profile is a stub ready for favourites, goals and
+   history to be filled in later.
 
    Requires: RECIPES (recipes-data-supabase.js) and buildRecipeCard()
    (nn-cards.js). Load this after both.
@@ -26,15 +26,44 @@
   'use strict';
 
   var MAX_RESULTS = 12;
-  var QUICK_MINUTES = 30;      // what "quick" means
-  var LOW_CALORIE = 350;       // what "low calorie" means
-  var MIN_POINTS = 3;          // below this a "match" is really just noise
+  var QUICK_MINUTES = 30;
+  var LOW_CALORIE = 350;
+  var MIN_POINTS = 3;
+  var NN_STORE = 'nnAssistant';
+  var MAX_RECENT = 6;
 
-  /**
-   * Common cravings mapped to what this database actually calls them.
-   * Without this, "ice cream" is split into "ice" and "cream" and starts
-   * matching ice cubes and anything described as creamy.
-   */
+  /* ---------- vocabulary ---------- */
+
+  var STOP = ('i im i\'m a an and or the some any what want need have has got give me my we ' +
+    'for with without something anything meal meals recipe recipes food dish dishes make ' +
+    'cook cooking eat eating please can you show find looking look at only just about of to ' +
+    'is are be that this it in on under over less than more using use idea ideas ' +
+    // Every recipe here is already healthy and tasty, so these say nothing.
+    // Left in, they become search terms that match nothing and drag the
+    // whole result set into the "no exact match" fallback.
+    'healthy healthier good nice tasty delicious yummy best great lovely proper ' +
+    'today tonight now please thanks').split(' ');
+
+  var MEALS = {
+    breakfast: ['breakfast', 'brunch', 'morning'],
+    lunch: ['lunch', 'midday'],
+    dinner: ['dinner', 'supper', 'evening', 'tonight'],
+    snack: ['snack', 'snacks', 'bite', 'nibble', 'munch'],
+    dessert: ['dessert', 'desserts', 'sweet', 'pudding', 'treat'],
+  };
+
+  /* "a meal" means something you sit down to — not a smoothie or a dip. */
+  var MEAL_GROUPS = [
+    { test: /\b(meal|meals|proper meal|square meal|main|mains|main course|entree|something to eat)\b/,
+      meals: ['breakfast', 'lunch', 'dinner'], terms: [] },
+    { test: /\b(drink|drinks|beverage|smoothie|smoothies|shake|shakes|juice|lassi)\b/,
+      meals: ['snack', 'breakfast'], terms: ['smoothie', 'lassi'] },
+  ];
+
+  var MEATY = ['chicken', 'turkey', 'beef', 'salmon', 'tuna', 'cod', 'fish', 'shrimp',
+    'prawn', 'lamb', 'pork', 'bacon', 'meat', 'mutton'];
+
+  /* Cravings mapped to what this database actually calls them. */
   var CONCEPTS = [
     { phrase: 'ice cream', meal: 'dessert', terms: ['frozen', 'yogurt'] },
     { phrase: 'milkshake', terms: ['smoothie'] },
@@ -52,35 +81,9 @@
     { phrase: 'smoothie', terms: ['smoothie'] },
   ];
 
-  /* ---------- vocabulary ---------- */
-
-  var STOP = ('i im i\'m a an and or the some any what want need have has got give me my we ' +
-    'for with without something anything meal meals recipe recipes food dish dishes make ' +
-    'cook cooking eat eating please can you show find looking look at only just about of to ' +
-    'is are be that this it in on under over less than more using use idea ideas').split(' ');
-
-  var MEALS = {
-    breakfast: ['breakfast', 'brunch', 'morning'],
-    lunch: ['lunch', 'midday'],
-    dinner: ['dinner', 'supper', 'evening'],
-    snack: ['snack', 'snacks', 'bite', 'nibble', 'munch'],
-    dessert: ['dessert', 'desserts', 'sweet', 'pudding', 'treat'],
-  };
-
-  /* "a meal" means something you sit down to — not a smoothie or a dip.
-     Without this, "quick meals under 30 minutes" happily returns drinks. */
-  var MEAL_GROUPS = [
-    { test: /\b(meal|meals|proper meal|square meal|main|mains|main course|entree|something to eat)\b/,
-      meals: ['breakfast', 'lunch', 'dinner'], terms: [] },
-    // Drinks live under "snack" alongside crisps and dips, so seed the words
-    // that actually identify a drink or the crisps will out-rank them.
-    { test: /\b(drink|drinks|beverage|smoothie|smoothies|shake|shakes|juice|lassi)\b/,
-      meals: ['snack', 'breakfast'], terms: ['smoothie', 'lassi'] },
-  ];
-
-  // Words that imply the dish must contain meat or fish.
-  var MEATY = ['chicken', 'turkey', 'beef', 'salmon', 'tuna', 'cod', 'fish', 'shrimp',
-    'prawn', 'lamb', 'pork', 'bacon', 'meat', 'mutton'];
+  /* Ingredients that push a recipe out of "cheap student cooking". */
+  var PRICEY = ['salmon', 'cod', 'shrimp', 'prawn', 'paneer', 'pine', 'tahini',
+    'saffron', 'cashew', 'protein powder', 'parmesan', 'feta', 'almond butter'];
 
   /* ---------- helpers ---------- */
 
@@ -102,7 +105,6 @@
     return norm(s).replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
   }
 
-  /** Crude singular form so "eggs" matches "egg" and "noodles" matches "noodle". */
   function stem(t) {
     if (t.length > 3 && t.slice(-3) === 'ies') return t.slice(0, -3) + 'y';
     if (t.length > 3 && t.slice(-2) === 'es') return t.slice(0, -2);
@@ -115,7 +117,6 @@
     return isNaN(n) ? null : n;
   }
 
-  /** Minutes from a cook_time string like "40 min" or "5 min + overnight". */
   function minutesOf(recipe) {
     var m = String(recipe.time || '').match(/(\d+)/);
     if (!m) return null;
@@ -133,7 +134,6 @@
     return out;
   }
 
-  /** Every ingredient name, lower-cased, without the quantity after the dash. */
   function ingredientNames(recipe) {
     var list = Array.isArray(recipe.ingredients) ? recipe.ingredients : [];
     return list.map(function (line) {
@@ -141,34 +141,84 @@
     });
   }
 
+  /** Rough effort score from steps, ingredient count and time. */
+  function difficultyOf(recipe) {
+    var steps = Array.isArray(recipe.steps) ? recipe.steps.length : 6;
+    var ings = Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 8;
+    var mins = minutesOf(recipe) || 30;
+    var effort = steps + (ings * 0.5) + (mins / 15);
+    if (effort <= 13) return 'easy';
+    if (effort <= 20) return 'medium';
+    return 'hard';
+  }
+
+  /** Few ingredients and nothing expensive in the basket. */
+  function isBudget(recipe) {
+    var lines = ingredientNames(recipe);
+    if (lines.length > 10) return false;
+    for (var i = 0; i < lines.length; i++) {
+      for (var j = 0; j < PRICEY.length; j++) {
+        if (lines[i].indexOf(PRICEY[j]) !== -1) return false;
+      }
+    }
+    return true;
+  }
+
+  /* ---------- personalisation (local only) ---------- */
+
+  function profile() {
+    try {
+      var raw = w.localStorage.getItem(NN_STORE);
+      var p = raw ? JSON.parse(raw) : {};
+      return {
+        diet: p.diet || null,
+        maxCalories: p.maxCalories || null,
+        minProtein: p.minProtein || null,
+        favorites: Array.isArray(p.favorites) ? p.favorites : [],
+        viewed: Array.isArray(p.viewed) ? p.viewed : [],
+        recent: Array.isArray(p.recent) ? p.recent : [],
+      };
+    } catch (e) {
+      return { diet: null, maxCalories: null, minProtein: null, favorites: [], viewed: [], recent: [] };
+    }
+  }
+
+  function saveProfile(p) {
+    try { w.localStorage.setItem(NN_STORE, JSON.stringify(p)); } catch (e) { /* private mode */ }
+  }
+
+  function remember(query) {
+    var p = profile();
+    var q = String(query).trim();
+    if (!q) return;
+    p.recent = [q].concat(p.recent.filter(function (x) { return x.toLowerCase() !== q.toLowerCase(); }))
+      .slice(0, MAX_RECENT);
+    saveProfile(p);
+  }
+
   /* ---------- 1. interpret ---------- */
 
-  /**
-   * Turn a plain-English query into a structured intent.
-   * Swap this one function for a model call if an AI key is ever added —
-   * it just has to return the same shape.
-   */
   function interpret(query) {
     var q = ' ' + norm(query).replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ') + ' ';
     var intent = {
       raw: query, diet: null, collection: null, meals: null,
-      maxCalories: null, maxMinutes: null, terms: [], wantsMeat: false,
+      maxCalories: null, maxMinutes: null, difficulty: null, budget: false,
+      terms: [], soft: [], avoid: [], wantsMeat: false,
     };
 
-    // Diet
-    if (/\b(vegetarian|veggie|meatless|plant based|plantbased|no meat|vegan)\b/.test(q)) {
-      intent.diet = 'Vegetarian';
-    } else if (/\b(non vegetarian|nonvegetarian|non veg|nonveg)\b/.test(q)) {
+    // Non-vegetarian is tested FIRST: the phrase contains the word
+    // "vegetarian", so checking the other way round always matches veg.
+    if (/\b(non vegetarian|nonvegetarian|non veg|nonveg|meat eater)\b/.test(q)) {
       intent.diet = 'Non-Vegetarian';
+    } else if (/\b(vegetarian|veggie|meatless|plant based|plantbased|no meat|vegan)\b/.test(q)) {
+      intent.diet = 'Vegetarian';
     }
 
-    // Collection
-    if (/\b(high protein|protein packed|lots of protein|muscle|gains|bulking|post workout)\b/.test(q)
+    if (/\b(high protein|protein packed|lots of protein|muscle|gains|bulking|post workout|filling|keep me full)\b/.test(q)
         || /\bprotein\b/.test(q)) {
       intent.collection = 'High Protein';
     }
 
-    // Meal. A named meal wins; otherwise a group word like "meals" applies.
     var groupTerms = [];
     var named = [];
     Object.keys(MEALS).forEach(function (key) {
@@ -187,22 +237,27 @@
       }
     }
 
-    // Calorie cap — "under 500 calories", "less than 400 cal", "low calorie"
     var cal = q.match(/(?:under|below|less than|max|fewer than)\s*(\d{2,4})\s*(?:cal|calorie|calories|kcal)/);
     if (cal) intent.maxCalories = parseInt(cal[1], 10);
     else if (/\b(low calorie|low cal|light|lighter)\b/.test(q)) intent.maxCalories = LOW_CALORIE;
 
-    // Time cap — "under 30 minutes", "quick", "fast"
     var t = q.match(/(?:under|below|less than|within|max|in)\s*(\d{1,3})\s*(?:min|mins|minute|minutes)/);
     if (t) intent.maxMinutes = parseInt(t[1], 10);
-    else if (/\b(quick|quickly|fast|speedy|easy|busy|hurry|no time)\b/.test(q)) intent.maxMinutes = QUICK_MINUTES;
+    else if (/\b(quick|quickly|fast|speedy|busy|hurry|no time|rush)\b/.test(q)) intent.maxMinutes = QUICK_MINUTES;
 
-    // Remaining meaningful words become ingredient / keyword terms.
+    if (/\b(easy|simple|beginner|basic|no skill|straightforward|foolproof)\b/.test(q)) intent.difficulty = 'easy';
+    if (/\b(cheap|budget|affordable|inexpensive|low cost|student|broke)\b/.test(q)) intent.budget = true;
+
+    if (/\b(no dairy|dairy free|lactose)\b/.test(q)) intent.avoid.push('milk', 'cheese', 'yogurt');
+    if (/\b(no nuts|nut free|nut allergy)\b/.test(q)) intent.avoid.push('almond', 'cashew', 'peanut');
+    if (/\b(no egg|egg free)\b/.test(q)) intent.avoid.push('egg');
+
     var used = {};
     Object.keys(MEALS).forEach(function (k) { MEALS[k].forEach(function (x) { used[x] = 1; }); });
     ['vegetarian', 'veggie', 'meatless', 'vegan', 'protein', 'high', 'low', 'calorie', 'calories',
-      'cal', 'kcal', 'quick', 'fast', 'easy', 'minute', 'minutes', 'min', 'mins', 'under', 'below',
-      'less', 'than', 'non', 'veg'].forEach(function (x) { used[x] = 1; });
+      'cal', 'kcal', 'quick', 'fast', 'busy', 'minute', 'minutes', 'min', 'mins', 'under', 'below',
+      'less', 'than', 'non', 'veg', 'easy', 'simple', 'beginner', 'basic', 'cheap', 'budget',
+      'affordable', 'student', 'dairy', 'free', 'nuts', 'allergy'].forEach(function (x) { used[x] = 1; });
 
     words(q).forEach(function (tok) {
       if (tok.length < 3) return;
@@ -212,14 +267,10 @@
       if (intent.terms.indexOf(tok) === -1) intent.terms.push(tok);
     });
 
-    // Words implied by a group word — "a drink" should prefer the smoothies
-    // over the crisps that share the same snack category.
     groupTerms.forEach(function (gt) {
       if (intent.terms.indexOf(gt) === -1) intent.terms.push(gt);
     });
 
-    // Multi-word cravings are concepts, not two separate words. Match those
-    // before the loose word-by-word search gets a chance to misfire.
     for (var c = 0; c < CONCEPTS.length; c++) {
       var con = CONCEPTS[c];
       if (q.indexOf(' ' + con.phrase + ' ') === -1) continue;
@@ -238,11 +289,15 @@
     return intent;
   }
 
-  /* ---------- 1b. AI interpretation ----------
-     Sends the raw phrase to the interpret-query Edge Function, which uses
-     the Gemini key already configured for the photo scanner. The model only
-     describes the request — it never picks recipes, so nothing can be
-     invented. Any failure falls straight back to interpret() above. */
+  /** Apply saved preferences where the request said nothing. */
+  function withProfile(intent) {
+    var p = profile();
+    if (!intent.diet && p.diet) { intent.diet = p.diet; intent.fromProfile = true; }
+    if (intent.maxCalories == null && p.maxCalories) { intent.maxCalories = p.maxCalories; intent.fromProfile = true; }
+    return intent;
+  }
+
+  /* ---------- 1b. AI interpretation ---------- */
 
   function interpretRemote(query) {
     var cfg = w.NN_CONFIG || {};
@@ -266,12 +321,9 @@
         clearTimeout(timer);
         if (!data || !data.ok || !data.intent) return null;
         var ai = data.intent;
-        var local = interpret(query); // reuse the local read as a safety net
+        var local = interpret(query);
 
-        // Ingredients are what the person actually asked for, so they decide
-        // whether a match counts. Keywords are mood/cuisine words like
-        // "comfort" or "italian" — helpful for ranking, but a recipe should
-        // never be demoted just because it does not contain the word "cosy".
+        // Ingredients decide whether a match counts; keywords only rank.
         var terms = (ai.ingredients || []).slice();
         if (!terms.length && !(ai.keywords || []).length) terms = local.terms;
 
@@ -283,23 +335,19 @@
           meals: (Array.isArray(ai.meals) && ai.meals.length) ? ai.meals : local.meals,
           maxCalories: ai.maxCalories != null ? ai.maxCalories : local.maxCalories,
           maxMinutes: ai.maxMinutes != null ? ai.maxMinutes : local.maxMinutes,
+          difficulty: local.difficulty,
+          budget: local.budget,
           terms: terms,
           soft: ai.keywords || [],
-          avoid: ai.avoid || [],
+          avoid: (ai.avoid || []).concat(local.avoid),
           wantsMeat: terms.some(function (t) { return MEATY.indexOf(stem(t)) !== -1; }),
         };
       })
       .catch(function () { clearTimeout(timer); return null; });
   }
 
-  /* ---------- 2. score ---------- */
+  /* ---------- 2. rank ---------- */
 
-  /**
-   * How well a term matches: 1 for a real word match, 0.4 for a loose
-   * prefix match, 0 for nothing. Grading this matters — "cream" only
-   * half-matches "Creamy", and treating that as a full hit is how a search
-   * for ice cream ends up recommending lentil dal.
-   */
   function matchStrength(term, haystackWords) {
     var s = stem(term);
     var best = 0;
@@ -331,66 +379,63 @@
     var kcal = num(recipe.calories);
     var protein = num(recipe.protein);
 
-    // Foods the person said they cannot eat rule a recipe out entirely.
+    // Foods they cannot eat rule a recipe out entirely.
     if (intent.avoid && intent.avoid.length) {
       for (var a = 0; a < intent.avoid.length; a++) {
         if (matchesTerm(intent.avoid[a], ingWords)) return null;
       }
     }
 
-    // Diet — treated as a requirement, not a preference.
     if (intent.diet) {
       if (cols.indexOf(intent.diet) === -1) return null;
       points += 3;
       reasons.push('✓ ' + intent.diet);
     }
-    // Asking for chicken should not return a vegetarian dish.
     if (intent.wantsMeat && cols.indexOf('Non-Vegetarian') === -1) return null;
 
-    // Collection
     if (intent.collection) {
       if (cols.indexOf(intent.collection) !== -1) {
         points += 3;
         reasons.push('✓ ' + intent.collection);
-      } else {
-        violation = true;
-      }
+      } else { violation = true; }
     }
 
-    // Meal — may be several (e.g. "meals" covers breakfast, lunch and dinner).
     if (intent.meals && intent.meals.length) {
       if (intent.meals.indexOf(recipe.category) !== -1) {
         points += 3;
         reasons.push('✓ ' + recipe.category.charAt(0).toUpperCase() + recipe.category.slice(1));
-      } else {
-        violation = true;
-      }
+      } else { violation = true; }
     }
 
-    // Calories
     if (intent.maxCalories != null) {
       if (kcal != null && kcal <= intent.maxCalories) {
         points += 2.5;
         reasons.push('✓ ' + kcal + ' calories');
-      } else {
-        violation = true;
-      }
+      } else { violation = true; }
     }
 
-    // Time
     if (intent.maxMinutes != null) {
       if (mins != null && mins <= intent.maxMinutes) {
         points += 2.5;
         reasons.push('✓ Ready in ' + recipe.time);
-      } else {
-        violation = true;
-      }
+      } else { violation = true; }
     }
 
-    // Ingredients and loose keywords.
-    // A miss on one term is NOT a failure — asking for "chicken, rice,
-    // broccoli" should still surface a dish with two of the three. Only a
-    // recipe matching none of them is treated as off-target.
+    if (intent.difficulty === 'easy') {
+      if (difficultyOf(recipe) === 'easy') {
+        points += 2;
+        reasons.push('✓ Beginner friendly');
+      } else { violation = true; }
+    }
+
+    if (intent.budget) {
+      if (isBudget(recipe)) {
+        points += 2;
+        reasons.push('✓ Budget friendly');
+      } else { violation = true; }
+    }
+
+    // Ingredients and loose keywords. Missing one term is not a failure.
     var matchedIngredients = [];
     var keywordOnly = [];
     var termHits = 0;
@@ -399,13 +444,10 @@
       var sIng = matchStrength(term, ingWords);
       var sTitle = matchStrength(term, titleWords);
       var sDesc = matchStrength(term, descWords);
-      // A loose partial only counts as a hit if nothing matched properly.
       var strongest = Math.max(sIng, sTitle, sDesc);
-      var inIng = sIng > 0, inTitle = sTitle > 0, inDesc = sDesc > 0;
 
-      if (inIng) {
+      if (sIng > 0) {
         points += 3 * sIng;
-        // Name the ingredient line it matched, for a readable reason.
         for (var i = 0; i < ingLines.length; i++) {
           if (matchesTerm(term, words(ingLines[i]))) {
             var label = ingLines[i].replace(/\s*\(.*?\)\s*/g, '').trim();
@@ -415,20 +457,17 @@
           }
         }
       }
-      if (inTitle) points += 3 * sTitle;
-      if (inDesc) points += 1 * sDesc;
+      if (sTitle > 0) points += 3 * sTitle;
+      if (sDesc > 0) points += 1 * sDesc;
 
-      // Only a solid match counts toward coverage; a 0.4 partial does not.
       if (strongest >= 1) {
         termHits++;
         if (sIng < 1) keywordOnly.push(term);
       }
     });
 
-    // Reward covering more of what was asked for.
     if (intent.terms.length > 1) points += (termHits / intent.terms.length) * 2;
 
-    // Soft words (cuisine, mood) nudge the ranking but never gate a result.
     if (intent.soft && intent.soft.length) {
       intent.soft.forEach(function (term) {
         if (matchesTerm(term, titleWords) || matchesTerm(term, descWords) || matchesTerm(term, ingWords)) {
@@ -438,29 +477,33 @@
       });
     }
 
-    matchedIngredients.slice(0, 3).forEach(function (name) {
-      reasons.push('✓ Contains ' + name);
-    });
+    // "Uses ingredients you have" reads better than listing three of them.
+    if (matchedIngredients.length >= 2) {
+      reasons.push('✓ Uses ingredients you have');
+      matchedIngredients.slice(0, 2).forEach(function (n) { reasons.push('✓ Contains ' + n); });
+    } else {
+      matchedIngredients.slice(0, 2).forEach(function (n) { reasons.push('✓ Contains ' + n); });
+    }
     keywordOnly.slice(0, 2).forEach(function (term) {
       reasons.push('✓ Matches “' + term + '”');
     });
 
-    // Gentle tie-breakers so results are sensibly ordered, not random.
+    // Tie-breakers.
     if (intent.collection === 'High Protein' && protein) points += Math.min(protein / 20, 1.5);
     if (intent.maxCalories != null && kcal) points += Math.max(0, (intent.maxCalories - kcal) / 400);
     if (intent.maxMinutes != null && mins) points += Math.max(0, (intent.maxMinutes - mins) / 60);
 
-    // A relevance floor. Without it a single weak partial word match is
-    // enough to surface a completely unrelated recipe.
+    var p = profile();
+    if (p.favorites.indexOf(recipe.title) !== -1) points += 1.5;
+    if (p.minProtein && protein && protein >= p.minProtein) points += 0.5;
+
     var floor = intent.terms.length ? MIN_POINTS : 0.5;
     if (points < floor) return null;
-    // "Exact" means every stated constraint was met and, when ingredients
-    // were named, at least one of them is actually in the recipe.
+
     var exact = !violation && (intent.terms.length === 0 || termHits > 0);
     return { recipe: recipe, points: points, reasons: reasons, exact: exact };
   }
 
-  /** Rank the whole database against an already-built intent. */
   function rank(intent) {
     var list = recipeList();
     var scored = [];
@@ -483,94 +526,98 @@
     };
   }
 
-  /** Synchronous search using only the built-in parser. */
-  function search(query) { return rank(interpret(query)); }
+  function search(query) { return rank(withProfile(interpret(query))); }
 
-  /**
-   * Search with AI interpretation when it is available, falling back to the
-   * local parser. Always resolves — a failed model call is invisible to the
-   * user beyond slightly simpler understanding.
-   */
   function searchSmart(query) {
     return interpretRemote(query).then(function (aiIntent) {
-      if (!aiIntent) return rank(interpret(query));
-      var out = rank(aiIntent);
-      // If the model over-constrained and found nothing, try the plain read.
+      if (!aiIntent) return rank(withProfile(interpret(query)));
+      var out = rank(withProfile(aiIntent));
       if (!out.results.length) {
-        var local = rank(interpret(query));
+        var local = rank(withProfile(interpret(query)));
         if (local.results.length) return local;
       }
       return out;
     });
   }
 
-  /* ---------- 3. render ---------- */
+  /* ---------- 3. conversation ---------- */
+
+  /** A spoken-style summary of what was understood and found. */
+  function describe(out) {
+    var i = out.intent;
+    var n = out.results.length;
+    if (!n) return 'We couldn’t find an exact match, but here are the closest healthy alternatives.';
+
+    var bits = [];
+    if (i.collection) bits.push('high-protein');
+    if (i.diet === 'Vegetarian') bits.push('vegetarian');
+    if (i.diet === 'Non-Vegetarian') bits.push('non-vegetarian');
+
+    var noun = 'recipe';
+    if (i.meals && i.meals.length === 1) noun = i.meals[0];
+    var phrase = bits.join(' ') + (bits.length ? ' ' : '') + noun + (n === 1 ? '' : 's');
+
+    var tail = [];
+    if (i.maxCalories != null) tail.push('under ' + i.maxCalories + ' calories');
+    if (i.maxMinutes != null) tail.push('ready in ' + i.maxMinutes + ' minutes or less');
+    if (i.difficulty === 'easy') tail.push('easy to make');
+    if (i.budget) tail.push('easy on the budget');
+
+    var s = (out.exact ? 'Here ' + (n === 1 ? 'is' : 'are') + ' ' + n + ' ' : 'The closest ' + n + ' ')
+      + phrase + (tail.length ? ' ' + tail.join(' and ') : '') + '.';
+    if (!out.exact) s = 'We couldn’t find an exact match. ' + s;
+    if (i.fromProfile) s += ' (Using your saved preferences.)';
+    return s;
+  }
+
+  /** One helpful question when the request is too open to answer well. */
+  function followUp(out) {
+    var i = out.intent;
+    var vague = !i.terms.length && !i.collection && i.maxCalories == null && i.maxMinutes == null;
+
+    if (vague && i.meals && i.meals.length && !i.diet) {
+      return {
+        q: 'Would you prefer vegetarian or non-vegetarian?',
+        options: [
+          ['Vegetarian', 'vegetarian ' + i.meals[0]],
+          ['Non-vegetarian', 'non-vegetarian ' + i.meals[0]],
+          ['Either is fine', i.meals[0] + ' recipes'],
+        ],
+      };
+    }
+    if (vague && !i.meals && !i.diet) {
+      return {
+        q: 'What are you after right now?',
+        options: [
+          ['Breakfast', 'breakfast'],
+          ['Lunch', 'lunch'],
+          ['Dinner', 'dinner'],
+          ['A snack', 'snack'],
+        ],
+      };
+    }
+    return null;
+  }
+
+  /** Related searches worth trying next. */
+  function suggestions(out) {
+    var i = out.intent;
+    var list = [];
+    var meal = (i.meals && i.meals.length === 1) ? i.meals[0] : '';
+
+    if (!i.collection) list.push(['Looking for higher protein options?', ('high protein ' + meal).trim()]);
+    if (i.maxCalories == null) list.push(['Need something under 400 calories?', ('under 400 calories ' + meal).trim()]);
+    if (i.diet !== 'Vegetarian') list.push(['Show similar vegetarian recipes', ('vegetarian ' + meal).trim()]);
+    if (i.maxMinutes == null) list.push(['Anything ready in 20 minutes?', ('under 20 minutes ' + meal).trim()]);
+    if (!i.budget) list.push(['Budget-friendly ideas', ('budget ' + meal).trim()]);
+
+    return list.slice(0, 3);
+  }
+
+  /* ---------- 4. UI ---------- */
 
   var els = {};
-
   var runToken = 0;
-
-  /** Kick off a search: show a thinking state, then draw whatever comes back. */
-  function runSearch(query) {
-    var mine = ++runToken;
-    els.status.textContent = 'Looking through our recipes…';
-    els.results.innerHTML = '';
-    els.clear.style.display = '';
-    searchSmart(query).then(function (out) {
-      if (mine !== runToken) return; // a newer search has started
-      draw(out);
-    });
-  }
-
-  function draw(out) {
-    els.results.innerHTML = '';
-
-    if (!out.results.length) {
-      els.status.textContent = 'We couldn’t find an exact match, but here are the closest healthy options.';
-      // Fall back to a genuinely useful set rather than an empty grid.
-      var all = recipeList();
-      var fallback = all.slice()
-        .sort(function (a, b) { return (num(b.protein) || 0) - (num(a.protein) || 0); })
-        .slice(0, 6);
-      fallback.forEach(function (r) {
-        els.results.appendChild(buildRecipeCard(r, all.indexOf(r)));
-      });
-      els.clear.style.display = '';
-      return;
-    }
-
-    els.status.textContent = out.exact
-      ? out.results.length + (out.results.length === 1 ? ' recipe matches' : ' recipes match') + ' your search'
-      : 'We couldn’t find an exact match, but here are the closest healthy options.';
-
-    out.results.forEach(function (item) {
-      var card = buildRecipeCard(item.recipe, item.index);
-      if (item.reasons.length) {
-        var why = d.createElement('div');
-        why.className = 'nnf-why';
-        item.reasons.slice(0, 4).forEach(function (r) {
-          var chip = d.createElement('span');
-          chip.className = 'nnf-why-chip';
-          chip.textContent = r;
-          why.appendChild(chip);
-        });
-        card.appendChild(why);
-      }
-      els.results.appendChild(card);
-    });
-
-    els.clear.style.display = '';
-  }
-
-  function clearAll() {
-    els.input.value = '';
-    els.results.innerHTML = '';
-    els.status.textContent = '';
-    els.clear.style.display = 'none';
-    els.input.focus();
-  }
-
-  /* ---------- mount ---------- */
 
   var CHIPS = [
     ['High Protein', 'high protein'],
@@ -583,6 +630,146 @@
     ['Under 500 Calories', 'under 500 calories'],
   ];
 
+  function chip(label, cls, onClick) {
+    var b = d.createElement('button');
+    b.type = 'button';
+    b.className = cls;
+    b.textContent = label;
+    b.addEventListener('click', onClick);
+    return b;
+  }
+
+  function showSkeletons(n) {
+    els.results.innerHTML = '';
+    for (var i = 0; i < n; i++) {
+      var s = d.createElement('div');
+      s.className = 'nnf-skel';
+      s.innerHTML = '<div class="nnf-skel-img"></div><div class="nnf-skel-body">' +
+        '<div class="nnf-skel-line"></div><div class="nnf-skel-line short"></div>' +
+        '<div class="nnf-skel-chips"><span></span><span></span><span></span></div></div>';
+      els.results.appendChild(s);
+    }
+  }
+
+  function renderRecent() {
+    var p = profile();
+    els.recent.innerHTML = '';
+    if (!p.recent.length) { els.recent.style.display = 'none'; return; }
+    els.recent.style.display = '';
+    var label = d.createElement('span');
+    label.className = 'nnf-recent-label';
+    label.textContent = 'Recent';
+    els.recent.appendChild(label);
+    p.recent.forEach(function (q) {
+      els.recent.appendChild(chip(q, 'nnf-chip nnf-chip-ghost', function () {
+        els.input.value = q;
+        runSearch(q);
+      }));
+    });
+  }
+
+  function runSearch(query) {
+    var mine = ++runToken;
+    remember(query);
+    renderRecent();
+    els.followup.innerHTML = '';
+    els.suggest.innerHTML = '';
+    els.status.textContent = 'Thinking…';
+    els.status.classList.add('thinking');
+    showSkeletons(3);
+    els.clear.style.display = '';
+
+    searchSmart(query).then(function (out) {
+      if (mine !== runToken) return;
+      els.status.classList.remove('thinking');
+      draw(out);
+    });
+  }
+
+  function draw(out) {
+    els.results.innerHTML = '';
+    els.status.textContent = describe(out);
+
+    var list = out.results;
+    if (!list.length) {
+      var all = recipeList();
+      all.slice()
+        .sort(function (a, b) { return (num(b.protein) || 0) - (num(a.protein) || 0); })
+        .slice(0, 6)
+        .forEach(function (r) {
+          els.results.appendChild(buildRecipeCard(r, all.indexOf(r)));
+        });
+    } else {
+      list.forEach(function (item, n) {
+        var card = buildRecipeCard(item.recipe, item.index);
+        card.classList.add('nnf-in');
+        card.style.animationDelay = (n * 45) + 'ms';
+        if (item.reasons.length) {
+          var why = d.createElement('div');
+          why.className = 'nnf-why';
+          item.reasons.slice(0, 4).forEach(function (r) {
+            var c = d.createElement('span');
+            c.className = 'nnf-why-chip';
+            c.textContent = r;
+            why.appendChild(c);
+          });
+          card.appendChild(why);
+        }
+        els.results.appendChild(card);
+      });
+    }
+
+    // Follow-up question
+    var fu = followUp(out);
+    els.followup.innerHTML = '';
+    if (fu) {
+      var box = d.createElement('div');
+      box.className = 'nnf-followup';
+      var qEl = d.createElement('p');
+      qEl.className = 'nnf-followup-q';
+      qEl.textContent = fu.q;
+      box.appendChild(qEl);
+      var row = d.createElement('div');
+      row.className = 'nnf-followup-row';
+      fu.options.forEach(function (opt) {
+        row.appendChild(chip(opt[0], 'nnf-chip nnf-chip-solid', function () {
+          els.input.value = opt[1];
+          runSearch(opt[1]);
+        }));
+      });
+      box.appendChild(row);
+      els.followup.appendChild(box);
+    }
+
+    // Related searches
+    els.suggest.innerHTML = '';
+    var sugg = suggestions(out);
+    if (sugg.length) {
+      var head = d.createElement('span');
+      head.className = 'nnf-recent-label';
+      head.textContent = 'Try next';
+      els.suggest.appendChild(head);
+      sugg.forEach(function (s) {
+        els.suggest.appendChild(chip(s[0], 'nnf-chip nnf-chip-ghost', function () {
+          els.input.value = s[1];
+          runSearch(s[1]);
+        }));
+      });
+    }
+  }
+
+  function clearAll() {
+    runToken++;
+    els.input.value = '';
+    els.results.innerHTML = '';
+    els.followup.innerHTML = '';
+    els.suggest.innerHTML = '';
+    els.status.textContent = '';
+    els.status.classList.remove('thinking');
+    els.clear.style.display = 'none';
+    els.input.focus();
+  }
+
   function mount() {
     var host = d.getElementById('nn-finder');
     if (!host || host.dataset.ready) return;
@@ -590,41 +777,43 @@
 
     host.innerHTML =
       '<div class="nnf-head">' +
-        '<span class="nnf-badge">✨ AI Recipe Finder</span>' +
-        '<h3 class="nnf-title">Tell us what you have — we’ll find it in our recipes</h3>' +
-        '<p class="nnf-sub">Searches only Nourish N Narrate recipes. Try “eggs and spinach”, ' +
-          '“high protein breakfast” or “vegetarian dinner under 400 calories”.</p>' +
+        '<span class="nnf-badge">✨ AI Nutrition Assistant</span>' +
+        '<h3 class="nnf-title">Tell me what you have — I’ll find it in our recipes</h3>' +
+        '<p class="nnf-sub">Ask in your own words. Try “I only have chicken and rice”, ' +
+          '“a filling breakfast in 15 minutes” or “something cheap and vegetarian”.</p>' +
       '</div>' +
       '<form class="nnf-bar" id="nnf-form">' +
         '<span class="nnf-icon" aria-hidden="true">🔍</span>' +
         '<input type="search" id="nnf-input" autocomplete="off" ' +
           'placeholder="What ingredients do you have or what are you craving?" ' +
-          'aria-label="Search recipes by ingredients or cravings" />' +
-        '<button class="nnf-go" type="submit">Find recipes</button>' +
+          'aria-label="Ask the nutrition assistant" />' +
+        '<button type="button" class="nnf-mic" id="nnf-mic" aria-label="Voice search">🎤</button>' +
+        '<button class="nnf-go" type="submit">Ask</button>' +
       '</form>' +
       '<div class="nnf-chips" id="nnf-chips" role="group" aria-label="Quick searches"></div>' +
+      '<div class="nnf-recent" id="nnf-recent" style="display:none;"></div>' +
       '<p class="nnf-status" id="nnf-status" aria-live="polite"></p>' +
+      '<div id="nnf-followup"></div>' +
       '<div class="recipe-grid nnf-results" id="nnf-results"></div>' +
+      '<div class="nnf-suggest" id="nnf-suggest"></div>' +
       '<div class="nnf-foot"><button type="button" class="nnf-clear" id="nnf-clear">Clear search</button></div>';
 
     els.input = d.getElementById('nnf-input');
     els.results = d.getElementById('nnf-results');
     els.status = d.getElementById('nnf-status');
     els.clear = d.getElementById('nnf-clear');
+    els.recent = d.getElementById('nnf-recent');
+    els.followup = d.getElementById('nnf-followup');
+    els.suggest = d.getElementById('nnf-suggest');
     els.clear.style.display = 'none';
 
     var chipWrap = d.getElementById('nnf-chips');
     CHIPS.forEach(function (pair) {
-      var b = d.createElement('button');
-      b.type = 'button';
-      b.className = 'nnf-chip';
-      b.textContent = pair[0];
-      b.addEventListener('click', function () {
+      chipWrap.appendChild(chip(pair[0], 'nnf-chip', function () {
         els.input.value = pair[1];
         runSearch(pair[1]);
         els.results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      });
-      chipWrap.appendChild(b);
+      }));
     });
 
     d.getElementById('nnf-form').addEventListener('submit', function (e) {
@@ -635,11 +824,66 @@
     });
 
     els.clear.addEventListener('click', clearAll);
+
+    // Voice input — used when the browser supports it, otherwise it explains.
+    var mic = d.getElementById('nnf-mic');
+    var SR = w.SpeechRecognition || w.webkitSpeechRecognition;
+    mic.addEventListener('click', function () {
+      if (!SR) {
+        els.status.textContent = 'Voice search isn’t supported in this browser yet — type your question instead.';
+        els.input.focus();
+        return;
+      }
+      var rec = new SR();
+      rec.lang = 'en-US';
+      rec.interimResults = false;
+      mic.classList.add('listening');
+      els.status.textContent = 'Listening…';
+      rec.onresult = function (ev) {
+        var said = ev.results[0][0].transcript;
+        els.input.value = said;
+        runSearch(said);
+      };
+      rec.onerror = function () { els.status.textContent = 'Didn’t catch that — try again or type it.'; };
+      rec.onend = function () { mic.classList.remove('listening'); };
+      rec.start();
+    });
+
+    renderRecent();
   }
 
   if (d.readyState === 'loading') d.addEventListener('DOMContentLoaded', mount);
   else mount();
   w.addEventListener('recipesLoaded', mount);
 
-  w.NNFinder = { search: search, searchSmart: searchSmart, interpret: interpret, rank: rank, mount: mount };
+  /* Public API — also the hooks for future personalisation. */
+  w.NNFinder = {
+    search: search,
+    searchSmart: searchSmart,
+    interpret: interpret,
+    rank: rank,
+    describe: describe,
+    followUp: followUp,
+    suggestions: suggestions,
+    mount: mount,
+    profile: profile,
+    saveProfile: saveProfile,
+    setPreference: function (key, value) {
+      var p = profile();
+      p[key] = value;
+      saveProfile(p);
+    },
+    toggleFavorite: function (title) {
+      var p = profile();
+      var at = p.favorites.indexOf(title);
+      if (at === -1) p.favorites.push(title); else p.favorites.splice(at, 1);
+      saveProfile(p);
+      return p.favorites.indexOf(title) !== -1;
+    },
+    noteViewed: function (title) {
+      var p = profile();
+      p.viewed = [title].concat(p.viewed.filter(function (x) { return x !== title; })).slice(0, 30);
+      saveProfile(p);
+    },
+  };
 })(window, document);

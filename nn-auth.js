@@ -19,6 +19,8 @@
      getLogs(dateStr)         — entries for one day (YYYY-MM-DD)
      addLog(dateStr, kind, name, calories)
      deleteLog(id)
+     generateRecipe(spec)     — AI Recipe Creator (create-recipe function)
+     saveAiRecipe / getAiRecipes / deleteAiRecipe
 =================================================================== */
 
 const NNAuth = (() => {
@@ -293,6 +295,75 @@ const NNAuth = (() => {
     return data;
   }
 
+  /* ---------------- AI Recipe Creator ----------------
+     Generated recipes live in their own table, ai_recipes, and are private
+     to the person who made them. The curated `recipes` table is never
+     written to from the browser — that separation is what keeps AI output
+     out of the collections, the pantry matcher and the site's search. */
+
+  /** Generate one recipe from a spec. Resolves to either
+        { ok:true, feasible:true,  recipe }
+        { ok:true, feasible:false, problem, suggestions }  — could not be done
+        { ok:false, reason }                               — call failed
+      Never throws. */
+  async function generateRecipe(spec) {
+    if (!client) return { ok: false, reason: 'no_client' };
+    try {
+      const { data, error } = await client.functions.invoke('create-recipe', { body: spec || {} });
+      if (error) return { ok: false, reason: error.message || 'invoke_failed' };
+      if (!data || data.error) return { ok: false, reason: (data && data.error) || 'empty' };
+      if (data.feasible === false) {
+        return {
+          ok: true, feasible: false,
+          problem: data.problem || '',
+          suggestions: data.suggestions || [],
+        };
+      }
+      if (!data.recipe) return { ok: false, reason: 'empty' };
+      return { ok: true, feasible: true, recipe: data.recipe, model: data.model };
+    } catch (e) {
+      return { ok: false, reason: 'network' };
+    }
+  }
+
+  /** Store a generated recipe against the signed-in user. */
+  async function saveAiRecipe(recipe, spec) {
+    if (!client) return { ok: false, message: 'Not connected.' };
+    const session = await getSession();
+    if (!session) return { ok: false, message: 'Please log in first.' };
+    const { data, error } = await client.from('ai_recipes')
+      .insert({
+        user_id: session.user.id,
+        title: recipe.title,
+        payload: recipe,
+        spec: spec || null,
+      })
+      .select('id, created_at')
+      .single();
+    if (error) return { ok: false, message: error.message };
+    return { ok: true, id: data.id, created_at: data.created_at };
+  }
+
+  /** Every recipe this user has saved, newest first. */
+  async function getAiRecipes() {
+    if (!client) return [];
+    const session = await getSession();
+    if (!session) return [];
+    const { data, error } = await client
+      .from('ai_recipes')
+      .select('id, title, payload, spec, created_at')
+      .order('created_at', { ascending: false });
+    if (error || !data) return [];
+    return data;
+  }
+
+  async function deleteAiRecipe(id) {
+    if (!client) return { ok: false };
+    const { error } = await client.from('ai_recipes').delete().eq('id', id);
+    if (error) return { ok: false, message: error.message };
+    return { ok: true };
+  }
+
   return {
     onReady, getSession, signUp, signIn, signOut,
     saveResult, getLatestResult, getAllResults, deleteResult,
@@ -300,6 +371,7 @@ const NNAuth = (() => {
     saveWeight, getWeights, getRecipes,
     getFoodLibrary, getExerciseLibrary, getMealPlans,
     analyzeFoodPhoto, correctFoodScan,
+    generateRecipe, saveAiRecipe, getAiRecipes, deleteAiRecipe,
     getLogsSince, /* #2 EXTRA FEATURE */
   };
 })();

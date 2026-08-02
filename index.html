@@ -77,7 +77,7 @@
       <!-- ✏️ Desktop navigation links -->
       <ul class="nav-links" role="list">
         <li><a href="#home"    class="active">Home</a></li>
-        <li><a href="#recipes">Recipes</a></li>
+        <li><a href="recipes.html">Recipes</a></li>
         <li><a href="calculator.html">Calculator</a></li>
         <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
         <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
@@ -113,7 +113,7 @@
   <!-- ✏️ Mobile menu links — keep in sync with the desktop nav above -->
   <div class="mobile-menu" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
     <a href="#home"    onclick="closeMobileMenu()">Home</a>
-    <a href="#recipes" onclick="closeMobileMenu()">Recipes</a>
+    <a href="recipes.html">Recipes</a>
     <a href="calculator.html" onclick="closeMobileMenu()">Nutrition Calculator</a>
     <a href="tracker.html" id="m-nav-tracker" style="display:none;">📈 My Tracker</a>
     <a href="profile.html" id="m-nav-profile" style="display:none;">👤 My Profile</a>
@@ -164,9 +164,9 @@
 
         <!-- ✏️ Button labels -->
         <div class="hero-actions anim-d4">
-          <button class="btn-primary" onclick="document.getElementById('recipes').scrollIntoView({behavior:'smooth'})">
+          <a class="btn-primary" href="recipes.html" style="text-decoration:none;">
             🌿 Explore Recipes <span class="btn-arrow" aria-hidden="true">→</span>
-          </button>
+          </a>
           <button class="btn-secondary" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">
             Learn More
           </button>
@@ -178,7 +178,7 @@
         <!-- ✏️ Quick trust stats -->
         <div class="hero-stats anim-d5">
           <div class="hero-stat"><strong id="member-count">27</strong><span>Members &amp; growing</span></div>
-          <div class="hero-stat"><strong>25+</strong><span>Recipes recreated</span></div>
+          <div class="hero-stat"><strong>50+</strong><span>Recipes recreated</span></div>
           <div class="hero-stat"><strong>100%</strong><span>Taste-tested</span></div>
           <div class="hero-stat"><strong>4</strong><span>Student founders</span></div>
         </div>
@@ -273,97 +273,8 @@
        Recipe cards are generated automatically from the RECIPES
        data (Supabase). No HTML edits needed to add recipes.
   ============================================================ -->
-  <section id="recipes">
-    <div class="container">
-
-      <!-- Landing point for the ↑ side rail -->
-      <div class="recipes-header" data-rail-top>
-        <div class="reveal">
-          <!-- ✏️ Section label and title -->
-          <span class="section-label">Recipes</span>
-          <h2 class="section-title">Healthy Twists on Classics</h2>
-          <div class="divider"></div>
-        </div>
-      </div>
-
-      <!-- Diet Type Selector — two big buttons -->
-      <div class="diet-selector reveal reveal-scale" id="diet-selector">
-        <button class="diet-btn veg-btn" onclick="showRecipesByType('veg')">
-          <div class="diet-icon" aria-hidden="true">🌱</div>
-          <div class="diet-label">Vegetarian</div>
-        </button>
-        <button class="diet-btn non-veg-btn" onclick="showRecipesByType('non-veg')">
-          <div class="diet-icon" aria-hidden="true">🍗</div>
-          <div class="diet-label">Non-Vegetarian</div>
-        </button>
-        <!-- Additional collection — recipes here also stay in Vegetarian
-             or Non-Vegetarian above; this is a tag, not a category. -->
-        <button class="diet-btn high-protein-btn diet-btn-wide" onclick="showRecipesByType('high-protein')">
-          <div class="diet-icon" aria-hidden="true">💪</div>
-          <div class="diet-label">High Protein</div>
-          <div class="diet-sub" id="hp-count"></div>
-        </button>
-        <a href="all-recipes.html" class="diet-see-all see-more-btn">📖 Show All Recipes <span aria-hidden="true">→</span></a>
-
-        <!-- AI Recipe Finder — searches only the recipes already in our
-             database. Built by nn-finder.js; sits inside the selector so it
-             shows and hides along with the collection chooser. -->
-        <div class="nn-finder" id="nn-finder"></div>
-      </div>
-
-      <!-- Recipes View — hidden until a diet type is selected -->
-      <div id="recipes-view" style="display: none;">
-        <div style="margin-bottom: 2rem;">
-          <button class="see-more-btn btn-back" onclick="backToSelector()">← Back to Diet Selection</button>
-        </div>
-
-        <!-- Search bar -->
-        <div class="search-wrap">
-          <span class="search-icon" aria-hidden="true">🔍</span>
-          <input
-            type="search"
-            id="recipe-search"
-            placeholder="Search recipes…"
-            aria-label="Search recipes"
-            oninput="filterRecipes()"
-          />
-        </div>
-
-        <!-- Category filters -->
-        <div class="filter-pills" role="group" aria-label="Filter by category">
-          <button class="pill active" data-filter="all"       onclick="setFilter(this,'all')">All</button>
-          <button class="pill"        data-filter="breakfast" onclick="setFilter(this,'breakfast')">Breakfast</button>
-          <button class="pill"        data-filter="lunch"     onclick="setFilter(this,'lunch')">Lunch</button>
-          <button class="pill"        data-filter="dinner"    onclick="setFilter(this,'dinner')">Dinner</button>
-          <button class="pill"        data-filter="snack"     onclick="setFilter(this,'snack')">Snacks</button>
-          <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
-        </div>
-
-        <!-- Recipe cards are injected here by renderRecipes() -->
-        <div class="recipe-grid" id="recipe-grid"></div>
-
-        <!-- Back to Diet Selection button (shown after recipes load) -->
-        <div class="text-center" id="back-to-diet-wrap" style="margin-top:2.25rem; display:none;">
-          <button onclick="resetDietSelection()" class="see-more-btn">← Back to Diet Selection</button>
-        </div>
-      </div>
-
-      <!-- See all / show fewer toggle (managed by JS) -->
-      <div class="text-center" id="see-more-wrap" style="margin-top:2.25rem; display:none;">
-        <a href="all-recipes.html" id="see-more-btn" class="see-more-btn">See all recipes →</a>
-      </div>
-
-      <!-- Rate Us — also the landing point for the ↓ side rail -->
-      <div class="text-center reveal" data-rail-bottom style="margin-top:3rem;">
-        <p class="rate-note">Enjoyed our recipes? Let us know what you think!</p>
-        <a href="https://docs.google.com/forms/d/e/1FAIpQLScGB0JQA7vv-c65fRwx55KJVPVipxNZvfVxurwDjiCBD-AezQ/viewform?usp=publish-editor"
-           target="_blank" rel="noopener noreferrer" class="btn-rate">
-          ⭐ Rate Our Project &amp; Foods
-        </a>
-      </div>
-
-    </div>
-  </section>
+  <!-- The recipes section now lives on its own page (recipes.html).
+       Every "Recipes" link and the hero button point there. -->
 
 
   <!-- ============================================================
@@ -405,58 +316,6 @@
        RECIPE MODAL
        Populated automatically when a recipe card is clicked.
   ============================================================ -->
-  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="modal" id="recipe-modal">
-      <button class="modal-close" onclick="closeModal()" aria-label="Close recipe">✕</button>
-      <div id="modal-header"></div><!-- Image or emoji header injected here -->
-      <div class="modal-body">
-        <div class="modal-category" id="modal-category"></div>
-        <h2  class="modal-title"    id="modal-title"></h2>
-        <p   class="modal-desc"     id="modal-desc"></p>
-        <div class="modal-stats">
-          <div class="modal-stat"><div class="modal-stat-val" id="modal-time"></div><div class="modal-stat-label">Prep &amp; Cook</div></div>
-          <div class="modal-stat"><div class="modal-stat-val" id="modal-servings"></div><div class="modal-stat-label">Servings</div></div>
-          <div class="modal-stat"><div class="modal-stat-val" id="modal-calories"></div><div class="modal-stat-label">Per Serving</div></div>
-          <div class="modal-stat"><div class="modal-stat-val" id="modal-protein"></div><div class="modal-stat-label">Protein</div></div>
-          <div class="modal-stat"><div class="modal-stat-val" id="modal-fiber"></div><div class="modal-stat-label">Fiber</div></div>
-          <div class="modal-stat"><div class="modal-stat-val" id="modal-fat"></div><div class="modal-stat-label">Fat</div></div>
-        </div>
-        <div class="modal-ingredients">
-          <div class="modal-section-title">🛒 Ingredients</div>
-          <div id="modal-ingredients-list"></div>
-        </div>
-        <div class="modal-steps">
-          <div class="modal-section-title">📋 Instructions</div>
-          <ol id="modal-steps-list"></ol>
-        </div>
-        <div class="modal-tip" id="modal-tip" style="display:none">
-          <strong>💡 Healthy Tip</strong>
-          <span id="modal-tip-text"></span>
-        </div>
-
-        <!-- Why It's Healthier — injected by JS -->
-        <div class="modal-why" id="modal-why" style="display:none">
-          <div class="modal-section-title">💚 Why It's Healthier</div>
-          <div class="modal-why-list" id="modal-why-list"></div>
-        </div>
-
-        <!-- Original vs. Our Version comparison table — injected by JS -->
-        <div class="modal-comparison" id="modal-comparison" style="display:none">
-          <div class="modal-section-title" style="margin-top:1.5rem">⚖️ Original vs. Our Version</div>
-          <table class="modal-table" id="modal-table">
-            <thead>
-              <tr>
-                <th>Original Version</th>
-                <th>Our Healthier Version</th>
-              </tr>
-            </thead>
-            <tbody id="modal-table-body"></tbody>
-          </table>
-        </div>
-
-      </div>
-    </div>
-  </div>
 
 
   <!-- ============================================================
@@ -686,201 +545,10 @@
   <script src="form-handlers.js"></script>
   <script src="nn-auth.js"></script>
   <script src="nn-cards.js"></script>
-  <script src="nn-finder.js"></script>
   <script>
 
-    /* ===========================================================
-       A. RECIPE DATA
-       Recipes are loaded from Supabase via the scripts above.
-       Card builders + modal live in nn-cards.js (shared with
-       all-recipes.html).
-    =========================================================== */
-
-    const FEATURED = [
-      "Chicken Biryani",
-      "Whole Wheat Veggie Pizza",
-      "Berry Smoothie Bowl",
-      "Strawberry Frozen Yogurt",
-      "Garlic Chicken Noodles",
-      "Avocado Toast with Egg",
-    ];
-
-
-    /* ===========================================================
-       B. RECIPE RENDERER
-       Reads the RECIPES array and builds the HTML for the grid.
-    =========================================================== */
-
-    /** Main render function — called when a diet type is selected */
-    function renderRecipes() {
-      try {
-        const grid = document.getElementById('recipe-grid');
-        if (!grid) return;
-
-        grid.innerHTML = '';
-
-        // Render the recipes in the selected collection. A recipe can belong
-        // to several, so this is a membership test rather than an equality
-        // check on `type` — nothing is moved or duplicated.
-        let count = 0;
-        RECIPES.forEach((r, i) => {
-          if (inCollection(r, currentTypeFilter)) {
-            const card = buildRecipeCard(r, i);
-            // Stamp collections here too, in case an older nn-cards.js is
-            // cached and didn't set them — otherwise filtering finds nothing.
-            if (!card.dataset.collections) {
-              card.dataset.collections = collectionsOf(r).join('|');
-            }
-            grid.appendChild(card);
-            count++;
-          }
-        });
-
-        // Pad with placeholder cards so the grid never looks empty
-        for (let i = count; i < 6; i++) {
-          grid.appendChild(buildPlaceholderCard());
-        }
-      } catch (e) {
-        console.error('Error in renderRecipes:', e);
-      }
-    }
-
-    /** Show or hide the "See all recipes" link based on search/filter state. */
-    function updateSeeMoreButton() {
-      const wrap = document.getElementById('see-more-wrap');
-      if (!wrap) return;
-      const query = document.getElementById('recipe-search').value.trim();
-      const hasExtras = document.querySelectorAll('#recipe-grid .extra-recipe').length > 0;
-      wrap.style.display = (hasExtras && currentFilter === 'all' && !query) ? '' : 'none';
-    }
-
-
-    /* ===========================================================
-       D. SEARCH & FILTER
-    =========================================================== */
-
-    let currentFilter = 'all';     // Active category filter
-    let currentTypeFilter = 'all'; // Selected collection: veg | non-veg | high-protein
-
-    /* Collections are worked out here rather than relying on nn-cards.js, so
-       the page still filters correctly if an older copy of that file is
-       served from cache after a partial deploy. */
-    const COLLECTION_NAMES = {
-      'veg': 'Vegetarian', 'non-veg': 'Non-Vegetarian', 'high-protein': 'High Protein',
-    };
-
-    /** Collections for a recipe: the stored array, or derived from its data. */
-    function collectionsOf(recipe) {
-      if (Array.isArray(recipe.collections) && recipe.collections.length) {
-        return recipe.collections;
-      }
-      const out = [recipe.type === 'non-veg' ? 'Non-Vegetarian' : 'Vegetarian'];
-      // High Protein: 15 g+ per serving AND either 20 g+ or 20%+ of calories.
-      const p = parseFloat(recipe.protein) || 0;
-      const kcal = Number(recipe.calories) || 0;
-      if (p >= 15 && (p >= 20 || (kcal > 0 && (p * 4) / kcal >= 0.20))) {
-        out.push('High Protein');
-      }
-      return out;
-    }
-
-    function inCollection(recipe, key) {
-      if (!key || key === 'all') return true;
-      return collectionsOf(recipe).indexOf(COLLECTION_NAMES[key] || key) !== -1;
-    }
-
-    function cardMatchesCollection(card, key) {
-      if (!key || key === 'all') return true;
-      const name = COLLECTION_NAMES[key] || key;
-      return ('|' + (card.dataset.collections || '') + '|').indexOf('|' + name + '|') !== -1;
-    }
-
-    /* Show how many recipes sit in the High Protein collection. They remain
-       listed under Vegetarian / Non-Vegetarian as well — this is a tag. */
-    function updateCollectionCounts() {
-      const el = document.getElementById('hp-count');
-      // RECIPES is declared with `let`, so it is not on window — read the
-      // binding directly or this silently does nothing.
-      if (!el || typeof RECIPES === 'undefined' || !Array.isArray(RECIPES)) return;
-      const n = RECIPES.filter(r => inCollection(r, 'high-protein')).length;
-      el.textContent = n ? n + ' recipes' : '';
-    }
-    window.addEventListener('recipesLoaded', updateCollectionCounts);
-
-    function showRecipesByType(type) {
-      try {
-        currentTypeFilter = type;
-
-        const selector = document.getElementById('diet-selector');
-        const view     = document.getElementById('recipes-view');
-        const backBtn  = document.getElementById('back-to-diet-wrap');
-
-        if (selector) selector.style.display = 'none';
-        if (view) {
-          view.style.display = 'block';
-          // Restart the slide-in animation each time the view is shown
-          view.classList.remove('slide-in');
-          void view.offsetWidth;
-          view.classList.add('slide-in');
-        }
-
-        renderRecipes();
-
-        if (backBtn) backBtn.style.display = 'block';
-      } catch (e) {
-        console.error('Error in showRecipesByType:', e);
-      }
-    }
-
-    function backToSelector() {
-      currentTypeFilter = 'all';
-      currentFilter = 'all';
-      const sel     = document.getElementById('diet-selector');
-      const backBtn = document.getElementById('back-to-diet-wrap');
-      sel.style.display = 'grid';
-      // Restart the slide-in animation for the selector on return
-      sel.classList.remove('slide-in');
-      void sel.offsetWidth;
-      sel.classList.add('slide-in');
-      document.getElementById('recipes-view').style.display = 'none';
-      if (backBtn) backBtn.style.display = 'none';
-      // Reset search and filters
-      document.getElementById('recipe-search').value = '';
-      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
-      document.querySelector('.pill[data-filter="all"]').classList.add('active');
-    }
-
-    // Alias for the back button
-    function resetDietSelection() { backToSelector(); }
-
-    function setFilter(btn, category) {
-      currentFilter = category;
-      document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      filterRecipes();
-    }
-
-    function filterRecipes() {
-      const query = document.getElementById('recipe-search').value.toLowerCase().trim();
-      const collapsed = currentFilter === 'all' && !query;
-
-      document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
-        if (card.classList.contains('placeholder')) {
-          card.style.display = query ? 'none' : '';
-          return;
-        }
-        const cat  = card.dataset.category || '';
-        const text = card.textContent.toLowerCase();
-        const matchCat  = currentFilter === 'all' || cat === currentFilter;
-        const matchType = cardMatchesCollection(card, currentTypeFilter);
-        const matchQ    = !query || text.includes(query);
-        let show = matchCat && matchType && matchQ;
-        if (show && collapsed && card.classList.contains('extra-recipe')) show = false;
-        card.style.display = show ? '' : 'none';
-      });
-
-      updateSeeMoreButton();
-    }
+    /* Recipe rendering, filtering and the collection chooser now live
+       in recipes.html. */
 
 
     /* ===========================================================

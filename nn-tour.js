@@ -17,8 +17,15 @@
     'index.html': [
       { sel: '.nav-logo', title: '👋 Welcome to Nourish N Narrate!', text: 'Quick tour? We turn your favorite comfort foods into healthier versions — let us show you around in 20 seconds.' },
       { sel: '.hero-actions', title: '🌿 Start here', text: 'Explore our healthy recipe collection, or scroll down to learn what we are all about.' },
-      { sel: '#diet-selector', title: '🍽️ Browse recipes', text: 'Pick Vegetarian or Non-Vegetarian to see our recipes. Every card has a "+ Track" button that logs the meal to your daily tracker.' },
+      { sel: '.nav-links a[href="recipes.html"]', title: '🍽️ Browse recipes', text: 'The Recipes tab opens our full collection \u2014 pick Vegetarian, Non-Vegetarian or High Protein, and every card has a "+ Track" button that logs the meal to your daily tracker.' },
       { sel: '.calc-banner', title: '🧮 Your personal plan', text: 'The Nutrition Calculator builds a daily calorie and macro plan just for you — and saves it to your free account.' },
+      { sel: '#theme-toggle', title: '🌙 One more thing', text: 'Prefer dark mode? Toggle it here. Enjoy the site!' },
+    ],
+    'recipes.html': [
+      { sel: '#diet-selector', title: '🍽️ Pick a collection', text: 'Choose Vegetarian, Non-Vegetarian or High Protein to see the matching recipes. A recipe can sit in more than one collection.' },
+      { sel: '#nn-finder', title: '🤖 AI Nutrition Assistant', text: 'Describe what you feel like \u2014 "quick high-protein dinner" \u2014 and it finds recipes that fit, then explains why.' },
+      { sel: '#nn-pantry', title: '🧅 Pantry Mode', text: 'List what you already have at home and we rank the recipes you can cook right now, plus a shopping list for the near misses.' },
+      { sel: '#nn-creator', title: '✨ AI Recipe Creator', text: 'No recipe fits? Give it your ingredients, time and calorie target and it writes you a brand-new one \u2014 with a shopping list. Saved separately from our tested recipes.' },
       { sel: '#theme-toggle', title: '🌙 One more thing', text: 'Prefer dark mode? Toggle it here. Enjoy the site!' },
     ],
     'calculator.html': [

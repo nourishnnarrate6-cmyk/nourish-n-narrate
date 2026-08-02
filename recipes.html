@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Recipes — Nourish N Narrate</title>
+  <meta name="description" content="Browse Nourish N Narrate recipes by collection, search with the AI assistant, or find what you can cook with Pantry Mode." />
+
+  <!-- Icons, theme colour and social preview -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  <!-- Installable web app. Status bar stays "default": the CSS defines
+       safe-area insets for left/right/bottom but not top, so a
+       translucent bar would slide the nav under the notch. -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="theme-color" content="#059669" media="(prefers-color-scheme: light)" />
+  <meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)" />
+  <meta name="color-scheme" content="light dark" />
+  <meta name="apple-mobile-web-app-title" content="Nourish N Narrate" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Nourish N Narrate" />
+  <meta property="og:title" content="Recipes — Nourish N Narrate" />
+  <meta property="og:description" content="Browse by collection, search with the AI assistant, or cook from what you already have." />
+  <meta name="twitter:card" content="summary" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Shared modern stylesheet (same design system as the home page) -->
+  <link rel="stylesheet" href="nn-modern.css" />
+
+  <style>
+    /* This page opens straight onto the recipes section, so it needs the
+       same clearance under the fixed navbar that other inner pages use. */
+    #recipes { padding-top: calc(var(--nav-h) + 2.5rem); }
+    @media (max-width: 560px) { #recipes { padding-top: calc(var(--nav-h) + 1.5rem); } }
+  </style>
+</head>
+<body data-view="recipes">
+
+  <!-- Loading screen -->
+  <div id="loading-screen" aria-hidden="true">
+    <div class="loader-logo">Nourish <span>N</span> Narrate</div>
+    <div class="loader-bar"></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="navbar">
+    <div class="nav-inner">
+      <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
+        <div class="leaf" aria-hidden="true">🌿</div>
+        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+      </a>
+      <ul class="nav-links" role="list">
+        <li><a href="index.html#home">Home</a></li>
+        <li><a href="recipes.html" class="active">Recipes</a></li>
+        <li><a href="calculator.html">Calculator</a></li>
+        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
+        <li><a href="donate.html">Donate</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
+        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile menu (same tabs as the desktop nav) -->
+  <div class="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
+    <a href="index.html#home">Home</a>
+    <a href="recipes.html">Recipes</a>
+    <a href="calculator.html">Calculator</a>
+    <a href="tracker.html">Tracker</a>
+    <a href="profile.html">Profile</a>
+    <a href="donate.html">💚 Donate</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+  </div>
+
+
+  <section id="recipes">
+    <div class="container">
+
+      <!-- Landing point for the ↑ side rail -->
+      <div class="recipes-header" data-rail-top>
+        <div class="reveal">
+          <!-- ✏️ Section label and title -->
+          <span class="section-label">Recipes</span>
+          <h2 class="section-title">Healthy Twists on Classics</h2>
+          <div class="divider"></div>
+        </div>
+      </div>
+
+      <!-- Diet Type Selector — two big buttons -->
+      <div class="diet-selector reveal reveal-scale" id="diet-selector">
+        <button class="diet-btn veg-btn" onclick="showRecipesByType('veg')">
+          <div class="diet-icon" aria-hidden="true">🌱</div>
+          <div class="diet-label">Vegetarian</div>
+        </button>
+        <button class="diet-btn non-veg-btn" onclick="showRecipesByType('non-veg')">
+          <div class="diet-icon" aria-hidden="true">🍗</div>
+          <div class="diet-label">Non-Vegetarian</div>
+        </button>
+        <!-- Additional collection — recipes here also stay in Vegetarian
+             or Non-Vegetarian above; this is a tag, not a category. -->
+        <button class="diet-btn high-protein-btn diet-btn-wide" onclick="showRecipesByType('high-protein')">
+          <div class="diet-icon" aria-hidden="true">💪</div>
+          <div class="diet-label">High Protein</div>
+          <div class="diet-sub" id="hp-count"></div>
+        </button>
+        <a href="all-recipes.html" class="diet-see-all see-more-btn">📖 Show All Recipes <span aria-hidden="true">→</span></a>
+
+        <!-- The AI tools. The first two sit side by side on a computer and
+             stack on a phone; the creator runs full width beneath them.
+             They live inside the selector so they show and hide along with
+             the collection chooser. -->
+        <div class="nn-tools">
+          <!-- Searches only the recipes already in our database. -->
+          <div class="nn-finder" id="nn-finder"></div>
+
+          <!-- Ranks recipes by what the visitor already has at home. -->
+          <div class="nn-pantry" id="nn-pantry"></div>
+
+          <!-- Writes a new recipe. Output is labelled AI-generated and is
+               saved to the private ai_recipes table — never to the curated
+               recipe database the two tools above read from. -->
+          <div class="nn-creator" id="nn-creator"></div>
+        </div>
+      </div>
+
+      <!-- Recipes View — hidden until a diet type is selected -->
+      <div id="recipes-view" style="display: none;">
+        <div style="margin-bottom: 2rem;">
+          <button class="see-more-btn btn-back" onclick="backToSelector()">← Back to Diet Selection</button>
+        </div>
+
+        <!-- Search bar -->
+        <div class="search-wrap">
+          <span class="search-icon" aria-hidden="true">🔍</span>
+          <input
+            type="search"
+            id="recipe-search"
+            placeholder="Search recipes…"
+            aria-label="Search recipes"
+            oninput="filterRecipes()"
+          />
+        </div>
+
+        <!-- Category filters -->
+        <div class="filter-pills" role="group" aria-label="Filter by category">
+          <button class="pill active" data-filter="all"       onclick="setFilter(this,'all')">All</button>
+          <button class="pill"        data-filter="breakfast" onclick="setFilter(this,'breakfast')">Breakfast</button>
+          <button class="pill"        data-filter="lunch"     onclick="setFilter(this,'lunch')">Lunch</button>
+          <button class="pill"        data-filter="dinner"    onclick="setFilter(this,'dinner')">Dinner</button>
+          <button class="pill"        data-filter="snack"     onclick="setFilter(this,'snack')">Snacks</button>
+          <button class="pill"        data-filter="dessert"   onclick="setFilter(this,'dessert')">Desserts</button>
+        </div>
+
+        <!-- Recipe cards are injected here by renderRecipes() -->
+        <div class="recipe-grid" id="recipe-grid"></div>
+
+        <!-- Back to Diet Selection button (shown after recipes load) -->
+        <div class="text-center" id="back-to-diet-wrap" style="margin-top:2.25rem; display:none;">
+          <button onclick="resetDietSelection()" class="see-more-btn">← Back to Diet Selection</button>
+        </div>
+      </div>
+
+      <!-- See all / show fewer toggle (managed by JS) -->
+      <div class="text-center" id="see-more-wrap" style="margin-top:2.25rem; display:none;">
+        <a href="all-recipes.html" id="see-more-btn" class="see-more-btn">See all recipes →</a>
+      </div>
+
+      <!-- Rate Us — also the landing point for the ↓ side rail -->
+      <div class="text-center reveal" data-rail-bottom style="margin-top:3rem;">
+        <p class="rate-note">Enjoyed our recipes? Let us know what you think!</p>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLScGB0JQA7vv-c65fRwx55KJVPVipxNZvfVxurwDjiCBD-AezQ/viewform?usp=publish-editor"
+           target="_blank" rel="noopener noreferrer" class="btn-rate">
+          ⭐ Rate Our Project &amp; Foods
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal" id="recipe-modal">
+      <button class="modal-close" onclick="closeModal()" aria-label="Close recipe">✕</button>
+      <div id="modal-header"></div><!-- Image or emoji header injected here -->
+      <div class="modal-body">
+        <div class="modal-category" id="modal-category"></div>
+        <h2  class="modal-title"    id="modal-title"></h2>
+        <p   class="modal-desc"     id="modal-desc"></p>
+        <div class="modal-stats">
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-time"></div><div class="modal-stat-label">Prep &amp; Cook</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-servings"></div><div class="modal-stat-label">Servings</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-calories"></div><div class="modal-stat-label">Per Serving</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-protein"></div><div class="modal-stat-label">Protein</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-fiber"></div><div class="modal-stat-label">Fiber</div></div>
+          <div class="modal-stat"><div class="modal-stat-val" id="modal-fat"></div><div class="modal-stat-label">Fat</div></div>
+        </div>
+        <div class="modal-ingredients">
+          <div class="modal-section-title">🛒 Ingredients</div>
+          <div id="modal-ingredients-list"></div>
+        </div>
+        <div class="modal-steps">
+          <div class="modal-section-title">📋 Instructions</div>
+          <ol id="modal-steps-list"></ol>
+        </div>
+        <div class="modal-tip" id="modal-tip" style="display:none">
+          <strong>💡 Healthy Tip</strong>
+          <span id="modal-tip-text"></span>
+        </div>
+
+        <!-- Why It's Healthier — injected by JS -->
+        <div class="modal-why" id="modal-why" style="display:none">
+          <div class="modal-section-title">💚 Why It's Healthier</div>
+          <div class="modal-why-list" id="modal-why-list"></div>
+        </div>
+
+        <!-- Original vs. Our Version comparison table — injected by JS -->
+        <div class="modal-comparison" id="modal-comparison" style="display:none">
+          <div class="modal-section-title" style="margin-top:1.5rem">⚖️ Original vs. Our Version</div>
+          <table class="modal-table" id="modal-table">
+            <thead>
+              <tr>
+                <th>Original Version</th>
+                <th>Our Healthier Version</th>
+              </tr>
+            </thead>
+            <tbody id="modal-table-body"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="foot-logo">Nourish <span>N</span> Narrate</div>
+    <p>&copy; 2026 Nourish N Narrate. Inspiring healthier choices through delicious alternatives.</p>
+    <div class="foot-social">
+      <a href="https://www.youtube.com/channel/UCIHTdS000vhikhav7c141bA" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on YouTube">
+        <svg viewBox="0 0 24 24" fill="#FF0000" aria-hidden="true"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.12-2.14C19.5 3.55 12 3.55 12 3.55s-7.5 0-9.38.51A3.02 3.02 0 0 0 .5 6.2C0 8.08 0 12 0 12s0 3.92.5 5.8a3.02 3.02 0 0 0 2.12 2.14c1.88.51 9.38.51 9.38.51s7.5 0 9.38-.51a3.02 3.02 0 0 0 2.12-2.14C24 15.92 24 12 24 12s0-3.92-.5-5.8ZM9.6 15.6V8.4l6.2 3.6-6.2 3.6Z"/></svg>
+        <span>YouTube</span>
+      </a>
+      <a href="https://www.instagram.com/nourishnnarrate/" target="_blank" rel="noopener noreferrer" aria-label="Nourish N Narrate on Instagram">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        <span>Instagram</span>
+      </a>
+    </div>
+    <p class="foot-note">Made with &#128154; by students, for everyone.</p>
+  </footer>
+
+  <button id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top" title="Back to top">&#8593;</button>
+
+  <!-- Supabase Integration -->
+  <script src="nn-config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-client.js"></script>
+  <script src="recipes-data-supabase.js"></script>
+  <script src="form-handlers.js"></script>
+  <script src="nn-auth.js"></script>
+  <script src="nn-cards.js"></script>
+  <script src="nn-finder.js"></script>
+  <script src="nn-pantry.js"></script>
+  <script src="nn-creator.js"></script>
+
+  <script>
+/* ===========================================================
+       A. RECIPE DATA
+       Recipes are loaded from Supabase via the scripts above.
+       Card builders + modal live in nn-cards.js (shared with
+       all-recipes.html).
+    =========================================================== */
+
+    const FEATURED = [
+      "Chicken Biryani",
+      "Whole Wheat Veggie Pizza",
+      "Berry Smoothie Bowl",
+      "Strawberry Frozen Yogurt",
+      "Garlic Chicken Noodles",
+      "Avocado Toast with Egg",
+    ];
+
+
+    /* ===========================================================
+       B. RECIPE RENDERER
+       Reads the RECIPES array and builds the HTML for the grid.
+    =========================================================== */
+
+    /** Main render function — called when a diet type is selected */
+    function renderRecipes() {
+      try {
+        const grid = document.getElementById('recipe-grid');
+        if (!grid) return;
+
+        grid.innerHTML = '';
+
+        // Render the recipes in the selected collection. A recipe can belong
+        // to several, so this is a membership test rather than an equality
+        // check on `type` — nothing is moved or duplicated.
+        let count = 0;
+        RECIPES.forEach((r, i) => {
+          if (inCollection(r, currentTypeFilter)) {
+            const card = buildRecipeCard(r, i);
+            // Stamp collections here too, in case an older nn-cards.js is
+            // cached and didn't set them — otherwise filtering finds nothing.
+            if (!card.dataset.collections) {
+              card.dataset.collections = collectionsOf(r).join('|');
+            }
+            grid.appendChild(card);
+            count++;
+          }
+        });
+
+        // Pad with placeholder cards so the grid never looks empty
+        for (let i = count; i < 6; i++) {
+          grid.appendChild(buildPlaceholderCard());
+        }
+      } catch (e) {
+        console.error('Error in renderRecipes:', e);
+      }
+    }
+
+    /** Show or hide the "See all recipes" link based on search/filter state. */
+    function updateSeeMoreButton() {
+      const wrap = document.getElementById('see-more-wrap');
+      if (!wrap) return;
+      const query = document.getElementById('recipe-search').value.trim();
+      const hasExtras = document.querySelectorAll('#recipe-grid .extra-recipe').length > 0;
+      wrap.style.display = (hasExtras && currentFilter === 'all' && !query) ? '' : 'none';
+    }
+
+
+    /* ===========================================================
+       D. SEARCH & FILTER
+    =========================================================== */
+
+    let currentFilter = 'all';     // Active category filter
+    let currentTypeFilter = 'all'; // Selected collection: veg | non-veg | high-protein
+
+    /* Collections are worked out here rather than relying on nn-cards.js, so
+       the page still filters correctly if an older copy of that file is
+       served from cache after a partial deploy. */
+    const COLLECTION_NAMES = {
+      'veg': 'Vegetarian', 'non-veg': 'Non-Vegetarian', 'high-protein': 'High Protein',
+    };
+
+    /** Collections for a recipe: the stored array, or derived from its data. */
+    function collectionsOf(recipe) {
+      if (Array.isArray(recipe.collections) && recipe.collections.length) {
+        return recipe.collections;
+      }
+      const out = [recipe.type === 'non-veg' ? 'Non-Vegetarian' : 'Vegetarian'];
+      // High Protein: 15 g+ per serving AND either 20 g+ or 20%+ of calories.
+      const p = parseFloat(recipe.protein) || 0;
+      const kcal = Number(recipe.calories) || 0;
+      if (p >= 15 && (p >= 20 || (kcal > 0 && (p * 4) / kcal >= 0.20))) {
+        out.push('High Protein');
+      }
+      return out;
+    }
+
+    function inCollection(recipe, key) {
+      if (!key || key === 'all') return true;
+      return collectionsOf(recipe).indexOf(COLLECTION_NAMES[key] || key) !== -1;
+    }
+
+    function cardMatchesCollection(card, key) {
+      if (!key || key === 'all') return true;
+      const name = COLLECTION_NAMES[key] || key;
+      return ('|' + (card.dataset.collections || '') + '|').indexOf('|' + name + '|') !== -1;
+    }
+
+    /* Show how many recipes sit in the High Protein collection. They remain
+       listed under Vegetarian / Non-Vegetarian as well — this is a tag. */
+    function updateCollectionCounts() {
+      const el = document.getElementById('hp-count');
+      // RECIPES is declared with `let`, so it is not on window — read the
+      // binding directly or this silently does nothing.
+      if (!el || typeof RECIPES === 'undefined' || !Array.isArray(RECIPES)) return;
+      const n = RECIPES.filter(r => inCollection(r, 'high-protein')).length;
+      el.textContent = n ? n + ' recipes' : '';
+    }
+    window.addEventListener('recipesLoaded', updateCollectionCounts);
+
+    function showRecipesByType(type) {
+      try {
+        currentTypeFilter = type;
+
+        const selector = document.getElementById('diet-selector');
+        const view     = document.getElementById('recipes-view');
+        const backBtn  = document.getElementById('back-to-diet-wrap');
+
+        if (selector) selector.style.display = 'none';
+        if (view) {
+          view.style.display = 'block';
+          // Restart the slide-in animation each time the view is shown
+          view.classList.remove('slide-in');
+          void view.offsetWidth;
+          view.classList.add('slide-in');
+        }
+
+        renderRecipes();
+
+        if (backBtn) backBtn.style.display = 'block';
+      } catch (e) {
+        console.error('Error in showRecipesByType:', e);
+      }
+    }
+
+    function backToSelector() {
+      currentTypeFilter = 'all';
+      currentFilter = 'all';
+      const sel     = document.getElementById('diet-selector');
+      const backBtn = document.getElementById('back-to-diet-wrap');
+      sel.style.display = 'grid';
+      // Restart the slide-in animation for the selector on return
+      sel.classList.remove('slide-in');
+      void sel.offsetWidth;
+      sel.classList.add('slide-in');
+      document.getElementById('recipes-view').style.display = 'none';
+      if (backBtn) backBtn.style.display = 'none';
+      // Reset search and filters
+      document.getElementById('recipe-search').value = '';
+      document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+      document.querySelector('.pill[data-filter="all"]').classList.add('active');
+    }
+
+    // Alias for the back button
+    function resetDietSelection() { backToSelector(); }
+
+    function setFilter(btn, category) {
+      currentFilter = category;
+      document.querySelectorAll('.filter-pills .pill').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      filterRecipes();
+    }
+
+    function filterRecipes() {
+      const query = document.getElementById('recipe-search').value.toLowerCase().trim();
+      const collapsed = currentFilter === 'all' && !query;
+
+      document.querySelectorAll('#recipe-grid .recipe-card').forEach(card => {
+        if (card.classList.contains('placeholder')) {
+          card.style.display = query ? 'none' : '';
+          return;
+        }
+        const cat  = card.dataset.category || '';
+        const text = card.textContent.toLowerCase();
+        const matchCat  = currentFilter === 'all' || cat === currentFilter;
+        const matchType = cardMatchesCollection(card, currentTypeFilter);
+        const matchQ    = !query || text.includes(query);
+        let show = matchCat && matchType && matchQ;
+        if (show && collapsed && card.classList.contains('extra-recipe')) show = false;
+        card.style.display = show ? '' : 'none';
+      });
+
+      updateSeeMoreButton();
+    }
+
+
+    
+    /* ---------- Page chrome (theme + navbar) ---------- */
+    const htmlEl = document.documentElement;
+    const themeBtn = document.getElementById('theme-toggle');
+    const savedTheme = localStorage.getItem('nnTheme') || 'light';
+    htmlEl.setAttribute('data-theme', savedTheme);
+    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+    themeBtn.addEventListener('click', () => {
+      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      htmlEl.setAttribute('data-theme', next);
+      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+      localStorage.setItem('nnTheme', next);
+    });
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    /* Signed-in visitors get their Tracker and Profile tabs here too. */
+    if (window.NNAuth) {
+      NNAuth.onReady(async () => {
+        const session = await NNAuth.getSession();
+        if (!session) return;
+        ['nav-tracker-li', 'nav-profile-li'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.style.display = '';
+        });
+      });
+    }
+
+    /* Reveal-on-scroll parity with the rest of the site. */
+    document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
+
+    /* Recipes arrive asynchronously — draw the counts when they land. */
+    window.addEventListener('recipesLoaded', () => {
+      updateCollectionCounts();
+      const loader = document.getElementById('loading-screen');
+      if (loader) loader.classList.add('hidden');
+    });
+    window.addEventListener('load', () => {
+      setTimeout(() => {
+        const loader = document.getElementById('loading-screen');
+        if (loader) loader.classList.add('hidden');
+      }, 900);
+    });
+  </script>
+
+  <script src="nn-premium.js"></script>
+  <script src="nn-tour.js"></script>
+
+  <!-- PWA: register the service worker (offline support + installability) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.js').catch(function (err) {
+          console.warn('Service worker registration failed:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

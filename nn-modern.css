@@ -900,10 +900,35 @@
 
   .diet-see-all { grid-column: 1 / -1; justify-self: center; margin-top: 0.75rem; }
 
+  /* ---------- The two AI tools ----------
+     The chooser grid above is only two 280px tracks wide, so this wrapper
+     is given an explicit width and centred: that lets the tools use the
+     full container instead of being squeezed into a 584px cell. */
+  .nn-tools {
+    grid-column: 1 / -1;
+    justify-self: center;
+    width: min(1140px, calc(100vw - 2.5rem));
+    margin-top: 2.25rem;
+    display: grid;
+    grid-template-columns: 1fr;
+    align-items: start;
+    gap: 1.5rem;
+    text-align: left;
+  }
+  /* Side by side once there is room for both to breathe. */
+  @media (min-width: 940px) {
+    .nn-tools { grid-template-columns: 1fr 1fr; }
+    /* Half the width means the default 290px card track would drop to a
+       single very tall column, so tighten it to keep results two-up. */
+    .nn-tools .nnf-results {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .nn-tools .nnf-results .recipe-card { font-size: 0.94rem; }
+  }
+
   /* ---------- AI Recipe Finder ---------- */
   .nn-finder {
-    grid-column: 1 / -1;
-    margin-top: 2.25rem;
     padding: 2rem 1.75rem;
     text-align: left;
     background: var(--surface);
@@ -990,6 +1015,246 @@
     padding: .22rem .6rem;
   }
 
+  /* Mic — voice search where the browser supports it */
+  .nnf-mic {
+    flex: 0 0 auto;
+    width: 44px; height: 44px;
+    display: grid; place-items: center;
+    font-size: 1rem;
+    color: var(--text-muted); background: var(--surface-2);
+    border: 1.5px solid var(--border); border-radius: 50%;
+    cursor: pointer;
+    transition: color .25s ease, border-color .25s ease, transform .25s ease;
+  }
+  .nnf-mic:hover { color: var(--green); border-color: var(--green); }
+  .nnf-mic.listening { color: #fff; background: var(--grad-green); border-color: transparent; animation: nnfPulse 1.2s ease-in-out infinite; }
+  @keyframes nnfPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+  .nnf-status.thinking::after {
+    content: ''; display: inline-block;
+    width: 1.1em; text-align: left;
+    animation: nnfDots 1.2s steps(4, end) infinite;
+  }
+  @keyframes nnfDots { 0% { content: ''; } 25% { content: '.'; } 50% { content: '..'; } 75% { content: '...'; } }
+
+  /* Recent + related-search rows */
+  .nnf-recent, .nnf-suggest {
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: .45rem; max-width: 680px; margin: 1rem auto 0;
+  }
+  .nnf-suggest:empty { display: none; }
+  .nnf-recent-label {
+    font-size: .74rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--text-muted); margin-right: .2rem;
+  }
+  .nnf-chip-ghost { background: transparent; font-weight: 500; }
+  .nnf-chip-solid {
+    color: #fff; background: var(--grad-green); border-color: transparent; font-weight: 700;
+  }
+  .nnf-chip-solid:hover { color: #fff; background: var(--grad-green); opacity: .9; }
+
+  /* Follow-up question */
+  .nnf-followup {
+    max-width: 620px; margin: 1.2rem auto 0;
+    padding: 1.1rem 1.3rem;
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.22);
+    border-radius: var(--radius-lg);
+    text-align: center;
+    animation: fadeInUp .4s var(--ease-out) both;
+  }
+  .nnf-followup-q { margin: 0 0 .8rem; font-size: .97rem; font-weight: 600; color: var(--green-deep); }
+  .nnf-followup-row { display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem; }
+
+  /* Skeleton cards while thinking */
+  .nnf-skel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  .nnf-skel-img { height: 160px; }
+  .nnf-skel-body { padding: 1.1rem; }
+  .nnf-skel-line { height: 12px; border-radius: 6px; margin-bottom: .6rem; }
+  .nnf-skel-line.short { width: 60%; }
+  .nnf-skel-chips { display: flex; gap: .4rem; margin-top: .9rem; }
+  .nnf-skel-chips span { height: 18px; width: 54px; border-radius: 999px; }
+  .nnf-skel-img, .nnf-skel-line, .nnf-skel-chips span {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--border) 37%, var(--surface-2) 63%);
+    background-size: 400% 100%;
+    animation: nnfShimmer 1.3s ease-in-out infinite;
+  }
+  @keyframes nnfShimmer { 0% { background-position: 100% 50%; } 100% { background-position: 0 50%; } }
+
+  /* Results ease in rather than snapping */
+  .nnf-results .nnf-in { animation: fadeInUp .45s var(--ease-out) both; }
+
+  /* ---------- Pantry Mode ---------- */
+  .nn-pantry {
+    padding: 2rem 1.75rem;
+    text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  .nnp-inputwrap { position: relative; max-width: 680px; margin: 0 auto; }
+
+  /* Ingredient suggestions */
+  .nnp-suggest {
+    position: absolute; left: 0; right: 0; top: calc(100% + .35rem);
+    z-index: 40;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 12px);
+    box-shadow: var(--shadow-md, 0 16px 40px rgba(10,18,30,.12));
+    overflow: hidden;
+  }
+  .nnp-suggest-item {
+    display: block; width: 100%; text-align: left;
+    padding: .65rem 1rem;
+    font-family: inherit; font-size: .92rem; color: var(--text);
+    background: transparent; border: none; cursor: pointer;
+  }
+  .nnp-suggest-item:hover,
+  .nnp-suggest-item.active { background: var(--green-pale); color: var(--green-deep); }
+  .nnp-suggest { max-height: 260px; overflow-y: auto; }
+
+  /* A long pasted ingredient must wrap rather than stretch the chip row */
+  .nnp-chip-name { overflow-wrap: anywhere; }
+
+  /* Pantry chips */
+  .nnp-chips {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: .5rem;
+    max-width: 680px; margin: 1.1rem auto 0;
+  }
+  .nnp-chip {
+    display: inline-flex; align-items: center; gap: .45rem;
+    padding: .42rem .5rem .42rem .8rem;
+    font-size: .88rem; font-weight: 600; color: var(--green-deep);
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.25);
+    border-radius: var(--radius-full);
+    animation: nnpPop .28s var(--ease-spring) both;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  .nnp-chip.leaving { opacity: 0; transform: scale(.8); }
+  .nnp-chip-emoji { font-size: 1rem; line-height: 1; }
+  .nnp-chip-x {
+    width: 20px; height: 20px; display: grid; place-items: center;
+    font-size: .68rem; color: var(--green-deep);
+    background: rgba(5, 150, 105, 0.14);
+    border: none; border-radius: 50%; cursor: pointer;
+    transition: background .2s ease, transform .2s ease;
+  }
+  .nnp-chip-x:hover { background: var(--green); color: #fff; transform: rotate(90deg); }
+  @keyframes nnpPop { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: scale(1); } }
+
+  /* Match strip under each recipe card */
+  .nnp-match { padding: 0 1.1rem 1.1rem; }
+  .nnp-match-all {
+    margin: 0; padding: .6rem .8rem;
+    font-size: .88rem; font-weight: 700; text-align: center;
+    color: var(--green-deep); background: var(--green-pale);
+    border-radius: var(--radius-full);
+  }
+  .nnp-match-head { margin: 0 0 .5rem; font-size: .85rem; font-weight: 700; color: var(--ink); }
+  .nnp-bar {
+    height: 7px; background: var(--surface-2);
+    border-radius: var(--radius-full); overflow: hidden; margin-bottom: .55rem;
+  }
+  .nnp-bar-fill {
+    height: 100%; background: var(--grad-green);
+    border-radius: var(--radius-full);
+    animation: nnpGrow .7s var(--ease-out) both;
+  }
+  @keyframes nnpGrow { from { width: 0 !important; } }
+  .nnp-match-missing { margin: 0 0 .7rem; font-size: .82rem; line-height: 1.5; color: var(--text-muted); }
+
+  /* Have vs need, told apart by colour and icon rather than position */
+  .nnp-pills { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: .75rem; }
+  .nnp-pill {
+    font-size: .73rem; font-weight: 700;
+    padding: .2rem .55rem; border-radius: var(--radius-full);
+  }
+  .nnp-pill-have { color: var(--green-deep); background: var(--green-pale); }
+  .nnp-pill-need {
+    color: var(--orange); background: var(--orange-pale);
+    border: 1px dashed rgba(234, 88, 12, 0.35);
+  }
+  [data-theme="dark"] .nnp-pill-have { color: var(--green-light); background: rgba(52,211,153,.12); }
+  [data-theme="dark"] .nnp-pill-need { color: #fdba74; background: rgba(234,88,12,.14); }
+
+  /* Auto-complete: how many recipes use this ingredient */
+  .nnp-suggest-item { display: flex; align-items: center; justify-content: space-between; }
+  .nnp-suggest-uses { font-size: .72rem; color: var(--text-muted); margin-left: 1rem; }
+  .nnp-list-btn {
+    width: 100%; padding: .55rem 1rem;
+    font-family: inherit; font-size: .84rem; font-weight: 700;
+    color: var(--orange); background: var(--orange-pale);
+    border: 1px solid rgba(234, 88, 12, 0.28);
+    border-radius: var(--radius-full); cursor: pointer;
+    transition: background .2s ease, color .2s ease;
+  }
+  .nnp-list-btn:hover { color: #fff; background: var(--orange); }
+
+  /* Shopping list */
+  .nnp-modal-overlay {
+    position: fixed; inset: 0; z-index: 1100;
+    display: flex; align-items: center; justify-content: center; padding: 1.25rem;
+    background: rgba(10, 18, 30, 0.6);
+    -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: 0; visibility: hidden;
+    transition: opacity .3s ease, visibility .3s ease;
+  }
+  .nnp-modal-overlay.open { opacity: 1; visibility: visible; }
+  .nnp-modal {
+    position: relative; width: min(420px, 100%);
+    padding: 1.9rem 1.6rem 1.5rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 30px 80px rgba(10, 18, 30, 0.4);
+    transform: translateY(16px) scale(.97);
+    transition: transform .35s var(--ease-out);
+  }
+  .nnp-modal-overlay.open .nnp-modal { transform: none; }
+  .nnp-modal-x {
+    position: absolute; top: .8rem; right: .8rem;
+    width: 32px; height: 32px; display: grid; place-items: center;
+    font-size: .8rem; color: var(--ink);
+    background: var(--surface-2); border: 1px solid var(--border);
+    border-radius: 50%; cursor: pointer;
+    transition: transform .3s var(--ease-spring);
+  }
+  .nnp-modal-x:hover { transform: rotate(90deg); }
+  .nnp-modal-title { font-family: var(--font-display); font-size: 1.15rem; color: var(--ink); margin-bottom: .2rem; }
+  .nnp-modal-sub {
+    margin: 0 0 .8rem; font-size: .78rem; font-weight: 700;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--text-muted);
+  }
+  .nnp-list { list-style: none; padding: 0; margin: 0 0 1rem; }
+  .nnp-list li {
+    display: flex; align-items: center; gap: .65rem;
+    padding: .5rem 0; border-bottom: 1px solid var(--border);
+    font-size: .95rem; color: var(--text);
+  }
+  .nnp-list li:last-child { border-bottom: none; }
+  .nnp-list input { width: 17px; height: 17px; accent-color: var(--green); cursor: pointer; }
+  .nnp-list label { cursor: pointer; }
+  .nnp-list input:checked + label { color: var(--text-muted); text-decoration: line-through; }
+  .nnp-modal-note { margin: 0 0 1.1rem; font-size: .78rem; line-height: 1.5; color: var(--text-muted); }
+  .nnp-modal-actions { display: flex; gap: .5rem; justify-content: center; }
+
+  [data-theme="dark"] .nnp-chip { background: rgba(52, 211, 153, 0.12); color: var(--green-light); }
+  [data-theme="dark"] .nnp-match-all { background: rgba(52, 211, 153, 0.12); color: var(--green-light); }
+
+  @media (max-width: 560px) {
+    .nn-pantry { padding: 1.5rem 1.1rem; }
+    .nnp-chips { justify-content: flex-start; }
+    .nnp-modal { padding: 1.6rem 1.1rem 1.2rem; }
+  }
+
   .nnf-foot { text-align: center; }
   .nnf-clear {
     margin-top: 1.3rem;
@@ -1006,10 +1271,323 @@
 
   @media (max-width: 560px) {
     .nn-finder { padding: 1.5rem 1.1rem; }
-    .nnf-bar { flex-direction: column; }
-    .nnf-bar input { width: 100%; }
-    .nnf-go { width: 100%; }
+    .nnf-bar { flex-wrap: wrap; }
+    .nnf-bar input { flex: 1 1 100%; order: 1; }
+    .nnf-mic { order: 2; }
+    .nnf-go { order: 3; flex: 1; }
     .nnf-icon { top: 1rem; }
+    .nnf-followup { padding: 1rem; }
+    .nnf-recent, .nnf-suggest { justify-content: flex-start; }
+  }
+
+  /* ================================================================
+     AI RECIPE CREATOR
+
+     Shares the finder's shell (.nnf-head, .nnf-badge, .nnf-bar,
+     .nnf-chip, .nnf-go) so the three tools read as one family. Only
+     the pieces the creator adds — the settings grid and the generated
+     recipe sheet — are defined here.
+  ================================================================ */
+  .nn-creator {
+    grid-column: 1 / -1;               /* full width beneath the two-up tools */
+    padding: 2.25rem 2rem;
+    text-align: left;
+    /* A quiet gradient wash marks this as the flagship of the three without
+       shouting over the recipe cards below it. */
+    background:
+      radial-gradient(600px 220px at 92% 0%, rgba(234, 88, 12, 0.05), transparent 70%),
+      radial-gradient(520px 240px at 4% 100%, rgba(5, 150, 105, 0.06), transparent 70%),
+      var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* ---------- Settings grid ---------- */
+  .nnc-form {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  @media (min-width: 720px) {
+    .nnc-form { grid-template-columns: 1fr 1fr; }
+    .nnc-field-wide { grid-column: 1 / -1; }
+  }
+
+  .nnc-field { min-width: 0; }
+  .nnc-label {
+    display: flex; align-items: baseline; justify-content: space-between; gap: .75rem;
+    margin-bottom: .55rem;
+    font-size: .8rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .nnc-value {
+    font-size: .85rem; font-weight: 700; letter-spacing: 0;
+    text-transform: none; color: var(--green);
+  }
+  .nnc-optional { color: var(--text-muted); font-weight: 500; font-style: italic; }
+
+  /* The shared search bar, but left-aligned and full width in this context. */
+  .nnc-bar { max-width: none; margin: 0 0 .7rem; }
+  .nnc-bar input { padding-left: 2.6rem; }
+
+  .nnc-pills { justify-content: flex-start; gap: .45rem; }
+  .nnc-opt { padding: .5rem 1rem; }
+  .nnc-opt.active {
+    color: #fff; background: var(--grad-green);
+    border-color: transparent; box-shadow: var(--shadow-sm);
+  }
+  .nnc-opt.active:hover { color: #fff; background: var(--grad-green); }
+  .nnc-pantry { margin-top: .1rem; }
+
+  .nnc-sliders {
+    grid-column: 1 / -1;
+    display: grid; gap: 1.1rem 1.75rem;
+    grid-template-columns: 1fr;
+    padding: 1.25rem 1.35rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+  }
+  @media (min-width: 720px) { .nnc-sliders { grid-template-columns: repeat(3, 1fr); } }
+
+  .nnc-range {
+    -webkit-appearance: none; appearance: none;
+    width: 100%; height: 6px;
+    background: var(--border-strong);
+    border-radius: var(--radius-full);
+    outline: none; cursor: pointer;
+  }
+  .nnc-range::-webkit-slider-thumb {
+    -webkit-appearance: none; appearance: none;
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--grad-green);
+    border: 2px solid var(--surface);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: transform .2s var(--ease-spring);
+  }
+  .nnc-range::-webkit-slider-thumb:hover { transform: scale(1.15); }
+  .nnc-range::-moz-range-thumb {
+    width: 18px; height: 18px; border-radius: 50%;
+    background: var(--green); border: 2px solid var(--surface);
+    box-shadow: var(--shadow-sm); cursor: pointer;
+  }
+  .nnc-range:focus-visible { box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.18); }
+
+  .nnc-go-row { text-align: center; }
+  .nnc-generate { padding: 1rem 2.6rem; font-size: 1rem; }
+  .nnc-generate:disabled { opacity: .65; cursor: progress; transform: none; }
+
+  /* ---------- Generated recipe sheet ---------- */
+  .nnc-result:empty { display: none; }
+  .nnc-result.show {
+    margin-top: 1.6rem;
+    padding: 1.75rem 1.6rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    animation: fadeInUp .45s var(--ease-out) both;
+  }
+
+  .nnc-rx-head { display: flex; gap: 1.1rem; align-items: flex-start; margin-bottom: 1.3rem; }
+  .nnc-rx-emoji {
+    flex: 0 0 auto;
+    width: 64px; height: 64px;
+    display: grid; place-items: center;
+    font-size: 2rem;
+    background: var(--green-pale);
+    border: 1px solid rgba(5, 150, 105, 0.15);
+    border-radius: 20px;
+  }
+  .nnc-rx-headtext { flex: 1; min-width: 0; }
+  /* The label the whole feature turns on — always visible above the title. */
+  .nnc-badge {
+    display: inline-block; margin-bottom: .5rem;
+    padding: .3rem .8rem;
+    font-size: .72rem; font-weight: 700; letter-spacing: .05em;
+    color: #fff; background: var(--grad-green);
+    border-radius: var(--radius-full);
+  }
+  .nnc-rx-title {
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 3.6vw, 1.75rem);
+    line-height: 1.2; color: var(--ink); margin: 0 0 .35rem;
+  }
+  .nnc-rx-desc { margin: 0 0 .6rem; font-size: .95rem; line-height: 1.6; color: var(--text); }
+  .nnc-rx-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
+  .nnc-tag {
+    font-size: .72rem; font-weight: 700;
+    color: var(--text-muted); background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    padding: .2rem .65rem;
+  }
+
+  .nnc-stats {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: .6rem;
+    margin-bottom: .75rem;
+  }
+  .nnc-stat {
+    padding: .8rem .5rem; text-align: center;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 12px);
+  }
+  .nnc-stat-val { font-size: 1rem; font-weight: 700; color: var(--ink); line-height: 1.2; }
+  .nnc-stat-label {
+    margin-top: .2rem;
+    font-size: .68rem; font-weight: 600; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .nnc-macros .nnc-stat { background: var(--green-pale); border-color: rgba(5, 150, 105, 0.18); }
+  .nnc-macros .nnc-stat-val { color: var(--green-deep); }
+
+  .nnc-rx-h {
+    margin: 1.5rem 0 .7rem;
+    font-family: inherit;
+    font-size: .82rem; font-weight: 700; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--green);
+  }
+
+  .nnc-ing { list-style: none; padding: 0; margin: 0; }
+  .nnc-ing li {
+    display: flex; gap: .65rem; align-items: baseline;
+    padding: .45rem 0;
+    font-size: .94rem; line-height: 1.5; color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  .nnc-ing li:last-child { border-bottom: none; }
+  .nnc-ing-body strong { color: var(--ink); font-weight: 700; }
+  .nnc-ing-mark {
+    flex: 0 0 auto;
+    width: 20px; height: 20px;
+    display: grid; place-items: center;
+    font-size: .7rem; font-weight: 700;
+    border-radius: 50%;
+  }
+  /* Green tick = already yours. Orange plus = on the shopping list. */
+  .nnc-ing-have .nnc-ing-mark { color: var(--green-deep); background: var(--green-pale); }
+  .nnc-ing-need .nnc-ing-mark { color: var(--orange); background: var(--orange-pale); }
+
+  .nnc-shop { margin-top: .5rem; }
+  .nnc-shop-sub { margin: 0 0 .7rem; font-size: .85rem; line-height: 1.55; color: var(--text-muted); }
+
+  .nnc-steps { margin: 0; padding-left: 1.3rem; }
+  .nnc-steps li {
+    margin-bottom: .7rem;
+    font-size: .95rem; line-height: 1.7; color: var(--text);
+    padding-left: .3rem;
+  }
+  .nnc-steps li::marker { color: var(--green); font-weight: 700; }
+
+  .nnc-tips { margin: 0; padding-left: 1.2rem; }
+  .nnc-tips li { margin-bottom: .5rem; font-size: .92rem; line-height: 1.65; color: var(--text); }
+
+  .nnc-rx-note { margin: .6rem 0 0; font-size: .82rem; line-height: 1.55; color: var(--text-muted); }
+
+  .nnc-actions {
+    display: flex; flex-wrap: wrap; gap: .6rem; align-items: center;
+    margin-top: 1.6rem; padding-top: 1.4rem;
+    border-top: 1px solid var(--border);
+  }
+  .nnc-save:disabled { opacity: .75; cursor: default; transform: none; }
+
+  .nnc-disclaimer {
+    margin: 1rem 0 0;
+    font-size: .78rem; line-height: 1.6; color: var(--text-muted);
+  }
+
+  /* ---------- Could-not-generate panel ---------- */
+  .nnc-refuse { text-align: center; padding: .5rem 0; }
+  .nnc-refuse-ico { font-size: 2.2rem; margin-bottom: .5rem; }
+  .nnc-refuse-title {
+    font-family: var(--font-display); font-size: 1.25rem;
+    color: var(--ink); margin: 0 0 .5rem;
+  }
+  .nnc-refuse-why {
+    max-width: 520px; margin: 0 auto 1.2rem;
+    font-size: .95rem; line-height: 1.65; color: var(--text);
+  }
+  .nnc-refuse-lead {
+    margin: 0 0 .5rem;
+    font-size: .78rem; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; color: var(--text-muted);
+  }
+  .nnc-refuse-list {
+    display: inline-block; text-align: left;
+    max-width: 480px; margin: 0 auto 1.4rem; padding-left: 1.2rem;
+  }
+  .nnc-refuse-list li {
+    margin-bottom: .45rem;
+    font-size: .93rem; line-height: 1.6; color: var(--text);
+  }
+  .nnc-refuse-list li::marker { color: var(--orange); }
+
+  /* ---------- Saved recipes ---------- */
+  .nnc-saved-wrap { margin-top: 1.75rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+  .nnc-saved-list { display: grid; gap: .55rem; }
+  .nnc-saved {
+    display: flex; align-items: stretch; gap: .5rem;
+  }
+  .nnc-saved-open {
+    flex: 1; min-width: 0;
+    display: flex; align-items: center; gap: .85rem;
+    padding: .7rem .9rem;
+    font-family: inherit; text-align: left;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 12px);
+    cursor: pointer;
+    transition: border-color .2s ease, transform .2s ease;
+  }
+  .nnc-saved-open:hover { border-color: var(--green); transform: translateX(2px); }
+  .nnc-saved-emoji { flex: 0 0 auto; font-size: 1.35rem; }
+  .nnc-saved-meta { min-width: 0; display: flex; flex-direction: column; gap: .1rem; }
+  .nnc-saved-title {
+    font-size: .93rem; font-weight: 600; color: var(--ink);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .nnc-saved-sub { font-size: .78rem; color: var(--text-muted); }
+  .nnc-saved-del {
+    flex: 0 0 auto; width: 42px;
+    font-size: .9rem; color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md, 12px);
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease;
+  }
+  .nnc-saved-del:hover { color: var(--orange); border-color: var(--orange); }
+  .nnc-saved-del:disabled { opacity: .4; cursor: default; }
+
+  .nnc-skel { display: grid; gap: .7rem; }
+
+  [data-theme="dark"] .nnc-macros .nnc-stat {
+    background: rgba(52, 211, 153, 0.10); border-color: rgba(52, 211, 153, 0.20);
+  }
+  [data-theme="dark"] .nnc-macros .nnc-stat-val { color: var(--green-light); }
+  [data-theme="dark"] .nnc-ing-have .nnc-ing-mark { background: rgba(52, 211, 153, 0.14); color: var(--green-light); }
+
+  @media (max-width: 560px) {
+    .nn-creator { padding: 1.5rem 1.1rem; }
+    .nnc-result.show { padding: 1.3rem 1rem; }
+    .nnc-stats { grid-template-columns: repeat(2, 1fr); }
+    .nnc-rx-head { gap: .85rem; }
+    .nnc-rx-emoji { width: 52px; height: 52px; font-size: 1.6rem; border-radius: 16px; }
+    .nnc-actions > * { flex: 1 1 auto; }
+    .nnc-generate { width: 100%; }
+  }
+
+  /* Printing the page itself should give the recipe, not the form. */
+  @media print {
+    .nn-creator .nnc-form,
+    .nn-creator .nnc-go-row,
+    .nn-creator .nnf-head,
+    .nnc-actions,
+    .nnc-saved-wrap { display: none !important; }
+    .nnc-result.show { border: none; background: none; padding: 0; }
   }
 
   /* Slide-in when switching views */
