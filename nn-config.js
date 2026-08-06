@@ -24,7 +24,7 @@
   /* Fundraising figures. Single source of truth: donate.html and the
      admin dashboard both read these, so the number is only ever edited
      in one place. Update `raised` as donations come in. */
-  w.NN_CONFIG.DONATIONS = { raised: 643, goal: 10000 };
+  w.NN_CONFIG.DONATIONS = { raised: 694, goal: 10000 };
 
   /* Public storage bucket that holds every recipe photo. */
   w.NN_CONFIG.STORAGE_URL = w.NN_CONFIG.SUPABASE_URL + '/storage/v1/object/public/recipe-images/';
