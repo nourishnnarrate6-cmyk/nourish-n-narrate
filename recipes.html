@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+  <!-- Apply the saved theme before first paint (no white flash in dark mode) -->
+  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('nnTheme')||'light')}catch(e){}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Recipes — Nourish N Narrate</title>
@@ -55,21 +57,21 @@
     <div class="nav-inner">
       <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
         <div class="leaf" aria-hidden="true">🌿</div>
-        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+        Nourish&nbsp;<span class="accent">N</span>&nbsp;Narrate
       </a>
       <ul class="nav-links" role="list">
         <li><a href="index.html#home">Home</a></li>
         <li><a href="recipes.html" class="active">Recipes</a></li>
         <li><a href="calculator.html">Calculator</a></li>
-        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
-        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
-        <li><a href="donate.html">Donate</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="profile.html">Profile</a></li>
         <li><a href="index.html#about">About</a></li>
         <li><a href="index.html#contact">Contact</a></li>
       </ul>
       <div class="nav-actions">
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
-        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <a class="nav-auth" id="auth-link" data-nn-auth href="login.html?redirect=recipes.html">Log In</a>
+        <a class="nav-cta" href="donate.html">💚 Donate</a>
         <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -80,13 +82,14 @@
   <!-- Mobile menu (same tabs as the desktop nav) -->
   <div class="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
     <a href="index.html#home">Home</a>
-    <a href="recipes.html">Recipes</a>
+    <a href="recipes.html" aria-current="page">Recipes</a>
     <a href="calculator.html">Calculator</a>
-    <a href="tracker.html">Tracker</a>
-    <a href="profile.html">Profile</a>
-    <a href="donate.html">💚 Donate</a>
+    <a href="tracker.html" data-nn-signed-in style="display:none;">📈 Tracker</a>
+    <a href="profile.html" data-nn-signed-in style="display:none;">👤 Profile</a>
     <a href="index.html#about">About</a>
     <a href="index.html#contact">Contact</a>
+    <a href="login.html?redirect=recipes.html" id="m-auth-link" data-nn-auth>🔑 Log In</a>
+    <a href="donate.html" class="mobile-cta">💚 Donate</a>
   </div>
 
 
@@ -108,17 +111,19 @@
         <button class="diet-btn veg-btn" onclick="showRecipesByType('veg')">
           <div class="diet-icon" aria-hidden="true">🌱</div>
           <div class="diet-label">Vegetarian</div>
+          <div class="diet-sub" data-collection-count="veg"></div>
         </button>
         <button class="diet-btn non-veg-btn" onclick="showRecipesByType('non-veg')">
           <div class="diet-icon" aria-hidden="true">🍗</div>
           <div class="diet-label">Non-Vegetarian</div>
+          <div class="diet-sub" data-collection-count="non-veg"></div>
         </button>
         <!-- Additional collection — recipes here also stay in Vegetarian
              or Non-Vegetarian above; this is a tag, not a category. -->
         <button class="diet-btn high-protein-btn diet-btn-wide" onclick="showRecipesByType('high-protein')">
           <div class="diet-icon" aria-hidden="true">💪</div>
           <div class="diet-label">High Protein</div>
-          <div class="diet-sub" id="hp-count"></div>
+          <div class="diet-sub" data-collection-count="high-protein"></div>
         </button>
         <a href="all-recipes.html" class="diet-see-all see-more-btn">📖 Show All Recipes <span aria-hidden="true">→</span></a>
 
@@ -296,7 +301,6 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="supabase-client.js"></script>
   <script src="recipes-data-supabase.js"></script>
-  <script src="form-handlers.js"></script>
   <script src="nn-auth.js"></script>
   <script src="nn-analytics.js"></script>
   <script src="nn-score.js"></script>
@@ -419,15 +423,16 @@
 
     /* Show how many recipes sit in the High Protein collection. They remain
        listed under Vegetarian / Non-Vegetarian as well — this is a tag. */
+    /* Recipe count under each collection button. */
     function updateCollectionCounts() {
-      const el = document.getElementById('hp-count');
       // RECIPES is declared with `let`, so it is not on window — read the
       // binding directly or this silently does nothing.
-      if (!el || typeof RECIPES === 'undefined' || !Array.isArray(RECIPES)) return;
-      const n = RECIPES.filter(r => inCollection(r, 'high-protein')).length;
-      el.textContent = n ? n + ' recipes' : '';
+      if (typeof RECIPES === 'undefined' || !Array.isArray(RECIPES)) return;
+      document.querySelectorAll('[data-collection-count]').forEach(el => {
+        const n = RECIPES.filter(r => inCollection(r, el.dataset.collectionCount)).length;
+        el.textContent = n ? n + ' recipes' : '';
+      });
     }
-    window.addEventListener('recipesLoaded', updateCollectionCounts);
 
     function showRecipesByType(type) {
       try {
@@ -598,34 +603,7 @@
 
 
     
-    /* ---------- Page chrome (theme + navbar) ---------- */
-    const htmlEl = document.documentElement;
-    const themeBtn = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('nnTheme') || 'light';
-    htmlEl.setAttribute('data-theme', savedTheme);
-    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-    themeBtn.addEventListener('click', () => {
-      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      htmlEl.setAttribute('data-theme', next);
-      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('nnTheme', next);
-    });
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
 
-    /* Signed-in visitors get their Tracker and Profile tabs here too. */
-    if (window.NNAuth) {
-      NNAuth.onReady(async () => {
-        const session = await NNAuth.getSession();
-        if (!session) return;
-        ['nav-tracker-li', 'nav-profile-li'].forEach(id => {
-          const el = document.getElementById(id);
-          if (el) el.style.display = '';
-        });
-      });
-    }
 
     /* Reveal-on-scroll parity with the rest of the site. */
     document.querySelectorAll('.reveal').forEach(el => el.classList.add('visible'));
@@ -645,17 +623,8 @@
   </script>
 
   <script src="nn-premium.js"></script>
+  <script src="nn-nav.js"></script>
   <script src="nn-tour.js"></script>
 
-  <!-- PWA: register the service worker (offline support + installability) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function (err) {
-          console.warn('Service worker registration failed:', err);
-        });
-      });
-    }
-  </script>
 </body>
 </html>

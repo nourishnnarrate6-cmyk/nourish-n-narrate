@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+  <!-- Apply the saved theme before first paint (no white flash in dark mode) -->
+  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('nnTheme')||'light')}catch(e){}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Nutrition Calculator — Nourish N Narrate</title>
@@ -464,19 +466,7 @@
   }
 
   /* ---------- Auth & saved results ---------- */
-  .nav-auth {
-    display: inline-flex; align-items: center;
-    padding: 0.55rem 1.2rem;
-    font-size: 0.9rem; font-weight: 600;
-    color: var(--green-mid);
-    background: var(--surface);
-    border: 1.5px solid rgba(5, 150, 105, 0.35);
-    border-radius: var(--radius-full);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: all 0.25s var(--ease-out);
-  }
-  .nav-auth:hover { background: var(--green-pale); transform: translateY(-1px); }
+  /* (.nav-auth now comes from nn-modern.css like every other page) */
 
   .restore-banner {
     display: flex; align-items: center; justify-content: center;
@@ -649,13 +639,15 @@
         <li><a href="index.html#home">Home</a></li>
         <li><a href="recipes.html">Recipes</a></li>
         <li><a href="calculator.html" class="active">Calculator</a></li>
-        <li><a href="tracker.html">Tracker</a></li>
-        <li><a href="profile.html">Profile</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="profile.html">Profile</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
       </ul>
       <div class="nav-actions">
-        <a class="nav-auth" id="auth-link" href="login.html?redirect=calculator.html">Log In</a>
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
-        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <a class="nav-auth" id="auth-link" data-nn-auth href="login.html?redirect=calculator.html">Log In</a>
+        <a class="nav-cta" href="donate.html">💚 Donate</a>
         <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -667,10 +659,13 @@
   <div class="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
     <a href="index.html#home">Home</a>
     <a href="recipes.html">Recipes</a>
-    <a href="calculator.html">Calculator</a>
-    <a href="tracker.html">Tracker</a>
-    <a href="profile.html">Profile</a>
-    <a href="login.html?redirect=calculator.html" id="m-auth-link">🔑 Log In</a>
+    <a href="calculator.html" aria-current="page">Calculator</a>
+    <a href="tracker.html" data-nn-signed-in style="display:none;">📈 Tracker</a>
+    <a href="profile.html" data-nn-signed-in style="display:none;">👤 Profile</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+    <a href="login.html?redirect=calculator.html" id="m-auth-link" data-nn-auth>🔑 Log In</a>
+    <a href="donate.html" class="mobile-cta">💚 Donate</a>
   </div>
 
 
@@ -933,7 +928,7 @@
         </div>
         <div id="save-logged-in" style="display:none;">
           <button class="btn-calculate btn-save" id="btn-save" type="button">💾 Save My Results</button>
-          <a href="tracker.html" class="btn-calculate btn-save" style="text-decoration:none;background:linear-gradient(135deg,#ea580c,#c2410c);box-shadow:0 10px 30px -8px rgba(234,88,12,0.45);">📈 Track This Plan</a>
+          <a href="tracker.html" class="btn-calculate btn-save" style="background:linear-gradient(135deg,#ea580c,#c2410c);box-shadow:0 10px 30px -8px rgba(234,88,12,0.45);">📈 Track This Plan</a>
           <span class="save-status" id="save-status" aria-live="polite"></span>
         </div>
       </div>
@@ -950,7 +945,7 @@
         <p style="color:var(--text-muted);font-size:0.95rem;margin-bottom:0.9rem;">
           💡 For more personalized tips, track this plan and go to the tracker.
         </p>
-        <a href="tracker.html" class="btn-calculate" style="text-decoration:none;">📈 Track This Plan →</a>
+        <a href="tracker.html" class="btn-calculate">📈 Track This Plan →</a>
       </div>
 
       <div class="recalc-wrap">
@@ -969,13 +964,13 @@
       <div class="signup-icon" aria-hidden="true">💾</div>
       <h3 id="signup-modal-title">Don't lose your results!</h3>
       <p>Create a free account and we'll save this plan to your profile — your numbers will be waiting next time you visit.</p>
-      <a class="btn-calculate" href="login.html?redirect=calculator.html&mode=signup" style="text-decoration:none;">Create a Free Account</a>
+      <a class="btn-calculate" href="login.html?redirect=calculator.html&mode=signup">Create a Free Account</a>
     </div>
   </div>
 
 
   <!-- ============================================================
-       FOOTER  (identical on every page — edit all six together)
+       FOOTER  (identical on every page — edit them all together)
   ============================================================ -->
   <footer>
     <div class="foot-logo">Nourish <span>N</span> Narrate</div>
@@ -1449,30 +1444,7 @@
 
   /* ---------- G. PAGE CHROME ---------- */
 
-  /* Dark mode (shares the saved preference with the home page) */
-  const htmlEl   = document.documentElement;
-  const themeBtn = document.getElementById('theme-toggle');
-  const savedTheme = localStorage.getItem('nnTheme') || 'light';
-  htmlEl.setAttribute('data-theme', savedTheme);
-  themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-  themeBtn.addEventListener('click', () => {
-    const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-    htmlEl.setAttribute('data-theme', next);
-    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-    localStorage.setItem('nnTheme', next);
-  });
 
-  /* Navbar glass effect on scroll */
-  const navbar = document.getElementById('navbar');
-  window.addEventListener('scroll', () => {
-    navbar.classList.toggle('scrolled', window.scrollY > 20);
-  }, { passive: true });
-
-  /* Scroll-to-top button */
-  const scrollTopBtn = document.getElementById('scroll-top');
-  window.addEventListener('scroll', () => {
-    scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
-  }, { passive: true });
 
   /* Hide loading screen */
   window.addEventListener('load', () => {
@@ -1484,19 +1456,6 @@
     const session = await NNAuth.getSession();
     if (!session) return; // logged out — defaults already correct
 
-    // Nav + mobile menu: swap "Log In" for "Sign Out"
-    [['auth-link', 'Sign Out'], ['m-auth-link', '🔓 Sign Out']].forEach(([id, label]) => {
-      const el = document.getElementById(id);
-      if (!el) return;
-      el.textContent = label;
-      el.href = '#';
-      el.title = 'Signed in as ' + session.user.email;
-      el.addEventListener('click', async e => {
-        e.preventDefault();
-        await NNAuth.signOut();
-        location.reload();
-      });
-    });
 
     // Results footer: show the save button instead of the login prompt
     document.getElementById('save-logged-out').style.display = 'none';
@@ -1552,18 +1511,9 @@
   });
   </script>
   <script src="nn-premium.js"></script>
+  <script src="nn-nav.js"></script>
   <script src="nn-install.js"></script>
   <script src="nn-tour.js"></script>
 
-  <!-- PWA: register the service worker (offline support + installability) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function (err) {
-          console.warn('Service worker registration failed:', err);
-        });
-      });
-    }
-  </script>
 </body>
 </html>

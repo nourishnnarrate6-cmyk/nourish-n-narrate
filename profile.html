@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+  <!-- Apply the saved theme before first paint (no white flash in dark mode) -->
+  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('nnTheme')||'light')}catch(e){}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>My Profile — Nourish N Narrate</title>
@@ -245,12 +247,15 @@
         <li><a href="index.html#home">Home</a></li>
         <li><a href="recipes.html">Recipes</a></li>
         <li><a href="calculator.html">Calculator</a></li>
-        <li><a href="tracker.html">Tracker</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="tracker.html">Tracker</a></li>
         <li><a href="profile.html" class="active">Profile</a></li>
+        <li><a href="index.html#about">About</a></li>
+        <li><a href="index.html#contact">Contact</a></li>
       </ul>
       <div class="nav-actions">
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
-        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <a class="nav-auth" id="auth-link" data-nn-auth href="login.html?redirect=profile.html">Log In</a>
+        <a class="nav-cta" href="donate.html">💚 Donate</a>
         <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -263,8 +268,12 @@
     <a href="index.html#home">Home</a>
     <a href="recipes.html">Recipes</a>
     <a href="calculator.html">Calculator</a>
-    <a href="tracker.html">Tracker</a>
-    <a href="profile.html">Profile</a>
+    <a href="tracker.html" data-nn-signed-in style="display:none;">📈 Tracker</a>
+    <a href="profile.html" aria-current="page">👤 Profile</a>
+    <a href="index.html#about">About</a>
+    <a href="index.html#contact">Contact</a>
+    <a href="login.html?redirect=profile.html" id="m-auth-link" data-nn-auth>🔑 Log In</a>
+    <a href="donate.html" class="mobile-cta">💚 Donate</a>
   </div>
 
 
@@ -324,7 +333,7 @@
 
 
   <!-- ============================================================
-       FOOTER  (identical on every page — edit all six together)
+       FOOTER  (identical on every page — edit them all together)
   ============================================================ -->
   <footer>
     <div class="foot-logo">Nourish <span>N</span> Narrate</div>
@@ -444,34 +453,9 @@
       location.href = 'index.html';
     });
 
-    /* ---------- Page chrome (theme + navbar) ---------- */
-    const htmlEl = document.documentElement;
-    const themeBtn = document.getElementById('theme-toggle');
-    const savedTheme = localStorage.getItem('nnTheme') || 'light';
-    htmlEl.setAttribute('data-theme', savedTheme);
-    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-    themeBtn.addEventListener('click', () => {
-      const next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      htmlEl.setAttribute('data-theme', next);
-      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('nnTheme', next);
-    });
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
   </script>
   <script src="nn-premium.js"></script>
+  <script src="nn-nav.js"></script>
 
-  <!-- PWA: register the service worker (offline support + installability) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function (err) {
-          console.warn('Service worker registration failed:', err);
-        });
-      });
-    }
-  </script>
 </body>
 </html>

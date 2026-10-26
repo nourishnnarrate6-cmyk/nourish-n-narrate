@@ -22,7 +22,7 @@
       { sel: '#theme-toggle', title: '🌙 One more thing', text: 'Prefer dark mode? Toggle it here. Enjoy the site!' },
     ],
     'recipes.html': [
-      { sel: '#diet-selector', title: '🍽️ Pick a collection', text: 'Choose Vegetarian, Non-Vegetarian or High Protein to see the matching recipes. A recipe can sit in more than one collection.' },
+      { sel: '#diet-selector .diet-btn', all: true, title: '🍽️ Pick a collection', text: 'Choose Vegetarian, Non-Vegetarian or High Protein to see the matching recipes. A recipe can sit in more than one collection.' },
       { sel: '#nn-finder', title: '🤖 AI Nutrition Assistant', text: 'Describe what you feel like \u2014 "quick high-protein dinner" \u2014 and it finds recipes that fit, then explains why.' },
       { sel: '#nn-pantry', title: '🧅 Pantry Mode', text: 'List what you already have at home and we rank the recipes you can cook right now, plus a shopping list for the near misses.' },
       { sel: '#nn-creator', title: '✨ AI Recipe Creator', text: 'No recipe fits? Give it your ingredients, time and calorie target and it writes you a brand-new one \u2014 with a shopping list. Saved separately from our tested recipes.' },
@@ -121,10 +121,26 @@
     return document.querySelector(steps[current].sel);
   }
 
+  /* Box to spotlight. Steps marked `all` cover every match (e.g. the three
+     collection buttons) rather than a container that holds far more. */
+  function targetRect() {
+    var s = steps[current];
+    if (!s.all) { var el = target(); return el && el.getBoundingClientRect(); }
+    var r = null;
+    document.querySelectorAll(s.sel).forEach(function (el) {
+      if (!visible(el)) return;
+      var b = el.getBoundingClientRect();
+      r = r ? { left: Math.min(r.left, b.left), top: Math.min(r.top, b.top),
+                right: Math.max(r.right, b.right), bottom: Math.max(r.bottom, b.bottom) } : b;
+    });
+    if (r) { r = { left: r.left, top: r.top, right: r.right, bottom: r.bottom,
+                   width: r.right - r.left, height: r.bottom - r.top }; }
+    return r;
+  }
+
   function place() {
-    var el = target();
-    if (!el) return;
-    var r = el.getBoundingClientRect();
+    var r = targetRect();
+    if (!r) return;
     var pad = 8;
     hole.style.left = (r.left - pad) + 'px';
     hole.style.top = (r.top - pad) + 'px';
@@ -135,7 +151,7 @@
     var vw = window.innerWidth, vh = window.innerHeight;
     var top = r.bottom + 16;
     if (top + th > vh - 12) top = r.top - th - 16;      // flip above
-    if (top < 12) top = Math.max(12, vh / 2 - th / 2);  // fallback: center
+    if (top < 12) top = Math.max(12, vh - th - 16);     // tall target: dock at the bottom
     var left = r.left + r.width / 2 - tw / 2;
     left = Math.min(Math.max(12, left), vw - tw - 12);
     tip.style.left = left + 'px';
@@ -162,8 +178,12 @@
     tip.querySelector('#nnt-back').style.visibility = current === 0 ? 'hidden' : 'visible';
     tip.querySelector('#nnt-next').textContent = current >= steps.length - 1 ? 'Finish ✓' : 'Next →';
 
-    var el = target();
-    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    // Centre the spotlight; anything taller than the screen starts just
+    // below the navbar instead, so its top is never cut off.
+    var r = targetRect();
+    var vh = window.innerHeight;
+    var y = r.height > vh - 220 ? r.top - 90 : r.top + r.height / 2 - vh / 2;
+    window.scrollTo({ top: Math.max(0, window.scrollY + y), behavior: 'smooth' });
     setTimeout(place, 420);
     setTimeout(place, 800); // settle after smooth scroll
   }

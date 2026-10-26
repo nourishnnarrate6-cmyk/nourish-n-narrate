@@ -373,11 +373,15 @@
     }
 
     // Close when clicking outside the modal box
-    document.getElementById('modal-overlay').addEventListener('click', e => {
-      if (e.target === e.currentTarget) closeModal();
-    });
+    // (Pages without a recipe modal, e.g. the home page, skip these.)
+    const modalOverlay = document.getElementById('modal-overlay');
+    if (modalOverlay) {
+      modalOverlay.addEventListener('click', e => {
+        if (e.target === e.currentTarget) closeModal();
+      });
 
-    // Close on Escape key
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeModal();
-    });
+      // Close on Escape key
+      document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+      });
+    }

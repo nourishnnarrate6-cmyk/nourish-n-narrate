@@ -3,10 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- Apply the saved theme before first paint (no white flash in dark mode) -->
+  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('nnTheme')||'light')}catch(e){}</script>
   <script>
-    // Scroll to top immediately on page load
-    window.addEventListener('load', function () { window.scrollTo(0, 0); });
-    document.documentElement.scrollTop = 0;
+    // Start at the top on a plain visit — but respect links like
+    // index.html#about coming from the other pages.
+    if (!location.hash) {
+      window.addEventListener('load', function () { window.scrollTo(0, 0); });
+      document.documentElement.scrollTop = 0;
+    }
   </script>
 
   <!-- ============================================================
@@ -79,8 +84,8 @@
         <li><a href="#home"    class="active">Home</a></li>
         <li><a href="recipes.html">Recipes</a></li>
         <li><a href="calculator.html">Calculator</a></li>
-        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
-        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="profile.html">Profile</a></li>
         <li><a href="#about">About</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
@@ -100,13 +105,13 @@
         <!-- Dark mode toggle -->
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
         <!-- Log In / Sign Up (hidden once the user is signed in) -->
-        <a href="login.html" class="nav-auth" id="nav-login">Log In / Sign Up</a>
+        <a href="login.html" class="nav-auth" id="auth-link" data-nn-auth>Log In / Sign Up</a>
         <!-- ✏️ CTA button — now points at the donation page -->
-        <a class="nav-cta" href="donate.html" style="text-decoration:none;">
+        <a class="nav-cta" href="donate.html">
           💚 Donate
         </a>
         <!-- Hamburger — mobile only -->
-        <button class="hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+        <button class="hamburger" id="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
       </div>
@@ -114,15 +119,15 @@
   </nav>
 
   <!-- ✏️ Mobile menu links — keep in sync with the desktop nav above -->
-  <div class="mobile-menu" id="mobile-menu" role="navigation" aria-label="Mobile navigation">
-    <a href="#home"    onclick="closeMobileMenu()">Home</a>
+  <div class="mobile-menu" id="mobile-menu" data-nn-menu role="navigation" aria-label="Mobile navigation">
+    <a href="#home">Home</a>
     <a href="recipes.html">Recipes</a>
-    <a href="calculator.html" onclick="closeMobileMenu()">Nutrition Calculator</a>
-    <a href="tracker.html" id="m-nav-tracker" style="display:none;">📈 My Tracker</a>
-    <a href="profile.html" id="m-nav-profile" style="display:none;">👤 My Profile</a>
-    <a href="#about"   onclick="closeMobileMenu()">About</a>
-    <a href="#contact" onclick="closeMobileMenu()">Contact</a>
-    <a href="login.html" id="m-nav-login">🔑 Log In / Sign Up</a>
+    <a href="calculator.html">Calculator</a>
+    <a href="tracker.html" data-nn-signed-in style="display:none;">📈 Tracker</a>
+    <a href="profile.html" data-nn-signed-in style="display:none;">👤 Profile</a>
+    <a href="#about">About</a>
+    <a href="#contact">Contact</a>
+    <a href="login.html" id="m-auth-link" data-nn-auth>🔑 Log In / Sign Up</a>
     <a href="donate.html" class="mobile-cta">💚 Donate</a>
   </div>
 
@@ -173,13 +178,13 @@
 
         <!-- ✏️ Button labels -->
         <div class="hero-actions anim-d4">
-          <a class="btn-primary" href="recipes.html" style="text-decoration:none;">
+          <a class="btn-primary" href="recipes.html">
             🌿 Explore Recipes <span class="btn-arrow" aria-hidden="true">→</span>
           </a>
-          <a href="donate.html" class="btn-secondary" style="text-decoration:none;">
+          <a href="donate.html" class="btn-secondary">
             💚 Donate Now
           </a>
-          <a href="tracker.html" class="btn-secondary" id="hero-tracker" style="display:none;text-decoration:none;">
+          <a href="tracker.html" class="btn-secondary" id="hero-tracker" style="display:none;">
             📈 My Tracker
           </a>
         </div>
@@ -189,7 +194,7 @@
           <div class="hero-stat"><strong id="member-count">27</strong><span>Members &amp; growing</span></div>
           <div class="hero-stat"><strong>50+</strong><span>Recipes recreated</span></div>
           <div class="hero-stat"><strong>100%</strong><span>Taste-tested</span></div>
-          <div class="hero-stat"><strong>4</strong><span>Student founders</span></div>
+          <div class="hero-stat"><strong>3</strong><span>Student founders</span></div>
         </div>
       </div>
 
@@ -486,9 +491,8 @@
           <h3 class="contact-founders-title">Founders</h3>
           <ul class="contact-founders-list">
             <li>Sai Sathvik Erukulla</li>
-            <li>Manvik Tej Kandem</li>
-            <li>Aatish Chittineni</li>
-            <li>Thanush Cherukuri</li>
+            <li>Lalith Kishore Reddy Kancharla</li>
+            <li>Nitya Vundyala</li>
           </ul>
         </div>
 
@@ -505,27 +509,8 @@
     </div>
   </section>
 
-
-
-
-
   <!-- ============================================================
-       JAVASCRIPT
-       TABLE OF CONTENTS:
-         A. Recipe Data (loaded from Supabase scripts below)
-         B. Recipe Renderer
-         C. Recipe Modal (lives in nn-cards.js)
-         D. Search & Filter
-         E. Loading Screen
-         F. Dark Mode Toggle
-         G. Navigation (scroll effect, active links, mobile menu)
-         H. Scroll-to-Top Button
-         I. Scroll Reveal Animation
-         J. FAQ Accordion
-         K. Hero Parallax (subtle, respects reduced motion)
-  ============================================================ -->
-  <!-- ============================================================
-       FOOTER  (identical on every page — edit all six together)
+       FOOTER  (identical on every page — edit them all together)
   ============================================================ -->
   <footer>
     <div class="foot-logo">Nourish <span>N</span> Narrate</div>
@@ -556,18 +541,9 @@
   <!-- Supabase Integration -->
   <script src="nn-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js"></script>
-  <script src="recipes-data-supabase.js"></script>
-  <script src="form-handlers.js"></script>
   <script src="nn-auth.js"></script>
   <script src="nn-analytics.js"></script>
-  <script src="nn-cards.js"></script>
   <script>
-
-    /* Recipe rendering, filtering and the collection chooser now live
-       in recipes.html. */
-
-
     /* ===========================================================
        E. LOADING SCREEN
     =========================================================== */
@@ -579,33 +555,9 @@
 
 
     /* ===========================================================
-       F. DARK MODE TOGGLE
-    =========================================================== */
-    const html     = document.documentElement;
-    const themeBtn = document.getElementById('theme-toggle');
-
-    // Restore saved preference from previous visit
-    const savedTheme = localStorage.getItem('nnTheme') || 'light';
-    html.setAttribute('data-theme', savedTheme);
-    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-
-    themeBtn.addEventListener('click', () => {
-      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      html.setAttribute('data-theme', next);
-      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('nnTheme', next);
-    });
-
-
-    /* ===========================================================
        G. NAVIGATION
+       (Theme toggle, navbar glass and mobile menu: nn-nav.js / nn-premium.js)
     =========================================================== */
-
-    // Navbar glass effect on scroll
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
 
     // Highlight the correct nav link as user scrolls through sections
     const sections = document.querySelectorAll('section[id]');
@@ -620,44 +572,6 @@
       });
     }, { threshold: .4 });
     sections.forEach(s => sectionObserver.observe(s));
-
-    // Mobile hamburger menu
-    const hamburger  = document.getElementById('hamburger');
-    const mobileMenu = document.getElementById('mobile-menu');
-    let menuOpen = false;
-
-    hamburger.addEventListener('click', () => {
-      menuOpen = !menuOpen;
-      hamburger.classList.toggle('open', menuOpen);
-      mobileMenu.classList.toggle('open', menuOpen);
-      mobileMenu.style.display = menuOpen ? 'flex' : 'none';
-      hamburger.setAttribute('aria-expanded', menuOpen);
-    });
-
-    function closeMobileMenu() {
-      menuOpen = false;
-      hamburger.classList.remove('open');
-      mobileMenu.classList.remove('open');
-      mobileMenu.style.display = 'none';
-      hamburger.setAttribute('aria-expanded', 'false');
-    }
-
-    // Close mobile menu when clicking outside it
-    document.addEventListener('click', e => {
-      if (menuOpen && !navbar.contains(e.target) && !mobileMenu.contains(e.target)) {
-        closeMobileMenu();
-      }
-    });
-
-
-    /* ===========================================================
-       H. SCROLL-TO-TOP BUTTON
-    =========================================================== */
-    const scrollTopBtn = document.getElementById('scroll-top');
-    window.addEventListener('scroll', () => {
-      scrollTopBtn.classList.toggle('visible', window.scrollY > 400);
-    }, { passive: true });
-
 
     /* ===========================================================
        I. SCROLL REVEAL ANIMATION
@@ -734,31 +648,12 @@
 
     /* ===========================================================
        L. SIGNED-IN SHORTCUTS
-       Users with an account see Tracker + Profile in the nav and
-       a "My Tracker" hero button with today's remaining calories.
+       Users with an account get a "My Tracker" hero button with
+       today's remaining calories. (Nav links: nn-nav.js.)
     =========================================================== */
     if (window.NNAuth) NNAuth.onReady(async () => {
       const session = await NNAuth.getSession();
       if (!session) return;
-
-      // Reveal the nav links
-      ['nav-tracker-li', 'nav-profile-li', 'm-nav-tracker', 'm-nav-profile'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = '';
-      });
-      // Signed in — the Log In / Sign Up buttons become Sign Out
-      [['nav-login', 'Sign Out'], ['m-nav-login', '🔓 Sign Out']].forEach(([id, label]) => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.textContent = label;
-        el.href = '#';
-        el.title = 'Signed in as ' + session.user.email;
-        el.addEventListener('click', async e => {
-          e.preventDefault();
-          await NNAuth.signOut();
-          location.reload();
-        });
-      });
 
       // Hero button with a live "kcal left today" readout
       const heroBtn = document.getElementById('hero-tracker');
@@ -796,6 +691,7 @@
   </script>
 
   <script src="nn-premium.js"></script>
+  <script src="nn-nav.js"></script>
   <script src="nn-tour.js"></script>
   <!-- Live member count from Supabase Auth -->
   <script>
@@ -855,15 +751,5 @@
     })();
   </script>
 
-  <!-- PWA: register the service worker (offline support + installability) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function (err) {
-          console.warn('Service worker registration failed:', err);
-        });
-      });
-    }
-  </script>
 </body>
 </html>

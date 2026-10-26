@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="light">
 <head>
+  <!-- Apply the saved theme before first paint (no white flash in dark mode) -->
+  <script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('nnTheme')||'light')}catch(e){}</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Donate — Nourish N Narrate</title>
@@ -224,21 +226,21 @@
     <div class="nav-inner">
       <a href="index.html#home" class="nav-logo" aria-label="Nourish N Narrate Home">
         <div class="leaf" aria-hidden="true">🌿</div>
-        Nourish <span class="accent">&nbsp;N&nbsp;</span> Narrate
+        Nourish&nbsp;<span class="accent">N</span>&nbsp;Narrate
       </a>
       <ul class="nav-links" role="list">
         <li><a href="index.html#home">Home</a></li>
         <li><a href="recipes.html">Recipes</a></li>
         <li><a href="calculator.html">Calculator</a></li>
-        <li id="nav-tracker-li" style="display:none;"><a href="tracker.html">Tracker</a></li>
-        <li id="nav-profile-li" style="display:none;"><a href="profile.html">Profile</a></li>
-        <li><a href="donate.html" class="active">Donate</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="tracker.html">Tracker</a></li>
+        <li data-nn-signed-in style="display:none;"><a href="profile.html">Profile</a></li>
         <li><a href="index.html#about">About</a></li>
         <li><a href="index.html#contact">Contact</a></li>
       </ul>
       <div class="nav-actions">
         <button class="theme-toggle" id="theme-toggle" aria-label="Toggle dark mode" title="Toggle dark mode">🌙</button>
-        <a class="nav-cta" href="index.html#home" style="text-decoration:none;">← Back to Home</a>
+        <a class="nav-auth" id="auth-link" data-nn-auth href="login.html?redirect=donate.html">Log In</a>
+        <a class="nav-cta" href="donate.html">💚 Donate</a>
         <button class="hamburger" data-nn-menu aria-label="Open menu" aria-expanded="false">
           <span></span><span></span><span></span>
         </button>
@@ -251,11 +253,12 @@
     <a href="index.html#home">Home</a>
     <a href="recipes.html">Recipes</a>
     <a href="calculator.html">Calculator</a>
-    <a href="tracker.html">Tracker</a>
-    <a href="profile.html">Profile</a>
-    <a href="donate.html">💚 Donate</a>
+    <a href="tracker.html" data-nn-signed-in style="display:none;">📈 Tracker</a>
+    <a href="profile.html" data-nn-signed-in style="display:none;">👤 Profile</a>
     <a href="index.html#about">About</a>
     <a href="index.html#contact">Contact</a>
+    <a href="login.html?redirect=donate.html" id="m-auth-link" data-nn-auth>🔑 Log In</a>
+    <a href="donate.html" class="mobile-cta">💚 Donate</a>
   </div>
 
 
@@ -476,9 +479,9 @@
 
   <script src="nn-config.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase-client.js"></script>
   <script src="nn-auth.js"></script>
   <script src="nn-premium.js"></script>
+  <script src="nn-nav.js"></script>
 
   <script>
     /* ===========================================================
@@ -552,45 +555,8 @@
       }
     })();
 
-    /* ---------- Theme + navbar (same as every other page) ---------- */
-    var htmlEl = document.documentElement;
-    var themeBtn = document.getElementById('theme-toggle');
-    var savedTheme = localStorage.getItem('nnTheme') || 'light';
-    htmlEl.setAttribute('data-theme', savedTheme);
-    themeBtn.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
-    themeBtn.addEventListener('click', function () {
-      var next = htmlEl.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
-      htmlEl.setAttribute('data-theme', next);
-      themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
-      localStorage.setItem('nnTheme', next);
-    });
-    var navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', function () {
-      navbar.classList.toggle('scrolled', window.scrollY > 20);
-    }, { passive: true });
 
-    /* Signed-in users see their Tracker / Profile tabs here too. */
-    if (window.NNAuth) {
-      NNAuth.onReady(async function () {
-        var session = await NNAuth.getSession();
-        if (!session) return;
-        ['nav-tracker-li', 'nav-profile-li'].forEach(function (id) {
-          var el = document.getElementById(id);
-          if (el) el.style.display = '';
-        });
-      });
-    }
   </script>
 
-  <!-- PWA: register the service worker (offline support + installability) -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('sw.js').catch(function (err) {
-          console.warn('Service worker registration failed:', err);
-        });
-      });
-    }
-  </script>
 </body>
 </html>

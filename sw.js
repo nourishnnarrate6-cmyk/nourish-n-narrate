@@ -18,7 +18,7 @@
    that is what tells existing installs to pull the new build.
 =================================================================== */
 
-const CACHE_VERSION = 'v36';
+const CACHE_VERSION = 'v40';
 const SHELL_CACHE = 'nn-shell-' + CACHE_VERSION;
 const ASSET_CACHE = 'nn-assets-' + CACHE_VERSION;
 const VALID_CACHES = [SHELL_CACHE, ASSET_CACHE];
@@ -43,12 +43,12 @@ const SHELL = [
   'nn-compare.js',
   'nn-config.js',
   'nn-premium.js',
+  'nn-nav.js',
   'nn-install.js',
   'nn-finder.js',
   'nn-pantry.js',
   'nn-creator.js',
   'nn-tour.js',
-  'form-handlers.js',
   'recipes-data-supabase.js',
   'supabase-client.js',
   'favicon.svg',
